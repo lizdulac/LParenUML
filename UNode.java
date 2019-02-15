@@ -12,7 +12,7 @@ public class UNode {
 	{		
 		x =0;
 		y =0;
-		z = 0; // 1? -1? depth of unplaced node should be... ??  Change in comment
+		z = 0; // 1? -1? depth of unplaced node should be... ??  
 	}
 	
 	public UNode(int x, int y, int z, String name )
