@@ -55,7 +55,7 @@ public class UMLEditor extends Application
         //*******************LOGIC GOES HERE***********************
         // TODO: call functions that set stage/begin program
         UNode un = new UNode (90, 90, 0, "name");
-        drawNode (canvas, UNode); // dummy call testing drawNode
+        drawNode (canvas, un); // dummy call testing drawNode
 
         
         //*****************SET WINDOW FEATURES********************* 
@@ -94,17 +94,17 @@ public class UMLEditor extends Application
         Group root = (Group) canvas.getParent ();
         GraphicsContext context = canvas.getGraphicsContext2D ();
         
-        String node_name = un.name;
+        String node_name = un.getName();
         
         //*****************DRAW RECTANGLE**************************
         context.setStroke (outline_color);
         context.setLineWidth (line_width);
-        context.strokeRect (un.x, un.y, width, height);
+        context.strokeRect (un.getX(), un.getY(), width, height);
         
         /* 
          * TODO: format text programmatically, not hardcoding.
          */
-        Text name = new Text (un.x + 30, un.y + 12, node_name);
+        Text name = new Text (un.getX() + 30, un.getY() + 12, node_name);
         root.getChildren ().add (name);
     }
 }
