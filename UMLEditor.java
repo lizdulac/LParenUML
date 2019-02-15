@@ -79,9 +79,6 @@ public class UMLEditor extends Application
      * x, y: coordinates of upper left corner where UML Diagram
      *       node will be drawn
      */
-    /* TODO: replace coordinates with UML Diagram Node object.
-     * Get coordinates and name from object.
-     */
     public void drawNode (Canvas canvas, UNode un)
     {
         /* TODO: determine rectangle width based off of name length
