@@ -54,7 +54,8 @@ public class UMLEditor extends Application
         
         //*******************LOGIC GOES HERE***********************
         // TODO: call functions that set stage/begin program
-        drawNode (canvas, 90, 90); // dummy call testing drawNode
+        UNode un = new UNode (90, 90, 0, "name");
+        drawNode (canvas, UNode); // dummy call testing drawNode
 
         
         //*****************SET WINDOW FEATURES********************* 
@@ -81,7 +82,7 @@ public class UMLEditor extends Application
     /* TODO: replace coordinates with UML Diagram Node object.
      * Get coordinates and name from object.
      */
-    public void drawNode (Canvas canvas, double x, double y)
+    public void drawNode (Canvas canvas, UNode un)
     {
         /* TODO: determine rectangle width based off of name length
          * and maximum width. Determine rectangle height based off of
@@ -96,17 +97,17 @@ public class UMLEditor extends Application
         Group root = (Group) canvas.getParent ();
         GraphicsContext context = canvas.getGraphicsContext2D ();
         
-        String node_name = "Name";
+        String node_name = un.name;
         
         //*****************DRAW RECTANGLE**************************
         context.setStroke (outline_color);
         context.setLineWidth (line_width);
-        context.strokeRect (x, y, width, height);
+        context.strokeRect (un.x, un.y, width, height);
         
         /* 
          * TODO: format text programmatically, not hardcoding.
          */
-        Text name = new Text (x + 30, y + 12, node_name);
+        Text name = new Text (un.x + 30, un.y + 12, node_name);
         root.getChildren ().add (name);
     }
 }
