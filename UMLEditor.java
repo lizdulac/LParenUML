@@ -1,12 +1,12 @@
-
 // General required javafx Classes
+
 import javafx.application.Application;
 
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.StageStyle;
 import javafx.scene.image.Image; // for icon
@@ -40,16 +40,16 @@ public class UMLEditor extends Application
     @Override
     public void start (Stage primaryStage) throws Exception
     {
-        int init_wind_width = 1500;
-        int init_wind_height = 650;
-        Color init_background_color = Color.WHITE;
+        int initWindWidth = 1500;
+        int initWindHeight = 650;
+        Color initBackgroundColor = Color.WHITE;
         
-        Canvas canvas = new Canvas (init_wind_width, init_wind_height);
+        Canvas canvas = new Canvas (initWindWidth, initWindHeight);
         
         Group root = new Group ();
         root.getChildren ().add (canvas);
         
-        Scene scene = new Scene (root, init_wind_width, init_wind_height, init_background_color);
+        Scene scene = new Scene (root, initWindWidth, initWindHeight, initBackgroundColor);
 
         
         //*******************LOGIC GOES HERE***********************
@@ -88,23 +88,24 @@ public class UMLEditor extends Application
         double width = 100;
         double height = 100;
         
-        Color outline_color = Color.BLACK;
-        double line_width = 1;
+        Color fillColor = Color.WHITE;
+        Color borderColor = Color.BLACK;
+        double lineWidth = 1;
         
         Group root = (Group) canvas.getParent ();
-        GraphicsContext context = canvas.getGraphicsContext2D ();
         
-        String node_name = un.getName();
+        String nodeName = un.getName();
         
         //*****************DRAW RECTANGLE**************************
-        context.setStroke (outline_color);
-        context.setLineWidth (line_width);
-        context.strokeRect (un.getX(), un.getY(), width, height);
+        Rectangle r = new Rectangle (un.getX(), un.getY(), width, height);
+        r.setFill (fillColor);
+        r.setStroke (borderColor);
+        r.setStrokeWidth (lineWidth);
         
         /* 
          * TODO: format text programmatically, not hardcoding.
          */
-        Text name = new Text (un.getX() + 30, un.getY() + 12, node_name);
-        root.getChildren ().add (name);
+        Text name = new Text (un.getX() + 30, un.getY() + 12, nodeName);
+        root.getChildren ().addAll (r, name);
     }
 }
