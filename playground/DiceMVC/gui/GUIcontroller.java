@@ -10,11 +10,11 @@ import javafx.event.EventHandler;
 public class GUIcontroller
 {
     // both the controller & view are owned by GUIcontroller
-	private static GUIcontroller sharedController;
-	private GUIview theView;
+    private static GUIcontroller sharedController;
+    private GUIview theView;
 
     // the model
-	private PairOfDice theDice;
+    private PairOfDice theDice;
 
     // stageTitle is displayed in the graphical window's titlebar
     private String stageTitle = "Dice";
@@ -24,32 +24,32 @@ public class GUIcontroller
 
 
     // constructor is private to enforce a Singleton pattern
-	private GUIcontroller(Stage stage)
-	{
+    private GUIcontroller(Stage stage)
+    {
         // initialize the model & view
-		theDice = new PairOfDice();
-		theView = new GUIview(this, stage);
+	theDice = new PairOfDice();
+	theView = new GUIview(this, stage);
 
         // make the graphical window visible
-		stage.setTitle(stageTitle);
-		stage.show();
-	}
+	stage.setTitle(stageTitle);
+	stage.show();
+    }
 
     // return the sharedController which is a Singleton
-	public static GUIcontroller getSharedController(Stage stage)
+    public static GUIcontroller getSharedController(Stage stage)
+    {
+	if(sharedController == null)
 	{
-		if(sharedController == null)
-		{
-            // initialize the controller if one does not exist
-			sharedController = new GUIcontroller(stage);
-		}
-		return sharedController;
+	    // initialize the controller if one does not exist
+	    sharedController = new GUIcontroller(stage);
 	}
+	return sharedController;
+    }
 
-	public PairOfDice getDice()
-	{
-		return theDice;
-	}
+    public PairOfDice getDice()
+    {
+        return theDice;
+    }
 
 
 //***************************** EVENT HANDLERS *****************************
@@ -61,33 +61,33 @@ public class GUIcontroller
         @Override 
         public void handle(ActionEvent e)
         {
-        	// determine the source button that generated the event
+	    // determine the source button that generated the event
             Node source = (Node) e.getSource();
 
             // userData contains the ID of each button
-        	int userData = (int) source.getUserData();
+	    int userData = (int) source.getUserData();
 
 
             // click originated from roll1 button
-        	if(userData == 1)
-        	{
-        		lastClicked = userData;
-        		theDice.getDie1().roll();
-        	}
+	    if(userData == 1)
+	    {
+		lastClicked = userData;
+		theDice.getDie1().roll();
+	    }
 
             // click originated from roll2 button
-        	else if(userData == 2)
-        	{
-        		lastClicked = userData;
-        		theDice.getDie2().roll();
-        	}
+            else if(userData == 2)
+	    {
+	        lastClicked = userData;
+        	theDice.getDie2().roll();
+            }
 
             // click originated from rollPair
-        	else if(userData == 3)
-        	{
-        		lastClicked = userData;
-        		theDice.rollPair();
-        	}
+	    else if(userData == 3)
+	    {
+	        lastClicked = userData;
+        	theDice.rollPair();
+            }
         }
     };
 }
