@@ -1,58 +1,56 @@
+//package softwaredev;
+
 import java.util.*;
+
 
 public class UNode {
 
-	private int x,y,z;
-	private String name;
+	private String id;
 	
+
 	private ArrayList<Edge> edgeStart = new ArrayList();
 	private ArrayList<Edge> edgeEnd = new ArrayList();
 	
 	public UNode()
 	{		
-		x =0;
-		y =0;
-		z = 0; // 1? -1? depth of unplaced node should be... ??  
+		  id = "";
 	}
 	
-	public UNode(int x, int y, int z, String name )
+	public UNode( String name)
 	{
-		this.x =x;
-		this.y =y;
-		this.z =z;
-		this.name = name;
+		this.id = name;
+		
 	}
 	
-	public UNode(int x, int y, int z, String name, ArrayList<Edge> end, ArrayList<Edge> start )
+	public UNode( String name, ArrayList<Edge> end, ArrayList<Edge> start )
 	{
-		this.x =x;
-		this.y =y;
-		this.z =z;
-		this.name = name;
+		id = name;
 		edgeEnd = end;
 		edgeStart = start;		
 	}
 	
-	
-	public int getX()
-	{
-		return x;
-	}
-	
-	public int getY()
-	{
-		return y;
-	}
-	
-	public int getZ()
-	{
-		return z;
-	}
-	
 	public String getName()
 	{
-		return name;
+		return id;
 	}
 	
+	public void addOutEdge( Edge e){
+		edgeStart.add(e);											
+	}
+	
+	public void addInEdge( Edge e){
+		edgeStart.add(e);
+	}
+	
+	/*
+	 * Inbound Iteration 2
+	 */
+	public void cleanEdges()
+	{
+		//clean outgoing edges and their ends		
+		
+		//clean incoming edges and their starts
+		
+	}
 	
 }
