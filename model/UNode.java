@@ -1,11 +1,11 @@
-package model;
+package softwaredev;
 
 import java.util.*;
 
-
 public class UNode {
 
-	private String id;
+	private Integer id;
+	private String name;
 	
 
 	private ArrayList<Edge> edgeStart = new ArrayList();
@@ -13,38 +13,51 @@ public class UNode {
 	
 	public UNode()
 	{		
-		  id = "";
+		  id = -1;
+		  name ="";
 	}
 	
-	public UNode( String name)
+	public UNode( Integer id, String name)
 	{
-		this.id = name;
+		this.id = id;
+		this.name = name;
 		
 	}
 	
-	public UNode( String name, ArrayList<Edge> end, ArrayList<Edge> start )
+	public UNode(Integer id, String name, ArrayList<Edge> end, ArrayList<Edge> start )
 	{
-		id = name;
+		this.id = id;
+		this.name = name;
 		edgeEnd = end;
 		edgeStart = start;		
 	}
 	
 	public String getName()
 	{
-		return id;
+		return name;
 	}
 	
-	public void addOutEdge(UEdge e){
+	public void setName(String str)
+	{
+		name = str;
+	}
+	
+	public void addOutEdge( Edge e){
 		edgeStart.add(e);											
 	}
 	
-	public void addInEdge(UEdge e){
+	public void addInEdge( Edge e){
 		edgeStart.add(e);
 	}
 	
-	
+	/*
+	 * Inbound Iteration 2
+	 */
 	public void cleanEdges()
 	{
+		//clean outgoing edges and their ends		
+		
+		//clean incoming edges and their starts
 		
 	}
 	
