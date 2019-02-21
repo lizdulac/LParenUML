@@ -1,4 +1,4 @@
-package softwaredev;
+package model;
 
 public class Edge {
 	private String name;//derp
