@@ -1,12 +1,12 @@
 package model;
 
-public class Edge {
+public class UEdge {
 	private String name;//derp
 	private String type;//derp
 	UNode end, start;//eeeyyyy
 	
 	
-	public Edge(UNode n1, UNode n2) {
+	public UEdge(UNode n1, UNode n2) {
 		start = n1;
 		end = n2;
 		name = "";
