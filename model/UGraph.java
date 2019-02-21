@@ -13,6 +13,13 @@ public class UGraph {
 	
 	public Map< String ,UNode> uNodes;
 	
+	
+	public UGraph()
+	{
+		uNodes = new Map<String, UNode>();
+	}
+	
+	
 	public boolean addNode(String nodeName)
 	{
 		if (uNodes.put(nodeName, new UNode( nodeName)) != null) 
