@@ -11,12 +11,11 @@ import java.util.*;
 */
 public class UGraph {
 	
-	public Map< String ,UNode> uNodes;
-	
+private AbstractMap< String ,UNode> uNodes;
 	
 	public UGraph()
 	{
-		uNodes = new Map<String, UNode>();
+		//uNodes = new AbstractMap<String, UNode>();	
 	}
 	
 	
