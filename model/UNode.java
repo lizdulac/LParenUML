@@ -34,11 +34,11 @@ public class UNode {
 		return id;
 	}
 	
-	public void addOutEdge( Edge e){
+	public void addOutEdge(UEdge e){
 		edgeStart.add(e);											
 	}
 	
-	public void addInEdge( Edge e){
+	public void addInEdge(UEdge e){
 		edgeStart.add(e);
 	}
 	
