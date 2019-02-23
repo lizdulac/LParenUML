@@ -1,4 +1,4 @@
-package softwaredev;
+package model;
 
 import java.util.*;
 
