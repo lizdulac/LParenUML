@@ -1,4 +1,4 @@
-package softwaredev;
+package model;
 
 public class Edge {
 	private String name;//Iteration 2/3
