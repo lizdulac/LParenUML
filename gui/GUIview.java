@@ -13,6 +13,7 @@ public class GUIview
 {
 	private GUIcontroller controller;
 	private Scene scene;
+	private Pane canvas;
 
 	private double windowW = 800.0;
 	private double windowH = 600.0;
@@ -27,18 +28,20 @@ public class GUIview
 	private Region configureUI()
 	{
 		BorderPane borderPane = new BorderPane();
+		canvas = new Pane();
 
 		Separator topSpacer = new Separator();
-		Pane buttonPanel = new Pane();
-		Pane canvas = new Pane();
+		Pane buttonPanel = new Pane();		
 		Separator rightSpacer = new Separator();
 		Separator bottomSpacer = new Separator();
 
 		topSpacer.setStyle("-fx-background-color: skyblue;");
 		buttonPanel.setStyle("-fx-background-color: mediumseagreen;");
-		canvas.setStyle("-fx-background-color: white;");
 		rightSpacer.setStyle("-fx-background-color: sandybrown");
 		bottomSpacer.setStyle("-fx-background-color: tomato;");
+		
+		canvas.setStyle("-fx-background-color: white;");
+		canvas.setOnMousePressed(controller.canvasMousePress);
 
 /*
 		topSpacer.setVisible(false);
