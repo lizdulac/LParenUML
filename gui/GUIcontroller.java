@@ -155,10 +155,6 @@ public class GUIcontroller
                     double offsetY = e.getSceneY () - lastClick.get ().getY ();
 
                     theView.moveNode (source, offsetX, offsetY);
-                    /*
-                     * source.setX(source.getX() + offsetX);
-                     * source.setY(source.getY() + offsetY);
-                     */
 
                     Point2D dragPoint = new Point2D (e.getSceneX (), e.getSceneY ());
                     lastClick.set (dragPoint);
