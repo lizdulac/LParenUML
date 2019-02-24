@@ -131,6 +131,9 @@ public class GUIview
 
     
     /*************************** NODE FUNCTIONS ***************************/
+    /* Nodes are stored as a child of the "canvas" panel in a group that
+     * contains a Rectangle, and then necessary text containers
+     */
     public Rectangle drawNode (double x, double y)
     {
         // TODO: only include necessary textboxes
@@ -171,10 +174,7 @@ public class GUIview
         return rect;
     }
     
-    // Translate rectangle to the right x, down y
-    /* Going off the assumption that a Rectangle is stored
-     * in a Group with all related graphical elements
-     */
+    // Translate Rectangle and related graphical elements to the right x, down y
     public void moveNode (Rectangle rect, double x, double y)
     {
         Group group = (Group) rect.getParent ();
@@ -188,6 +188,7 @@ public class GUIview
         }
     }
     
+    // Deletes Group containing Rectangle and text containers related to the UNode
     public void deleteNode (Rectangle rect)
     {
         Group group = (Group) rect.getParent ();
