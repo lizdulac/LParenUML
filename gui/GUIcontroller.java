@@ -125,8 +125,7 @@ public class GUIcontroller
         {
             double x = e.getSceneX ();
             double y = e.getSceneY ();
-            Point2D clickPoint = new Point2D (x, y);
-            lastClick.set (clickPoint);
+            lastClick.set (null);
             
             Rectangle source = ((Rectangle) e.getSource ());
             
