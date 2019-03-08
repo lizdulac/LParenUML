@@ -196,18 +196,14 @@ public class GUIview
         return nodeBody;
     }
     
-    // Translate Rectangle and related graphical elements to the right x, down y
-    public void moveNode (Rectangle rect, double x, double y)
+    public void moveNode (Pane theNode, Point2D lastClick, Point2D dragPoint)
     {
-        Group group = (Group) rect.getParent ();
-        
-        ObservableList<Node> list = group.getChildren ();
-        
-        for (int i = 0; i < list.size (); ++i)
-        {
-            list.get (i).setTranslateX (list.get (i).getTranslateX () + x);
-            list.get (i).setTranslateY (list.get (i).getTranslateY () + y);
-        }
+        double offsetX = dragPoint.getX() - lastClick.getX();
+        double offsetY = dragPoint.getY() - lastClick.getY();
+
+        // move/animate the node across the canvas
+        theNode.setLayoutX(theNode.getLayoutX() + offsetX);
+        theNode.setLayoutY(theNode.getLayoutY() + offsetY);
     }
     
     public void deleteNode (Pane theNode)
@@ -247,6 +243,19 @@ public class GUIview
 
         canvas.getChildren ().add (theEdge);
         return theEdge;
+    }
+
+    public void animateEdge(Pane srcNode, Line theEdge, Point2D dragPoint)
+    {
+        theEdge.setEndX(srcNode.getLayoutX() + dragPoint.getX());
+        theEdge.setEndY(srcNode.getLayoutY() + dragPoint.getY());
+    }
+
+    public void endEdgeDraw(Pane srcNode, Line theEdge, Point2D releasePoint)
+    {
+        // bind/attach the ending point of the line to the srcNode
+        theEdge.endXProperty ().bind(Bindings.add (srcNode.layoutXProperty (), releasePoint.getX ()));
+        theEdge.endYProperty ().bind(Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));        
     }
 
     public void removeEdge(Line theEdge)
