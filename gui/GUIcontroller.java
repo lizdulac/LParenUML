@@ -149,9 +149,7 @@ public class GUIcontroller
             Point2D clickPoint = new Point2D(e.getSceneX (), e.getSceneY ());
             // lastClick is a class variable of GUIcontroller
             lastClick.set(clickPoint);
-//          lastClick.set (null);
-
-            Pane srcNode = (Pane)  ((Node) e.getSource()).getParent ();
+            Pane srcNode = (Pane) ((Node) e.getSource()).getParent ();
 
             if (toolState == ToolState.ADD_EDGE)
             {
@@ -194,7 +192,6 @@ public class GUIcontroller
         {
             // default assumption is true, may be falsified by another handler
             isCanvasRelease = true;
-
             Pane srcNode = (Pane) e.getSource();
 
             if (toolState == ToolState.ADD_EDGE)
@@ -202,7 +199,7 @@ public class GUIcontroller
                 // this call is required for uNodeDragRelease to operate
                 srcNode.startFullDrag();
 
-                //System.out.println("startFullDrag: "+srcNode.getUserData());
+//              System.out.println("startFullDrag: "+srcNode.getUserData());
             }
         }
     };
@@ -216,27 +213,16 @@ public class GUIcontroller
 
             if(toolState == ToolState.SELECT)
             {
-                   double offsetX = e.getSceneX() - lastClick.get().getX();
-                   double offsetY = e.getSceneY() - lastClick.get().getY();
-
-                // move/animate the node across the canvas
-                srcNode.setLayoutX(srcNode.getLayoutX() + offsetX);
-                srcNode.setLayoutY(srcNode.getLayoutY() + offsetY);
-                //theView.moveNode (source, offsetX, offsetY);
-
                 Point2D dragPoint = new Point2D(e.getSceneX(), e.getSceneY());
+                theView.moveNode(srcNode, lastClick.get(), dragPoint);
                 lastClick.set(dragPoint);
-
-//                System.out.println("U-NODE: drag");
+//              System.out.println("U-NODE: drag");
             }
             else if (toolState == ToolState.ADD_EDGE)
             {
                 // update mouse/cursor coordinates
                 Point2D dragPoint = new Point2D(e.getX(), e.getY());
-
-                // move/animate the edge as it is dragged by the mouse
-                currentEdge.setEndX(srcNode.getLayoutX() + dragPoint.getX());
-                currentEdge.setEndY(srcNode.getLayoutY() + dragPoint.getY());
+                theView.animateEdge(srcNode, currentEdge, dragPoint);
             }
         }
     };
@@ -253,11 +239,10 @@ public class GUIcontroller
 
             if (toolState == ToolState.ADD_EDGE)
             {
-                // bind/attach the ending point of the line to the srcNode
-                currentEdge.endXProperty ().bind(Bindings.add (srcNode.layoutXProperty (), e.getX ()));
-                currentEdge.endYProperty ().bind(Bindings.add (srcNode.layoutYProperty (), e.getY ()));
+                Point2D releasePoint = new Point2D(e.getX(), e.getY());
+                theView.endEdgeDraw(srcNode, currentEdge, releasePoint);
 
-                // draggging over, so the line can begin accepting mouse events again
+                // dragging is over, the line can begin accepting mouse events again
                 currentEdge.setMouseTransparent(false);
             }
         }
