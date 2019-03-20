@@ -10,18 +10,17 @@ import java.util.*;
 */
 public class UGraph {
 	
+	// Map of Nodes
 	public Map< Integer ,UNode> uNodes;
 	
+       /*
+	* Empty Constructor a new UGraph. Inintializes an empty Map to store unique nodes in.
+       */
 	public UGraph()
 	{
 		uNodes = new HashMap<Integer , UNode>();	
 	}
-	
-	
-	public UNode getNode(Integer nodeid)
-	{
-		return uNodes.get(nodeid);
-	}
+		
 	
 	public boolean addNode(Integer id, String nodeName)
 	{
@@ -30,8 +29,19 @@ public class UGraph {
 		return false;
 	}
 	
-	
 	/*
+	 * Searches the map based on the key given
+	 * Parameters: Key
+	*/
+	public UNode getNode(Integer nodeid)
+	{
+		return uNodes.get(nodeid);
+	}
+	
+
+	
+	
+	/**
 	 * Inbound Iteration 2 
 	 */
 	public void removeNode (String id)
@@ -43,11 +53,12 @@ public class UGraph {
 	
 	
 	/*
-	 * n1 would be the click node and n2 would be the release node
+	 * This Method links two nodes with a single UEdge
+	 * Parameters -
 	 */
 	public void linkSingle(UNode n1, UNode n2, String edge)
 	{
-		Edge e = new Edge(n1, n2);
+		UEdge e = new UEdge(n1, n2);
 		n1.addOutEdge(e);
 		n2.addInEdge(e);
 	}
