@@ -3,31 +3,58 @@ package model;
 import java.util.*;
 
 /*
- * A UGraph is a collection of unique UNodes that have UEdges connecting the UNodes.
+ * A UGraph is a collection of unique UNodes that have Edges connecting the UNodes.
  * UGraph is owned by the 'Controller', Nodes and Edges are created by the Controller via the UGraph
  *  
- * 
  * 
 */
 public class UGraph {
 	
-	public Map< String ,UNode> uNodes;
+	// Map of Nodes
+	public Map< Integer ,UNode> uNodes;
 	
-	public boolean addNode(String nodeName)
+       /*
+	* Empty Constructor a new UGraph. Inintializes an empty Map to store unique nodes in.
+       */
+	public UGraph()
 	{
-		if (uNodes.put(nodeName, new UNode( nodeName)) != null) 
+		uNodes = new HashMap<Integer , UNode>();	
+	}
+		
+	
+	public boolean addNode(Integer id, String nodeName)
+	{
+		if (uNodes.put( id, new UNode( id, nodeName)) != null) 
 			return true;
 		return false;
 	}
 	
+	/*
+	 * Searches the map based on the key given
+	 * Parameters: Key
+	*/
+	public UNode getNode(Integer nodeid)
+	{
+		return uNodes.get(nodeid);
+	}
+	
+
+	
+	
+	/**
+	 * Inbound Iteration 2 
+	 */
 	public void removeNode (String id)
 	{
 		uNodes.get(id).cleanEdges();
 		uNodes.remove(id); //hard remove
 	}
 	
+	
+	
 	/*
-	 * n1 would be the click node and n2 would be the release node
+	 * This Method links two nodes with a single UEdge
+	 * Parameters -
 	 */
 	public void linkSingle(UNode n1, UNode n2, String edge)
 	{
