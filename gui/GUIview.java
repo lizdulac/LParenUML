@@ -26,6 +26,11 @@ import javafx.geometry.Point2D;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.stage.FileChooser;
+
 
 public class GUIview
 {
@@ -40,11 +45,11 @@ public class GUIview
     {
         controller = aController;
         canvas = new Pane();
-        scene = new Scene (configureUI (), windowW, windowH);
+        scene = new Scene (configureUI (aStage), windowW, windowH);
         aStage.setScene (scene);
     }
 
-    private BorderPane configureUI ()
+    private BorderPane configureUI (Stage aStage)
     {
         int topMargin = 25;
         int leftMargin = 100;
@@ -57,21 +62,21 @@ public class GUIview
         canvas.setOnMouseReleased(controller.canvasMouseRelease);
         canvas.setStyle ("-fx-background-color: #f2f2f2; -fx-background-radius: 50;");
 
-        Separator topSpacer = new Separator ();
+        MenuBar menuBar = createMenuBar(aStage);
         Pane buttonPanel = createButtonPanel ();
         Separator rightSpacer = new Separator ();
         Separator bottomSpacer = new Separator ();
 
-        topSpacer.setVisible (false);
+       // topSpacer.setVisible (false);
         rightSpacer.setVisible (false);
         bottomSpacer.setVisible (false);
 
-        topSpacer.setPrefHeight (topMargin);
+       // topSpacer.setPrefHeight (topMargin);
         buttonPanel.setPrefWidth (leftMargin);
         rightSpacer.setPrefWidth (rightMargin);
         bottomSpacer.setPrefHeight (bottomMargin);
 
-        borderPane = new BorderPane(canvas, topSpacer, rightSpacer, bottomSpacer, buttonPanel);
+        borderPane = new BorderPane(canvas, menuBar, rightSpacer, bottomSpacer, buttonPanel);
         borderPane.setBackground (Background.EMPTY);
 
         return borderPane;
@@ -133,6 +138,26 @@ public class GUIview
         return buttonPanel;
     }
 
+    /*************************** MENUBAR **********************************/
+    private MenuBar createMenuBar(Stage aStage)
+    {
+        MenuBar menuBar = new MenuBar();
+        Menu menu1 = new Menu("File");
+        menuBar.getMenus().add(menu1);
+        MenuItem menuItem1 = new MenuItem("Open");
+        //MenuItem menuItem2 = new MenuItem("Save");
+        
+        menu1.getItems().add(menuItem1);
+
+
+        menuItem1.setOnAction(e -> {
+        FileChooser file = new FileChooser();  
+        file.setTitle("Open File");  
+        file.showOpenDialog(aStage);
+        });
+
+        return menuBar;
+    }
     
     /*************************** NODE FUNCTIONS ***************************/
     /* Nodes are stored as a child of the "canvas" panel in a group that
