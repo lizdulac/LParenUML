@@ -8,8 +8,8 @@ public class UNode {
 	private String name;
 	
 
-	private ArrayList<Edge> edgeStart = new ArrayList();
-	private ArrayList<Edge> edgeEnd = new ArrayList();
+	private ArrayList<UEdge> edgeStart = new ArrayList();
+	private ArrayList<UEdge> edgeEnd = new ArrayList();
 	
 	public UNode()
 	{		
@@ -24,7 +24,7 @@ public class UNode {
 		
 	}
 	
-	public UNode(Integer id, String name, ArrayList<Edge> end, ArrayList<Edge> start )
+	public UNode(Integer id, String name, ArrayList<UEdge> end, ArrayList<UEdge> start )
 	{
 		this.id = id;
 		this.name = name;
@@ -42,11 +42,11 @@ public class UNode {
 		name = str;
 	}
 	
-	public void addOutEdge( Edge e){
+	public void addOutEdge( UEdge e){
 		edgeStart.add(e);											
 	}
 	
-	public void addInEdge( Edge e){
+	public void addInEdge( UEdge e){
 		edgeStart.add(e);
 	}
 	
