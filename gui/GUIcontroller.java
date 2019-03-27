@@ -1,6 +1,8 @@
 package gui;
 import model.*;
 
+import java.util.*;
+
 import javafx.scene.Node;
 import javafx.stage.Stage;
 import javafx.scene.shape.Line;
@@ -39,6 +41,11 @@ public class GUIcontroller
     private Boolean isCanvasRelease;
     private final ObjectProperty<Point2D> lastClick;
 
+    /**Stacks for redo/undo functionality */
+    private Stack<Command> undo_stack;
+    private Stack<Command> redo_stack;
+    
+    
     private GUIcontroller (Stage stage)
     {
         theGraph = new UGraph ();
@@ -247,4 +254,29 @@ public class GUIcontroller
             }
         }
     };
+    
+    
+    private Command packageAction(String str, Object ... objects)
+    {
+    	return  new Command(str,objects);
+    }
+    
+    private void pushAction(Command cmd, boolean redo) {
+    	if(redo)
+    		redo_stack.push(cmd);
+    	else
+    		undo_stack.push(cmd);
+    }
+    
+    private Command popAction(boolean redo)
+    {
+    	if(redo)
+    		return redo_stack.pop();
+    	else
+    		return undo_stack.pop();
+    	
+    }
+    
+    
+    
 }
