@@ -3,6 +3,7 @@ import model.*;
 
 import java.util.*;
 
+import gui.Command.Action;
 import javafx.scene.Node;
 import javafx.stage.Stage;
 import javafx.scene.shape.Line;
@@ -31,6 +32,8 @@ public class GUIcontroller
             this.value = value; 
         }
     };
+    
+
 
     private static GUIcontroller sharedController;
     private GUIview theView;
@@ -104,6 +107,9 @@ public class GUIcontroller
             default:
                 toolState = ToolState.SELECT;
             }
+            
+            
+            
 //            System.out.println ("TSTATE: changed to " + toolState);
         }
     };
@@ -256,9 +262,9 @@ public class GUIcontroller
     };
     
     
-    private Command packageAction(String str, Object ... objects)
+    private Command packageAction(Action type, Object ... objects)
     {
-    	return  new Command(str,objects);
+    	return  new Command(type,objects);
     }
     
     private void pushAction(Command cmd, boolean redo) {
@@ -267,6 +273,7 @@ public class GUIcontroller
     	else
     		undo_stack.push(cmd);
     }
+
     
     private Command popAction(boolean redo)
     {
@@ -276,6 +283,55 @@ public class GUIcontroller
     		return undo_stack.pop();
     	
     }
+    
+    
+    //params and return subject to change
+    private void undo()
+    {
+    	
+    	
+    }
+    
+    //params and return subject to change
+    private void redo()
+    {
+    	
+    }
+    
+    private boolean execute_command(Command cmd) {
+    	
+    	
+    	if(cmd.actionType == Action.ADD_EDGE )
+    	{
+    	
+    		
+    		return true;
+    	}
+    	else if(cmd.actionType == Action.ADD_NODE)
+    	{
+    		
+    		return true;
+
+    	}
+    	else if(cmd.actionType == Action.DELETE_NODE)
+    	{
+    		
+    		return true;
+
+    	}
+    	else if(cmd.actionType == Action.DELETE_NODE)
+    	{
+    		
+    		
+    		return true;
+
+    	}
+    	
+    	
+    	return false;
+    }
+    
+    
     
     
     
