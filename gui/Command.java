@@ -50,7 +50,14 @@ public class Command {
 	}
 	
 	
+	// ******************************** SIDE TESTING USING HISTORY ********************************
+	/* These methods are for implementing classes to call when they are 
+	 * executing a command. 
+	 * 
+	 */
+	public abstract void execute();
 	
+	public abstract void undo();
 	
 }
 
