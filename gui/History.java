@@ -8,9 +8,12 @@ import java.util.*;
  *
  */
 
-/* History is a frame-work class that models the History for REDO UNDO 
+/* In our case, the GUIController basically works as the History. But I wanted
+ * to create a History class to make things easier to understand.
+ * History is a frame-work class that models the History for REDO UNDO 
  * but a lot more simplistic. 
  * It is purely to save executed commands and to undo/redo them
+ *
  */
 
 
