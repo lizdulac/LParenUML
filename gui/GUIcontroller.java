@@ -108,8 +108,6 @@ public class GUIcontroller
                 toolState = ToolState.SELECT;
             }
             
-            
-            
 //            System.out.println ("TSTATE: changed to " + toolState);
         }
     };
@@ -123,12 +121,15 @@ public class GUIcontroller
             {
                 if (toolState == ToolState.ADD_NODE)
                 {
-                    int id = nextNodeId ();
+                    
+                	
+                	
+                	int id = nextNodeId ();
                     String name = ((Character) ((char) (id + 96))).toString ();
-
-                    theGraph.addNode(id, name);
-                    theView.drawNode (e.getX (), e.getY (), id);
-
+                    
+                    /*data order for add Node:*/ 
+                    execute_command(packageAction( Action.ADD_NODE, id, name, e.getX(), e.getY()));
+                    
 //                    System.out.println ("U-NODE: node created -> id=" + id + " name=" + name);
                 }
                 else
@@ -252,8 +253,9 @@ public class GUIcontroller
 
             if (toolState == ToolState.ADD_EDGE)
             {
-                Point2D releasePoint = new Point2D(e.getX(), e.getY());
-                theView.endEdgeDraw(srcNode, currentEdge, releasePoint);
+                
+            	Point2D releasePoint = new Point2D(e.getX(), e.getY());
+                execute_command(packageAction( Action.ADD_EDGE, releasePoint, currentEdge, srcNode));
 
                 // dragging is over, the line can begin accepting mouse events again
                 currentEdge.setMouseTransparent(false);
@@ -298,23 +300,50 @@ public class GUIcontroller
     	
     }
     
-    private boolean execute_command(Command cmd) {
+    private boolean execute_command(Command cmd, boolean isUndo, boolean isRedo) {
     	
-    	
-    	if(cmd.actionType == Action.ADD_EDGE )
-    	{
-    	
+    	if( isUndo && isRedo) {
     		
-    		return true;
+    	}
+    	
+    	Object[] data = cmd.getData();
+    	
+    	if(cmd.actionType == Action.ADD_EDGE)
+    	{
+    		//if clause needed for whether this action is an undo or redo
+    		
+    		if(data.length != 2)
+    		{
+    			System.out.println("Data for adding a node is incorrect");
+    			return false;
+    		}
+    		
+    		pushAction(cmd, false);
+    		
+        	theView.endEdgeDraw((Pane)data[0], (Line)data[1], (Point2D)data[2]);
+        	
+        	return true;
     	}
     	else if(cmd.actionType == Action.ADD_NODE)
     	{
+    		
+    		if(data.length != 4)
+    		{
+    			System.out.println("Data for adding a node is incorrect");
+    			return false;
+    		}
+    		
+    		pushAction(cmd, false);
+    		
+            theGraph.addNode((Integer)data[0], (String)data[1]);
+            theView.drawNode ((double)data[2],(double)data[3], (Integer)data[0]);
     		
     		return true;
 
     	}
     	else if(cmd.actionType == Action.DELETE_NODE)
     	{
+    		
     		
     		return true;
 
