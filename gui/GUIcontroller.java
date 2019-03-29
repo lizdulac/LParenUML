@@ -261,6 +261,7 @@ public class GUIcontroller
         }
     };
     
+ // ******************************** REDO & UNDO FUNCTIONS ********************************
     
     private Command packageAction(Action type, Object ... objects)
     {
@@ -297,8 +298,9 @@ public class GUIcontroller
     {
     	
     }
-    
-   private boolean execute_command(Command cmd, boolean isUndo, boolean isRedo) {
+ //Our command manager that is basically to keep the stack for our commands.  
+ 
+private boolean execute_command(Command cmd, boolean isUndo, boolean isRedo) {
     	
     	if( isUndo && isRedo) {
     		
@@ -341,15 +343,26 @@ public class GUIcontroller
     	}
     	else if(cmd.actionType == Action.DELETE_NODE)
     	{
+    		if ( data.length != 1)
+    		{
+    			System.out.println("Data for deleting node is incorrect");
+    		}
+    		pushAction(cmd, false);
     		
-    		
+    		theGraph.removeNode((String)data[0]);
+    		theView.deleteNode((Pane)data[0]);
     		return true;
 
     	}
     	else if(cmd.actionType == Action.DELETE_EDGE)
     	{
-    		
-    		
+    		if ( data.length != 2)
+    		{
+    			System.out.println("Date for deleting edge is incorrect");
+    		}
+    		pushAction(cmd, false);
+    		theView.removeEdge((Line)data[0]);
+    		theView.
     		return true;
 
     	}
@@ -357,3 +370,9 @@ public class GUIcontroller
     	
     	return false;
     }
+    
+    
+    
+    
+    
+}
