@@ -346,7 +346,7 @@ public class GUIcontroller
     		return true;
 
     	}
-    	else if(cmd.actionType == Action.DELETE_NODE)
+    	else if(cmd.actionType == Action.DELETE_EDGE)
     	{
     		
     		
