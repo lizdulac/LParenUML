@@ -51,7 +51,9 @@ public class Command {
 	
 	
 	// ******************************** SIDE TESTING USING HISTORY ********************************
-	/* These methods are for implementing classes to call when they are 
+	
+	/* @ An
+	 * These methods are for implementing classes to call when they are 
 	 * executing a command. 
 	 * 
 	 */
