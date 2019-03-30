@@ -128,7 +128,7 @@ public class GUIcontroller
                     String name = ((Character) ((char) (id + 96))).toString ();
                     
                     /*data order for add Node:*/ 
-                    execute_command(packageAction( Action.ADD_NODE, id, name, e.getX(), e.getY()));
+                    execute_command(packageAction( Action.ADD_NODE, id, name, e.getX(), e.getY()), false, false);
                     
 //                    System.out.println ("U-NODE: node created -> id=" + id + " name=" + name);
                 }
@@ -255,7 +255,7 @@ public class GUIcontroller
             {
                 
             	Point2D releasePoint = new Point2D(e.getX(), e.getY());
-                execute_command(packageAction( Action.ADD_EDGE, releasePoint, currentEdge, srcNode));
+                execute_command(packageAction( Action.ADD_EDGE, releasePoint, currentEdge, srcNode), false, false );
 
                 // dragging is over, the line can begin accepting mouse events again
                 currentEdge.setMouseTransparent(false);
