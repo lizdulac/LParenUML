@@ -121,9 +121,9 @@ public class GUIview
             buttons[i].setFont (buttonsFont);
             buttons[i].setStyle (buttonStyle);
             // 
-            if (i < GUIcontroller.ToolState.values ().length)
+            if (i < GUIcontroller.ToolState.values().length)
             {
-                buttons[i].setUserData (GUIcontroller.ToolState.values ()[i]);
+                buttons[i].setUserData (GUIcontroller.ToolState.values()[i]);
                 buttons[i].setOnAction (controller.buttonClick);
             }
             // add Button to panel
@@ -226,7 +226,7 @@ public class GUIview
         // into the local coordinate space of this Node.
         localPoint = srcNode.sceneToLocal (sceneClickPoint);
 
-        theEdge = new Line ();
+        theEdge = new Line();
         theEdge.setStrokeWidth (strokeWidth);
         // disallow parent container node from changing/managing size & layout 
         theEdge.setManaged(false);
@@ -257,9 +257,13 @@ public class GUIview
         theEdge.endXProperty ().bind(Bindings.add (srcNode.layoutXProperty (), releasePoint.getX ()));
         theEdge.endYProperty ().bind(Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));        
     }
-
+    
+    
     public void removeEdge(Line theEdge)
     {
         canvas.getChildren ().remove(theEdge);
     }
+     
+    
+    
 }

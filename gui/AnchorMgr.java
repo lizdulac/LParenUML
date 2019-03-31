@@ -1,18 +1,15 @@
 package gui;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
-
-import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.Pane;
 import javafx.geometry.*;
 import java.lang.Math;
 
 /**
- * This class creates 3 Point2D objects on each edge of given Pane
+ * This class creates a number of Point2D objects on each edge of given Pane
+ * 
  * @author jamesdryver
- *
  */
 public class AnchorMgr {
 	private Point2D[] anchorlist = new Point2D[12];
@@ -20,7 +17,10 @@ public class AnchorMgr {
 	private final int numPoints = 3;
 	private double snapDistance = 6.5;
 	
-	
+	/**
+	 * 
+	 * @param pn the given pane
+	 */
 	public AnchorMgr(Pane pn){
 		pane =pn;
 		generate_anchors();
@@ -38,32 +38,9 @@ public class AnchorMgr {
 	}
 
 	
-	public void generate_anchors()
-	{
-		double h = pane.getHeight();
-		double w = pane.getWidth();	
-		double p =0;
-		
-		for(int i = 0; i < numPoints; ++i ) {
-			
-			p = 1/(double)numPoints * (i + 1);
-			//anchor points need adjustment for Pane Layout X & Y
-			anchorlist[i] = new Point2D(p*w, 0);
-			anchorlist[i * numPoints + 1] = new Point2D(p*w, w);
-			anchorlist[i * numPoints + 2] = new Point2D(0, p*h);
-			anchorlist[i * numPoints + 3] = new Point2D(h, p*h);			
-		}	
-		
-		snapDistance = (1/(double)numPoints *((h+w)/2)) *.35;
-		
-	}
-	
-	
 	/**
-	 * 
-	 * This method detects if the cursor is within a radius of any of these points and returns that point.
-	 * 
-	 * Anchor points laid out in array as follows:
+	 * Generates anchors for a given pane
+	 *Anchor points laid out in array as follows:
 	 * Ex: numPoints = 3;
 	 *         0     4     8
 	 *   [ x x x x x x x x x x x ]
@@ -79,7 +56,45 @@ public class AnchorMgr {
 	 *   [ x x x x x x x x x x x ]
 	 *         1     5     9
 	 *
-	 * @param cursor
+	 */
+	public void generate_anchors()
+	{
+		double h = pane.getHeight();
+		double w = pane.getWidth();	
+		double p =0;
+		
+		for(int i = 0; i < numPoints; ++i ) {
+			
+			p = 1/(double)numPoints * (i + 1);
+			
+			//anchor points need adjustment for Pane Layout X & Y
+			
+			anchorlist[(i * numPoints)+ i] = new Point2D(p*w, 0);
+			anchorlist[(i * numPoints)+ i + 1] = new Point2D(p*w, w);
+			anchorlist[(i * numPoints)+ i + 2] = new Point2D(0, p*h);
+			anchorlist[(i * numPoints)+ i + 3] = new Point2D(h, p*h);			
+		}	
+		
+		snapDistance = (1/(double)numPoints *((h+w)/2)) *.35;
+		
+		for(int i = 0; i < anchorlist.length; ++i)
+		{
+			if(anchorlist[i] == null)
+			{
+				System.out.println("Error in anchor data at index: "+ i);
+			}
+			
+		}
+		
+	}
+	
+	
+	/**
+	 * 
+	 * This method detects if the cursor is within a radius of any of these points and returns that point.
+	 * 
+
+	 * @param cursor where the cursor is currently
 	 * @return Point2D closest to the cursor on the released Node
 	 */
 	public Point2D getNearAnchor(Point2D cursor) {
@@ -105,11 +120,10 @@ public class AnchorMgr {
 			}
 			else
 			{
+				
 				cur = anchorlist[3];
 			}
-			
-			
-			
+						
 		}
 		else if(x <= h/numPoints *2 && y >= w/numPoints *2){// Upper Left Quadrant
 			
@@ -131,7 +145,6 @@ public class AnchorMgr {
 	
 			double botRight = distance(x, y, anchorlist[9].getX(), anchorlist[9].getY());
 			double rightBot = distance(x, y, anchorlist[11].getX(), anchorlist[11].getY());
-			
 			
 			if(botRight < rightBot)
 			{
@@ -161,9 +174,9 @@ public class AnchorMgr {
 		}
 			
 
-		return cursor;
+		return cur;
 	}
-	
+
 	
 	public boolean hasSnap(Point2D cursor)
 	{
@@ -187,7 +200,6 @@ public class AnchorMgr {
 	public double distance(double x1, double y1, double x2, double y2) {
 		return Math.sqrt( (x2 -x1)*(x2 -x1) + (y2-y1)*(y2-y1) );
 	}
-	
 	
 	
 }

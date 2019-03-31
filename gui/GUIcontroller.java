@@ -32,8 +32,6 @@ public class GUIcontroller
             this.value = value; 
         }
     };
-    
-
 
     private static GUIcontroller sharedController;
     private GUIview theView;
@@ -56,6 +54,8 @@ public class GUIcontroller
         uNodeId = 0;
         isCanvasRelease = true;
         lastClick = new SimpleObjectProperty<> ();
+        undo_stack = new Stack<Command>();
+        redo_stack = new Stack<Command>();        
 
         System.out.println ("\n******* Start *******\n");
         theView = new GUIview (this, stage);
@@ -121,9 +121,7 @@ public class GUIcontroller
             {
                 if (toolState == ToolState.ADD_NODE)
                 {
-                    
-                	
-                	
+                                    	
                 	int id = nextNodeId ();
                     String name = ((Character) ((char) (id + 96))).toString ();
                     
@@ -218,6 +216,7 @@ public class GUIcontroller
         }
     };
 
+    
     public EventHandler<MouseEvent> uNodeDrag = new EventHandler<MouseEvent> ()
     {
         @Override
@@ -254,8 +253,9 @@ public class GUIcontroller
             if (toolState == ToolState.ADD_EDGE)
             {
                 
-            	Point2D releasePoint = new Point2D(e.getX(), e.getY());
-                execute_command(packageAction( Action.ADD_EDGE, releasePoint, currentEdge, srcNode), false, false );
+            	AnchorMgr a = new AnchorMgr(srcNode);
+            	Point2D releasePoint = a.getNearAnchor(new Point2D(e.getX(), e.getY()));
+                execute_command(packageAction( Action.ADD_EDGE, srcNode, currentEdge, releasePoint ), false, false);
 
                 // dragging is over, the line can begin accepting mouse events again
                 currentEdge.setMouseTransparent(false);
@@ -312,9 +312,10 @@ public class GUIcontroller
     	{
     		//if clause needed for whether this action is an undo or redo
     		
-    		if(data.length != 2)
+    		if(data.length != 3)
     		{
-    			System.out.println("Data for adding a node is incorrect");
+    			System.out.println("Data for adding an edge is incorrect");
+    			System.out.println("Data list was expected to be 2 but was: " + data.length);
     			return false;
     		}
     		
@@ -330,6 +331,7 @@ public class GUIcontroller
     		if(data.length != 4)
     		{
     			System.out.println("Data for adding a node is incorrect");
+    			System.out.println("Data list was expected to be 4 but was: " + data.length);
     			return false;
     		}
     		
