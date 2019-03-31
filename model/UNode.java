@@ -2,21 +2,37 @@ package model;
 
 import java.util.*;
 
+/**
+ * The UNode class keeps a list of outgoing edges and incoming edges. 
+ * 
+ * @author jamesdryver
+ *
+ */
 public class UNode {
 
 	private Integer id;
 	private String name;
-	
 
-	private ArrayList<Edge> edgeStart = new ArrayList();
-	private ArrayList<Edge> edgeEnd = new ArrayList();
+	private ArrayList<UEdge> edgeStart = new ArrayList<UEdge>();
+	private ArrayList<UEdge> edgeEnd = new ArrayList<UEdge>();
 	
+	/**
+	 * Blank constructor for a UNode. This constructor should never be called.
+	 * 
+	 * @deprecated use UNode( Integer id, String name) instead.
+	 */
 	public UNode()
 	{		
 		  id = -1;
 		  name ="";
 	}
 	
+	/**
+	 * UNode's basic constructor with an id and name.
+	 * 
+	 * @param id id of node
+	 * @param name name of node
+	 */
 	public UNode( Integer id, String name)
 	{
 		this.id = id;
@@ -24,7 +40,15 @@ public class UNode {
 		
 	}
 	
-	public UNode(Integer id, String name, ArrayList<Edge> end, ArrayList<Edge> start )
+	/**
+	 * A UNode's fillable constructor, allowing for UEdge initialization.
+	 * 
+	 * @param id id of node
+	 * @param name name of node
+	 * @param end list of incoming edges
+	 * @param start list of outgoing edges
+	 */
+	public UNode(Integer id, String name, ArrayList<UEdge> end, ArrayList<UEdge> start )
 	{
 		this.id = id;
 		this.name = name;
@@ -32,26 +56,58 @@ public class UNode {
 		edgeStart = start;		
 	}
 	
+	/**
+	 * Exposes the id attribute.
+	 * 
+	 * @return id of node
+	 */
+	public Integer getId()
+	{
+		return id;
+	}
+	
+	/**
+	 * Exposes the name attribute.
+	 * 
+	 * @return name of node
+	 */
 	public String getName()
 	{
 		return name;
 	}
 	
+	/**
+	 * Change the name of the Node.
+	 * 
+	 * @param str new node name
+	 */
 	public void setName(String str)
 	{
 		name = str;
 	}
 	
-	public void addOutEdge( Edge e){
+	/**
+	 * Adds a new Edge to outgoing edges.
+	 * 
+	 * @param e new edge
+	 */
+	public void addOutEdge( UEdge e){
 		edgeStart.add(e);											
 	}
 	
-	public void addInEdge( Edge e){
-		edgeStart.add(e);
+	/**
+	 * Adds a new Edge to incoming edges.
+	 * @param e new edge
+	 */
+	public void addInEdge( UEdge e){
+		edgeEnd.add(e);
 	}
 	
-	/*
-	 * Inbound Iteration 2
+	
+	/**
+	 *  Clean the outgoing edges off of a Node.
+	 * 
+	 * @version 3.0 Inbound Iteration 3 
 	 */
 	public void cleanEdges()
 	{
