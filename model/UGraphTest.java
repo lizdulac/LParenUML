@@ -9,6 +9,15 @@ class UGraphTest {
 	@Test
 	void addNodes() {
 		UGraph graph = new UGraph();
+
+		
+		
+		graph.addNode(42, "testnode_0");
+		
+		assertTrue(graph.size() > 0);
+		
+		
+	}
 			
 		boolean node =graph.addNode(42, "testnode_0");
 		assertTrue(graph.size() > 0);
@@ -43,6 +52,4 @@ class UGraphTest {
 		graph.linkSingle(n1, n2, "");
 		
 	}
-	
-
 }

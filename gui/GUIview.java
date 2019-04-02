@@ -143,9 +143,9 @@ public class GUIview
             buttons[i].setFont (buttonsFont);
             buttons[i].setStyle (buttonStyle);
             // 
-            if (i < GUIcontroller.ToolState.values ().length)
+            if (i < GUIcontroller.ToolState.values().length)
             {
-                buttons[i].setUserData (GUIcontroller.ToolState.values ()[i]);
+                buttons[i].setUserData (GUIcontroller.ToolState.values()[i]);
                 buttons[i].setOnAction (controller.buttonClick);
             }
             // add Button to panel
@@ -295,7 +295,7 @@ public class GUIview
         // into the local coordinate space of this Node.
         localPoint = srcNode.sceneToLocal (sceneClickPoint);
 
-        theEdge = new Line ();
+        theEdge = new Line();
         theEdge.setStrokeWidth (strokeWidth);
         // disallow parent container node from changing/managing size & layout 
         theEdge.setManaged(false);
@@ -345,9 +345,12 @@ public class GUIview
      * Remove visual representation of an Edge from the window
      * 
      * @param theEdge Edge to be removed from view
-     */
+     */ 
     public void removeEdge(Line theEdge)
     {
         canvas.getChildren ().remove(theEdge);
     }
+     
+    
+    
 }

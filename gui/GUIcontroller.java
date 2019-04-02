@@ -1,6 +1,9 @@
 package gui;
 import model.*;
 
+import java.util.*;
+
+import gui.Command.Action;
 import javafx.scene.Node;
 import javafx.stage.Stage;
 import javafx.scene.shape.Line;
@@ -39,6 +42,11 @@ public class GUIcontroller
     private Boolean isCanvasRelease;
     private final ObjectProperty<Point2D> lastClick;
 
+    /**Stacks for redo/undo functionality */
+    private Stack<Command> undo_stack;
+    private Stack<Command> redo_stack;
+    
+    
     private GUIcontroller (Stage stage)
     {
         theGraph = new UGraph ();
@@ -46,6 +54,8 @@ public class GUIcontroller
         uNodeId = 0;
         isCanvasRelease = true;
         lastClick = new SimpleObjectProperty<> ();
+        undo_stack = new Stack<Command>();
+        redo_stack = new Stack<Command>();        
 
         System.out.println ("\n******* Start *******\n");
         theView = new GUIview (this, stage);
@@ -97,6 +107,7 @@ public class GUIcontroller
             default:
                 toolState = ToolState.SELECT;
             }
+            
 //            System.out.println ("TSTATE: changed to " + toolState);
         }
     };
@@ -110,12 +121,13 @@ public class GUIcontroller
             {
                 if (toolState == ToolState.ADD_NODE)
                 {
-                    int id = nextNodeId ();
+                                    	
+                	int id = nextNodeId ();
                     String name = ((Character) ((char) (id + 96))).toString ();
-
-                    theGraph.addNode(id, name);
-                    theView.drawNode (e.getX (), e.getY (), id);
-
+                    
+                    /*data order for add Node:*/ 
+                    execute_command(packageAction( Action.ADD_NODE, id, name, e.getX(), e.getY()), false, false);
+                    
 //                    System.out.println ("U-NODE: node created -> id=" + id + " name=" + name);
                 }
                 else
@@ -204,6 +216,7 @@ public class GUIcontroller
         }
     };
 
+    
     public EventHandler<MouseEvent> uNodeDrag = new EventHandler<MouseEvent> ()
     {
         @Override
@@ -239,12 +252,118 @@ public class GUIcontroller
 
             if (toolState == ToolState.ADD_EDGE)
             {
-                Point2D releasePoint = new Point2D(e.getX(), e.getY());
-                theView.endEdgeDraw(srcNode, currentEdge, releasePoint);
+                
+            	AnchorMgr a = new AnchorMgr(srcNode);
+            	Point2D releasePoint = a.getNearAnchor(new Point2D(e.getX(), e.getY()));
+                execute_command(packageAction( Action.ADD_EDGE, srcNode, currentEdge, releasePoint ), false, false);
 
                 // dragging is over, the line can begin accepting mouse events again
                 currentEdge.setMouseTransparent(false);
             }
         }
     };
+    
+    
+    private Command packageAction(Action type, Object ... objects)
+    {
+    	return  new Command(type,objects);
+    }
+    
+    private void pushAction(Command cmd, boolean redo) {
+    	if(redo)
+    		redo_stack.push(cmd);
+    	else
+    		undo_stack.push(cmd);
+    }
+
+    
+    private Command popAction(boolean redo)
+    {
+    	if(redo)
+    		return redo_stack.pop();
+    	else
+    		return undo_stack.pop();
+    	
+    }
+    
+    
+    //params and return subject to change
+    private void undo()
+    {
+    	
+    	
+    }
+    
+    //params and return subject to change
+    private void redo()
+    {
+    	
+    }
+    
+    private boolean execute_command(Command cmd, boolean isUndo, boolean isRedo) {
+    	
+    	if( isUndo && isRedo) {
+    		
+    	}
+    	
+    	Object[] data = cmd.getData();
+    	
+    	if(cmd.actionType == Action.ADD_EDGE)
+    	{
+    		//if clause needed for whether this action is an undo or redo
+    		
+    		if(data.length != 3)
+    		{
+    			System.out.println("Data for adding an edge is incorrect");
+    			System.out.println("Data list was expected to be 2 but was: " + data.length);
+    			return false;
+    		}
+    		
+    		pushAction(cmd, false);
+    		
+        	theView.endEdgeDraw((Pane)data[0], (Line)data[1], (Point2D)data[2]);
+        	
+        	return true;
+    	}
+    	else if(cmd.actionType == Action.ADD_NODE)
+    	{
+    		
+    		if(data.length != 4)
+    		{
+    			System.out.println("Data for adding a node is incorrect");
+    			System.out.println("Data list was expected to be 4 but was: " + data.length);
+    			return false;
+    		}
+    		
+    		pushAction(cmd, false);
+    		
+            theGraph.addNode((Integer)data[0], (String)data[1]);
+            theView.drawNode ((double)data[2],(double)data[3], (Integer)data[0]);
+    		
+    		return true;
+
+    	}
+    	else if(cmd.actionType == Action.DELETE_NODE)
+    	{
+    		
+    		
+    		return true;
+
+    	}
+    	else if(cmd.actionType == Action.DELETE_NODE)
+    	{
+    		
+    		
+    		return true;
+
+    	}
+    	
+    	
+    	return false;
+    }
+    
+    
+    
+    
+    
 }
