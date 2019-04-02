@@ -76,7 +76,6 @@ public class GUIview
         Separator rightSpacer = new Separator ();
         Separator bottomSpacer = new Separator ();
 
-        topSpacer.setVisible (false);
         rightSpacer.setVisible (false);
         bottomSpacer.setVisible (false);
 
