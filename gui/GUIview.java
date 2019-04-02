@@ -1,14 +1,9 @@
 package gui;
 
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.Group;
-import javafx.scene.paint.Color;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TextArea;
@@ -18,33 +13,52 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BorderPane;
 
 import javafx.stage.Stage;
 import javafx.geometry.Pos;
 import javafx.geometry.Point2D;
 import javafx.beans.binding.Bindings;
-import javafx.collections.ObservableList;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.stage.FileChooser;
 
 
 public class GUIview
 {
+    /************************ GUIview CLASS MEMBERS *************************/
     private GUIcontroller controller;
     private Scene scene;
     private Pane canvas;
     private double windowW = 800.0;
     private double windowH = 600.0;
 
+    
     /*************************** INITIALIZATION ***************************/
+    /**
+     * Create an initialized GUIview. This creates a
+     * window with buttons and an area for visually creating a UML diagram.
+     * 
+     * @param aController controller containing all eventHandlers and 
+     * program state information necessary for determining reaction to events
+     * @param aStage the primary JavaFX Stage Object for this view to which
+     * all visual elements can be drawn by setting a scene
+     */
     public GUIview (GUIcontroller aController, Stage aStage)
     {
         controller = aController;
         canvas = new Pane();
-        scene = new Scene (configureUI (), windowW, windowH);
+        scene = new Scene (configureUI (aStage), windowW, windowH);
         aStage.setScene (scene);
     }
 
-    private BorderPane configureUI ()
+    /**
+     * Initializes visual aspects of the user interface. The graphic design 
+     * of this UML Diagram Editor is implemented here.
+     * 
+     * @return a JavaFX BorderPane which is the body of the Editor window
+     */
+    private BorderPane configureUI (Stage aStage)
     {
         int topMargin = 25;
         int leftMargin = 100;
@@ -57,30 +71,35 @@ public class GUIview
         canvas.setOnMouseReleased(controller.canvasMouseRelease);
         canvas.setStyle ("-fx-background-color: #f2f2f2; -fx-background-radius: 50;");
 
-        Separator topSpacer = new Separator ();
+        MenuBar menuBar = createMenuBar(aStage);
         Pane buttonPanel = createButtonPanel ();
         Separator rightSpacer = new Separator ();
         Separator bottomSpacer = new Separator ();
 
-        topSpacer.setVisible (false);
         rightSpacer.setVisible (false);
         bottomSpacer.setVisible (false);
 
-        topSpacer.setPrefHeight (topMargin);
         buttonPanel.setPrefWidth (leftMargin);
         rightSpacer.setPrefWidth (rightMargin);
         bottomSpacer.setPrefHeight (bottomMargin);
 
-        borderPane = new BorderPane(canvas, topSpacer, rightSpacer, bottomSpacer, buttonPanel);
+        borderPane = new BorderPane(canvas, menuBar, rightSpacer, bottomSpacer, buttonPanel);
         borderPane.setBackground (Background.EMPTY);
 
         return borderPane;
     }
     
-    // Button Style reference:
-    // http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
-    /*
+    /**
+     * Create a JavaFX Pane containing buttons for changing states, undoing, and redoing.
+     * The buttons are linked to eventHandlers in the GUIcontroller, and will display a 
+     * button description when hovered over.
+     * 
      * WARNING: UCodes, buttonNames, and GUIcontroller.ToolState enum values must all match up
+     * 
+     * Button Style reference:
+     *  http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
+     * 
+     * @return a JavaFX Pane Object containing all of the UML Diagram Editor buttons
      */
     private Pane createButtonPanel ()
     {
@@ -95,10 +114,13 @@ public class GUIview
         Font buttonsFont = Font.font ("sans-serif", FontWeight.BOLD, 20);
 
         // Gross CSS code to style buttons
-        String buttonStyle = "-fx-background-color:linear-gradient(#f2f2f2, #d6d6d6),"
+        String buttonStyle = ".button {"
+                + "-fx-background-color:linear-gradient(#f2f2f2, #d6d6d6),"
                 + "linear-gradient(#fcfcfc 0%, #d9d9d9 20%, #d6d6d6 100%),linear-gradient(#dddddd 0%, #f6f6f6 50%);"
                 + "-fx-background-radius: 8,7,6;-fx-background-insets: 0,1,2;-fx-text-fill: black;-fx-effect:"
-                + "dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );";
+                + "dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );}"
+                + ".button:selected {"
+                + "-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 );}";
 
         
         // VBox arranges elements vertically in a single column
@@ -133,10 +155,39 @@ public class GUIview
         return buttonPanel;
     }
 
+    /*************************** MENUBAR **********************************/
+    private MenuBar createMenuBar(Stage aStage)
+    {
+        MenuBar menuBar = new MenuBar();
+        Menu menu1 = new Menu("File");
+        menuBar.getMenus().add(menu1);
+        MenuItem menuItem1 = new MenuItem("Open");
+        //MenuItem menuItem2 = new MenuItem("Save");
+
+         menu1.getItems().add(menuItem1);
+
+
+         menuItem1.setOnAction(e -> {
+        FileChooser file = new FileChooser();  
+        file.setTitle("Open File");  
+        file.showOpenDialog(aStage);
+        });
+
+         return menuBar;
+    }
     
     /*************************** NODE FUNCTIONS ***************************/
-    /* Nodes are stored as a child of the "canvas" panel in a group that
+    
+    /**
+     * Draw the visual representation of a UNode.
+     * 
+     * NOTE: Nodes are stored as a child of the "canvas" panel in a group that
      * contains a StackPane, and then necessary text containers
+     * 
+     * @param x x coordinate of upper left corner of UNode
+     * @param y y coordinate of upper left corner of UNode
+     * @param uNodeId id of UNode represented by this display
+     * @return JavaFX StackPane containing all visual elements of a UNode
      */
     public StackPane drawNode (double x, double y, int uNodeId)
     {
@@ -180,14 +231,14 @@ public class GUIview
         uNode.setUserData (uNodeId);
 
 
-     // ***** REGISTER EVENT HANDLERS *****
-     // Different pieces of the visual "uNode" need seperate handlers
-     //
-     // nodeBody
+        // ***** REGISTER EVENT HANDLERS *****
+        // Different pieces of the visual "uNode" need separate handlers
+
+        // nodeBody
         nodeBody.setOnMousePressed (controller.uNodeMousePress);
         nodeBody.setOnDragDetected (controller.uNodeDragDetected);
-     //
-     // uNode
+
+        // uNode
         uNode.setOnMouseDragged (controller.uNodeDrag);
         uNode.setOnMouseReleased (controller.uNodeMouseRelease);
         uNode.setOnMouseDragReleased (controller.uNodeDragRelease);
@@ -196,6 +247,14 @@ public class GUIview
         return nodeBody;
     }
     
+    /**
+     * Translate visual representation of a Node by difference between
+     * lastClicked point, and dragPoint.
+     * 
+     * @param theNode JavaFX Pane containing all visual elements of a Node
+     * @param lastClick last registered mouse location
+     * @param dragPoint most recently registered mouse location
+     */
     public void moveNode (Pane theNode, Point2D lastClick, Point2D dragPoint)
     {
         double offsetX = dragPoint.getX() - lastClick.getX();
@@ -205,7 +264,13 @@ public class GUIview
         theNode.setLayoutX(theNode.getLayoutX() + offsetX);
         theNode.setLayoutY(theNode.getLayoutY() + offsetY);
     }
-    
+
+    /**
+     * Remove the visual representation of a Node from the window
+     * 
+     * @param theNode JavaFX Pane containing all visual elements of the
+     * Node to be deleted
+     */
     public void deleteNode (Pane theNode)
     {
         canvas.getChildren ().remove(theNode);
@@ -213,8 +278,12 @@ public class GUIview
 
 
     /*************************** EDGE FUNCTIONS ***************************/
-    /* 
+    /**
      * 
+     * 
+     * @param srcNode
+     * @param sceneClickPoint
+     * @return
      */
     public Line beginEdgeDraw(Pane srcNode, Point2D sceneClickPoint)
     {
@@ -245,20 +314,38 @@ public class GUIview
         return theEdge;
     }
 
+    /**
+     *
+     *
+     * @param srcNode
+     * @param theEdge
+     * @param dragPoint
+     */
     public void animateEdge(Pane srcNode, Line theEdge, Point2D dragPoint)
     {
         theEdge.setEndX(srcNode.getLayoutX() + dragPoint.getX());
         theEdge.setEndY(srcNode.getLayoutY() + dragPoint.getY());
     }
 
+    /**
+     * 
+     *  
+     * @param srcNode
+     * @param theEdge
+     * @param releasePoint
+     */
     public void endEdgeDraw(Pane srcNode, Line theEdge, Point2D releasePoint)
     {
         // bind/attach the ending point of the line to the srcNode
         theEdge.endXProperty ().bind(Bindings.add (srcNode.layoutXProperty (), releasePoint.getX ()));
-        theEdge.endYProperty ().bind(Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));        
+        theEdge.endYProperty ().bind(Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));
     }
-    
-    
+
+    /**
+     * Remove visual representation of an Edge from the window
+     * 
+     * @param theEdge Edge to be removed from view
+     */ 
     public void removeEdge(Line theEdge)
     {
         canvas.getChildren ().remove(theEdge);

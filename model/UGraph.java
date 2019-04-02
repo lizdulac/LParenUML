@@ -31,8 +31,10 @@ public class UGraph {
 	 */
 	public boolean addNode(Integer id, String nodeName)
 	{
-		if (uNodes.put( id, new UNode( id, nodeName)) != null) 
+		if (uNodes.put( id, new UNode( id, nodeName)) == null) { 
 			return true;
+		}
+		
 		return false;
 	}
 	
@@ -58,7 +60,7 @@ public class UGraph {
 	 * 
 	 * @param id key of the node to be deleted
 	 */
-	public void removeNode (String id)
+	public void removeNode (int id)
 	{
 		uNodes.get(id).cleanEdges();
 		uNodes.remove(id); //hard remove; See undo/redo/History.java
