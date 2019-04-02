@@ -345,15 +345,26 @@ public class GUIcontroller
     	}
     	else if(cmd.actionType == Action.DELETE_NODE)
     	{
+    		if ( data.length != 1)
+    		{
+    			System.out.println("Data for deleting node is incorrect");
+    		}
+    		pushAction(cmd, false);
     		
-    		
+    		theGraph.removeNode((String)data[0]);
+    		theView.deleteNode((Pane)data[0]);
     		return true;
 
     	}
-    	else if(cmd.actionType == Action.DELETE_NODE)
+    	else if(cmd.actionType == Action.DELETE_EDGE)
     	{
-    		
-    		
+    		if ( data.length != 2)
+    		{
+    			System.out.println("Date for deleting edge is incorrect");
+    		}
+    		pushAction(cmd, false);
+    		theView.removeEdge((Line)data[0]);
+    		theView.
     		return true;
 
     	}
