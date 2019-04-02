@@ -21,6 +21,7 @@ public class UNode {
 	 * 
 	 * @deprecated use UNode( Integer id, String name) instead.
 	 */
+	@Deprecated
 	public UNode()
 	{		
 		  id = -1;
