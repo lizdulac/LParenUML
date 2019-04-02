@@ -351,7 +351,7 @@ public class GUIcontroller
     		}
     		pushAction(cmd, false);
     		
-    		theGraph.removeNode((String)data[0]);
+    		//theGraph.removeNode((String)data[0]);
     		theView.deleteNode((Pane)data[0]);
     		return true;
 
@@ -364,7 +364,6 @@ public class GUIcontroller
     		}
     		pushAction(cmd, false);
     		theView.removeEdge((Line)data[0]);
-    		theView.
     		return true;
 
     	}
