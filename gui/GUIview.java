@@ -155,7 +155,14 @@ public class GUIview
         return buttonPanel;
     }
 
-    /*************************** MENUBAR **********************************/
+  /**
+   * Creates a MenuBar at the top of the application. 
+   * It contains buttons which display sub-menus with additional buttons.
+   * The buttons can call functions when clicked.  
+   *
+   * @param aStage - javaFX primary stage
+   * @return MenuBar that contains menu items (buttons)
+   */
     private MenuBar createMenuBar(Stage aStage)
     {
         MenuBar menuBar = new MenuBar();
@@ -177,7 +184,6 @@ public class GUIview
     }
     
     /*************************** NODE FUNCTIONS ***************************/
-    
     /**
      * Draw the visual representation of a UNode.
      * 
@@ -279,11 +285,13 @@ public class GUIview
 
     /*************************** EDGE FUNCTIONS ***************************/
     /**
-     * 
-     * 
-     * @param srcNode
-     * @param sceneClickPoint
-     * @return
+     * The first of the 3 functions required to draw an edge. Creates a
+     * new Line that is 'bound' to srcNode at localPoint. The other end  
+     * of the line remains 'unbound' and is temporarily set to localPoint.
+     *
+     * @param srcNode node that was clicked
+     * @param sceneClickPoint the click point location is in the coordinate space of the scene
+     * @return the javaFX Line that was created
      */
     public Line beginEdgeDraw(Pane srcNode, Point2D sceneClickPoint)
     {
@@ -315,11 +323,13 @@ public class GUIview
     }
 
     /**
+     * The second of the 3 functions required to draw an edge. Updates 
+     * the 'unbound' end of the line so that it remains attached to the
+     * mouse cursor during the drag operation.
      *
-     *
-     * @param srcNode
-     * @param theEdge
-     * @param dragPoint
+     * @param srcNode node that was originally clicked
+     * @param theEdge Line that was previously created & 'bound' to srcNode at one end
+     * @param dragPoint current location of mouse cursor in the drag operation
      */
     public void animateEdge(Pane srcNode, Line theEdge, Point2D dragPoint)
     {
@@ -328,11 +338,12 @@ public class GUIview
     }
 
     /**
-     * 
+     * The third and final function required to draw an edge. The
+     * 'unbound' end of the line is 'bound' to the releasePoint.
      *  
-     * @param srcNode
-     * @param theEdge
-     * @param releasePoint
+     * @param srcNode node that was originally clicked
+     * @param theEdge Line that was previously created & 'bound' to srcNode at one end
+     * @param releasePoint location of the mouse cursor when mouse button is released and drag operation ends
      */
     public void endEdgeDraw(Pane srcNode, Line theEdge, Point2D releasePoint)
     {
@@ -350,7 +361,4 @@ public class GUIview
     {
         canvas.getChildren ().remove(theEdge);
     }
-     
-    
-    
 }

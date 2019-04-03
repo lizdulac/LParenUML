@@ -264,11 +264,26 @@ public class GUIcontroller
     };
     
     
+
+    /**
+     * Packages the parameters and the type of action into a Command class.
+     * The execute_command method or other invoker style methods are responsible for recasting the objects.
+     * 
+     * @param type declared in the Action enum in @Command.java 
+     * @param objects a templated list of parameters cast as objects. 
+     */
     private Command packageAction(Action type, Object ... objects)
     {
     	return  new Command(type,objects);
     }
     
+    /**
+     * Pushes a Command onto the appropriate stack.
+     * 
+     * @version 2.0 iteration 2; this feature will be moved to History in iteration 3  
+     * @param cmd the Command to be pushed
+     * @param redo determines which stack to place it on
+     */
     private void pushAction(Command cmd, boolean redo) {
     	if(redo)
     		redo_stack.push(cmd);
@@ -276,18 +291,23 @@ public class GUIcontroller
     		undo_stack.push(cmd);
     }
 
-    
+    /**
+     * Pop a Command onto the appropriate stack.
+     * 
+     * @version 2.0 iteration 2; this feature will be moved to History in iteration 3  
+     * @param redo determines which stack to pop
+     */
     private Command popAction(boolean redo)
     {
     	if(redo)
     		return redo_stack.pop();
     	else
     		return undo_stack.pop();
-    	
     }
     
     
     //params and return subject to change
+    //inbound iteration 3 on click
     private void undo()
     {
     	
@@ -295,22 +315,31 @@ public class GUIcontroller
     }
     
     //params and return subject to change
+    //inbound iteration 3 on click
     private void redo()
     {
     	
     }
     
-    private boolean execute_command(Command cmd, boolean isUndo, boolean isRedo) {
+
+    /**
+     * This method takes a packaged Command and executes it on the prerequisite
+     * that the cmd action has all relevant data needed to call its associated methods.
+     *
+     * @param cmd the command to be executed
+     * @param isUndo if this value is true then the command is from the History class(inbound iteration 3)
+     * @return the command executed
+     */
+    private boolean execute_command(Command cmd, boolean isUndo) {
     	
     	if( isUndo && isRedo) {
-    		
+    		return false;
     	}
     	
     	Object[] data = cmd.getData();
     	
     	if(cmd.actionType == Action.ADD_EDGE)
     	{
-    		//if clause needed for whether this action is an undo or redo
     		
     		if(data.length != 3)
     		{
@@ -355,15 +384,10 @@ public class GUIcontroller
     		
     		
     		return true;
-
     	}
     	
     	
     	return false;
     }
-    
-    
-    
-    
     
 }
