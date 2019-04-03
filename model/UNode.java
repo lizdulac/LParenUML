@@ -104,6 +104,25 @@ public class UNode {
 		edgeEnd.add(e);
 	}
 	
+	/**
+	 * Exposes the list of incoming edges.
+	 * 
+	 * @return the list of incoming edges
+	 */
+	public ArrayList<UEdge> getInEdges(){
+		return edgeEnd;
+	}
+	
+	/**
+	 * Exposes the list of outgoing edges
+	 * 
+	 * @return the list of outgoing edges
+	 */
+	public ArrayList<UEdge> getOutEdges(){
+		return edgeStart;
+	}
+	
+	
 	
 	/**
 	 *  Clean the outgoing edges off of a Node.

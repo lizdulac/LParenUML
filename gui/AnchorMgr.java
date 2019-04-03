@@ -7,7 +7,7 @@ import javafx.geometry.*;
 import java.lang.Math;
 
 /**
- * This class creates a number of Point2D objects on each edge of given Pane
+ * This class creates a number of Point2D objects on each edge of given Pane.
  * 
  * @author jamesdryver
  */
@@ -18,8 +18,10 @@ public class AnchorMgr {
 	private double snapDistance = 6.5;
 	
 	/**
-	 * 
-	 * @param pn the given pane
+	 * Basic constructor for AnchorMgr.  
+	 * Generates anchorpoints immediately.
+	 *
+	 * @param pn pane to be anchored 
 	 */
 	public AnchorMgr(Pane pn){
 		pane =pn;
@@ -27,19 +29,28 @@ public class AnchorMgr {
 	}
 	
 	
+	/**
+	 * Sets a new pane to be anchored, generates new anchors.
+	 *
+	 * @param pn pane to be anchored 
+	 */
 	public void setPane(Pane pn)
 	{
 		pane =pn;
 		generate_anchors();
 	}
 	
+	/**
+	 * Exposes the anchored pane 
+	 *
+	 */
 	public Pane getPane() {
 		return pane;
 	}
 
 	
 	/**
-	 * Generates anchors for a given pane
+	 * Generates anchors for a given pane based on the numPoint value.
 	 *Anchor points laid out in array as follows:
 	 * Ex: numPoints = 3;
 	 *         0     4     8
@@ -90,10 +101,8 @@ public class AnchorMgr {
 	
 	
 	/**
-	 * 
 	 * This method detects if the cursor is within a radius of any of these points and returns that point.
 	 * 
-
 	 * @param cursor where the cursor is currently
 	 * @return Point2D closest to the cursor on the released Node
 	 */
@@ -178,6 +187,11 @@ public class AnchorMgr {
 	}
 
 	
+	/**
+	 * Returns whether the cursor is close enough to the pane to snap to the anchored pane.
+	 *
+	 * @param cursor position
+	 */
 	public boolean hasSnap(Point2D cursor)
 	{
 		double h = pane.getHeight();

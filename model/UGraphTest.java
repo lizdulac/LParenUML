@@ -9,15 +9,6 @@ class UGraphTest {
 	@Test
 	void addNodes() {
 		UGraph graph = new UGraph();
-
-		
-		
-		graph.addNode(42, "testnode_0");
-		
-		assertTrue(graph.size() > 0);
-		
-		
-	}
 			
 		boolean node =graph.addNode(42, "testnode_0");
 		assertTrue(graph.size() > 0);
@@ -51,5 +42,12 @@ class UGraphTest {
 		
 		graph.linkSingle(n1, n2, "");
 		
+		assertTrue(n1.getOutEdges().size() > 0, " no edge added to n1");
+		assertTrue(n1.getInEdges().size() == 0, " improper edge added to n1");
+		assertTrue(n2.getInEdges().size() > 0, " no edge added to n2");
+		assertTrue(n2.getOutEdges().size() == 0, " improper edge added to n2");
+		
 	}
+	
+
 }
