@@ -126,7 +126,7 @@ public class GUIcontroller
                     String name = ((Character) ((char) (id + 96))).toString ();
                     
                     /*data order for add Node:*/ 
-                    execute_command(packageAction( Action.ADD_NODE, id, name, e.getX(), e.getY()), false, false);
+                    execute_command(packageAction( Action.ADD_NODE, id, name, e.getX(), e.getY()), false);
                     
 //                    System.out.println ("U-NODE: node created -> id=" + id + " name=" + name);
                 }
@@ -255,7 +255,7 @@ public class GUIcontroller
                 
             	AnchorMgr a = new AnchorMgr(srcNode);
             	Point2D releasePoint = a.getNearAnchor(new Point2D(e.getX(), e.getY()));
-                execute_command(packageAction( Action.ADD_EDGE, srcNode, currentEdge, releasePoint ), false, false);
+                execute_command(packageAction( Action.ADD_EDGE, srcNode, currentEdge, releasePoint ), false);
 
                 // dragging is over, the line can begin accepting mouse events again
                 currentEdge.setMouseTransparent(false);
@@ -332,7 +332,7 @@ public class GUIcontroller
      */
     private boolean execute_command(Command cmd, boolean isUndo) {
     	
-    	if( isUndo && isRedo) {
+    	if( isUndo) {
     		return false;
     	}
     	
