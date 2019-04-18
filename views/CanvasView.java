@@ -14,10 +14,17 @@ import javafx.beans.binding.Bindings;
 
 public class CanvasView
 {
+    /*********************** CanvasView CLASS MEMBERS ***********************/
     private CanvasCtrl canvasCtrl;
     private UGraph theGraph;
     private Pane canvas;
 
+    /**
+     * CanvasView constructor
+     * 
+     * @param controller CanvasController containing all canvas eventhandlers
+     * @param graph UGraph that this view is representing
+     */
     public CanvasView (CanvasCtrl controller, UGraph graph)
     {
         canvasCtrl = controller;
@@ -28,6 +35,10 @@ public class CanvasView
         canvas.setOnMouseReleased(canvasCtrl.canvasMouseRelease);
     }
 
+    /**
+     * 
+     * @return JavaFX Pane representing visual workspace
+     */
     public Pane getCanvas ()
     {
     	return canvas;
@@ -36,6 +47,20 @@ public class CanvasView
 
     /*************************** NODE FUNCTIONS ***************************/
 
+    /**
+     * Draw the visual representation of a UNode.
+     * 
+     * NOTE: Nodes are stored as a child of the "canvas" panel in a group that
+     * contains a StackPane, and then necessary text containers
+     * 
+     * @param x
+     *            x coordinate of upper left corner of UNode
+     * @param y
+     *            y coordinate of upper left corner of UNode
+     * @param uNodeId
+     *            id of UNode represented by this display
+     * @return JavaFX StackPane containing all visual elements of a UNode
+     */
     public StackPane drawNode (double x, double y, int uNodeId)
     {
         // TODO: only include necessary textboxes
@@ -96,6 +121,14 @@ public class CanvasView
         return nodeBody;
     }
 
+    /**
+     * Translate visual representation of a Node by difference between
+     * lastClicked point, and dragPoint.
+     * 
+     * @param theNode JavaFX Pane containing all visual elements of a Node
+     * @param lastClick last registered mouse location
+     * @param dragPoint most recently registered mouse location
+     */
     public void moveNode (Pane theNode, Point2D lastClick, Point2D dragPoint)
     {
         double offsetX = dragPoint.getX() - lastClick.getX();
@@ -106,6 +139,12 @@ public class CanvasView
         theNode.setLayoutY(theNode.getLayoutY() + offsetY);
     }
 
+    /**
+     * Remove the visual representation of a Node from the window
+     * 
+     * @param theNode JavaFX Pane containing all visual elements of the
+     * Node to be deleted
+     */
     public void deleteNode (Pane theNode)
     {
         canvas.getChildren ().remove(theNode);
@@ -113,7 +152,16 @@ public class CanvasView
 
 
     /*************************** EDGE FUNCTIONS ***************************/
-
+   
+    /**
+     * The first of the 3 functions required to draw an edge. Creates a
+     * new Line that is 'bound' to srcNode at localPoint. The other end  
+     * of the line remains 'unbound' and is temporarily set to localPoint.
+     *
+     * @param srcNode node that was clicked
+     * @param sceneClickPoint the click point location is in the coordinate space of the scene
+     * @return the javaFX Line that was created
+     */
     public Line beginEdgeDraw(Pane srcNode, Point2D sceneClickPoint)
     {
         Line theEdge;
@@ -143,12 +191,29 @@ public class CanvasView
         return theEdge;
     }
 
+    /**
+     * The second of the 3 functions required to draw an edge. Updates 
+     * the 'unbound' end of the line so that it remains attached to the
+     * mouse cursor during the drag operation.
+     *
+     * @param srcNode node that was originally clicked
+     * @param theEdge Line that was previously created & 'bound' to srcNode at one end
+     * @param dragPoint current location of mouse cursor in the drag operation
+     */
     public void animateEdge(Pane srcNode, Line theEdge, Point2D dragPoint)
     {
         theEdge.setEndX(srcNode.getLayoutX() + dragPoint.getX());
         theEdge.setEndY(srcNode.getLayoutY() + dragPoint.getY());
     }
 
+    /**
+     * The third and final function required to draw an edge. The
+     * 'unbound' end of the line is 'bound' to the releasePoint.
+     *  
+     * @param srcNode node that was originally clicked
+     * @param theEdge Line that was previously created & 'bound' to srcNode at one end
+     * @param releasePoint location of the mouse cursor when mouse button is released and drag operation ends
+     */
     public void endEdgeDraw(Pane srcNode, Line theEdge, Point2D releasePoint)
     {
         // bind/attach the ending point of the line to the srcNode
@@ -156,6 +221,11 @@ public class CanvasView
         theEdge.endYProperty ().bind(Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));
     }
 
+    /**
+     * Remove visual representation of an Edge from the window
+     * 
+     * @param theEdge Edge to be removed from view
+     */ 
     public void removeEdge(Line theEdge)
     {
         canvas.getChildren ().remove (theEdge);
