@@ -1,4 +1,4 @@
-package gui;
+package controllers;
 import java.util.*;
 
 
@@ -16,7 +16,7 @@ public class Command {
 	 */
 	public enum Action
 	{
-	   ADD_NODE (0), ADD_EDGE (1), DELETE_NODE (2), DELETE_EDGE(3);
+	   ADD_NODE (0), ADD_EDGE (1), DELETE_NODE (2), DELETE_EDGE(3), SELECT_NODE(4);
 	    
 	    private final int value; 
 	    
@@ -24,6 +24,21 @@ public class Command {
 	        this.value = value; 
 	    }
 	};	
+	
+	/**
+	 * Enum of Scope of the command
+	 */
+	public enum Scope
+	{
+	   CANVAS (0), PROPERTY (1);
+		
+	    private final int value; 
+	    
+	    Scope (int value) { 
+	        this.value = value; 
+	    }
+	};	
+	
 	
 	
 	/**
@@ -34,16 +49,18 @@ public class Command {
 	 */
 	private Object[] data;	
 	protected Action actionType;
-	
+	protected Scope actionScope;
 
 	/**
 	 * Basic constructor for the Command class.
 	 *
 	 * @param type the type of action
+	 * @param s the scope of this command
 	 * @param arr array of parameters for the action
 	 */
-	public Command(Action type, Object[] arr ) {
+	public Command(Action type, Scope scope, Object[] arr ) {
 		actionType = type;
+		actionScope = scope; 
 		data = arr;		
 	}	
 	

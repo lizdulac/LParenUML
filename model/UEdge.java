@@ -36,6 +36,16 @@ public class UEdge {
 	}
 
 	/**
+	 * Exposes the name of the edge.
+	 * 
+	 * @return name of edge
+	 */
+	public String getName()
+	{
+		return name;
+	}
+
+	/**
 	 * Expose the starting node of the edge.
 	 * 
 	 * @return start node

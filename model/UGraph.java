@@ -32,6 +32,7 @@ public class UGraph {
 	 */
 	public boolean addNode(Integer id, String nodeName)
 	{
+	    System.out.printf ("UGraph: Node %d added named %s\n", id, nodeName);
 		if (uNodes.put( id, new UNode( id, nodeName)) == null) { 
 			return true;
 		}
@@ -76,9 +77,22 @@ public class UGraph {
 	 */
 	public void linkSingle(UNode n1, UNode n2, String edge)
 	{
-		UEdge e = new UEdge(n1, n2);
+		UEdge e = new UEdge(n1, n2, edge);
 		n1.addOutEdge(e);
 		n2.addInEdge(e);
 	}
+
+	/**
+	 * 
+	 * @return
+	 */
+    public Integer[] getAllNodes ()
+    {
+        Object[] temp = uNodes.keySet ().toArray ();
+        Integer[] keys = new Integer[temp.length];
+        System.arraycopy (temp, 0, keys, 0, temp.length);
+        Arrays.sort (keys);
+        return keys;
+}
 
 }

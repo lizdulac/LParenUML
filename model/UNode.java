@@ -132,9 +132,16 @@ public class UNode {
 	public void cleanEdges()
 	{
 		//clean outgoing edges and their ends		
+	    for (UEdge e: edgeStart)
+	    {
+	        e.start.getOutEdges ().remove (e);
+	    }
 		
 		//clean incoming edges and their starts
-		
+		for (UEdge e: edgeEnd)
+		{
+		    e.end.getInEdges ().remove (e);
+		}
 	}
 	
 }
