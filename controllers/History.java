@@ -20,6 +20,7 @@ import java.util.*;
 public final class History {
 	private static History instance = null;
 	private final Stack<Command> undoStack = new Stack<Command>();
+	private final Stack<Command> redoStack = new Stack<Command>();
 	
 	public void execute (final Command cmd)
 	{
@@ -32,11 +33,24 @@ public final class History {
 		if (!undoStack.isEmpty())
 		{
 			Command cmd = undoStack.pop();
-			//cmd.undo();
+			
 		} else {
 			System.out.println ("Nothing to undo here");
 		}
 	}
+	
+	public void redo()
+	{
+		if (!undoStack.isEmpty())
+		{
+			Command cmd = redoStack.pop();
+		} else {
+			System.out.println ("Nothing to undo here");
+		}
+	}
+
+	
+	
 	public static History getInstance()
 	{
 		if ( History.instance == null) {
@@ -48,7 +62,7 @@ public final class History {
 		}
 		return History.instance;
 	}
-	private History() {}
+	private History() {}//;??
 }
 
 
