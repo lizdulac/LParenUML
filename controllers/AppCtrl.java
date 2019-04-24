@@ -1,9 +1,10 @@
 package controllers;
-
 import model.*;
+import controllers.Command.Scope;
 
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -19,8 +20,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.image.Image;
 
+import java.io.File;
+import java.io.IOException;
 import javafx.util.Duration;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
@@ -30,12 +32,6 @@ import javafx.geometry.Pos;
 import javafx.geometry.Insets;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
-import java.io.File;
-import java.io.IOException;
-
-// import controllers.Command.Action;
-import controllers.Command.Scope;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -138,6 +134,13 @@ public class AppCtrl
         return anchorOffset;
     }
 
+    /**
+     * Configure settings for primary application window (appStage).
+     * This should be called before the application
+     * window is made visible with Window.show()
+     * 
+     * @return layout manager pane for primary application window
+     */
     private BorderPane configureAppStage ()
     {
         double canvasW = 700;
@@ -148,27 +151,33 @@ public class AppCtrl
         appStage.setMinHeight (canvasH);
         appStage.initStyle (StageStyle.DECORATED);
         appStage.setTitle (appName + "Untitled Document");
-        // Set Icon to LParen image. Image should be included with code outside
-        // of packages
-        try
-        {
-            appStage.getIcons ().add (new Image ("LParen.jpg"));
-        } catch (Exception e)
-        {
-            System.out.println ("AppCtrl ConfigStage: unable to render LParen Icon");
+
+        // Set app titlebar icon to LParen logo.
+        // Logo image file should be in root directory with Main.java
+        try {
+              appStage.getIcons ().add (new Image ("LParen.jpg"));
+        } catch (Exception e) {
+              System.out.println ("AppCtrl ConfigStage: unable to render LParen Icon");
         }
 
-        // vertical - top
-        appStage.setY (0);
-        // horizontal - center on screen
+        // center app horizontally on screen
         double xScreenCenter = Screen.getPrimary ().getVisualBounds ().getWidth () / 2;
         appStage.setX (xScreenCenter - (canvasW + toolW * 2) / 2);
+
+        appStage.setY (0);
         return configureBorderPane (canvasW, canvasH);
     }
 
+    /**
+     * Configure settings & add elements to borderPane.
+     * It is the layout manager for primary application window.
+     * 
+     * @param canvasW initial width of the canvas
+     * @param canvasH initial height of the canvas
+     * @return layout manager pane for primary application window
+     */
     private BorderPane configureBorderPane (double canvasW, double canvasH)
     {
-        // elements
         MenuBar menuBar = configureMenuBar (canvasW);
         Pane canvas = canvasCtrl.getCanvas ();
         Pane rightCorners = new Pane ();
@@ -183,16 +192,15 @@ public class AppCtrl
         StackPane.setAlignment (menuBar, Pos.TOP_LEFT);
 
         // Background Colors
-        canvas.setStyle ("-fx-border-color: transparent; -fx-background-color: " + canvasBgHex
-                + "; -fx-background-radius: " + cornerRadius + " 0 0 " + cornerRadius + ";");
-        rightCorners.setStyle ("-fx-background-color: " + canvasBgHex + "; -fx-background-radius: 0 " + cornerRadius
-                + " " + cornerRadius + " 0;");
-
         borderPane.setBackground (marginBg);
         topMargin.setBackground (marginBg);
         btmMargin.setBackground (marginBg);
         leftMargin.setBackground (marginBg);
         rightMargin.setBackground (marginBg);
+        canvas.setStyle       ("-fx-background-color: " + canvasBgHex + ";"+
+                               "-fx-background-radius: " + cornerRadius + " 0 0 " + cornerRadius + ";");
+        rightCorners.setStyle ("-fx-background-color: " + canvasBgHex + ";"+
+                               "-fx-background-radius: 0 " + cornerRadius + " " + cornerRadius + " 0;");
 
         // Dimensions
         canvas.setPrefWidth (canvasW);
@@ -213,29 +221,36 @@ public class AppCtrl
         return borderPane;
     }
 
+    /**
+     * Create new MenuBar, add items to it, and set the
+     * appropriate event handlers. The menuBar is positioned
+     * within the topMargin of the borderPane layout manager.
+     * 
+     * @param canvasW initial width of the canvas
+     * @return the JavaFX MenuBar that was created
+     */
     private MenuBar configureMenuBar (double canvasW)
     {
-        MenuBar menuBar = new MenuBar ();
-        Menu menu1 = new Menu ("File");
-        menuBar.getMenus ().add (menu1);
+        // ************ FILE MENU ************
+        // MenuItems
         MenuItem open = new MenuItem ("Open");
         MenuItem save = new MenuItem ("Save");
         MenuItem newF = new MenuItem ("New");
-
-        menu1.getItems ().add (open);
-        menu1.getItems ().add (save);
-        menu1.getItems ().add (newF);
-
+        // EventHandlers
         open.setOnAction (openFile);
         save.setOnAction (saveFile);
         newF.setOnAction (newFile);
+        // Add Items
+        Menu fileMenu = new Menu ("File", null, open, save, newF);
 
-        menuBar.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 0;");
+
+        // ************* MENU BAR *************
+        MenuBar menuBar = new MenuBar(fileMenu);
         menuBar.setBackground (transparent);
+        menuBar.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 0;");
         menuBar.setMaxWidth (margin + canvasW + 2.0);
         menuBar.setPrefHeight (30.0);
         menuBar.setMinHeight (30.0);
-
         return menuBar;
     }
 
@@ -297,11 +312,19 @@ public class AppCtrl
         }
     };
 
+    /**
+     * Configure settings for the secondary window (sideStage).
+     * This window contains the toolButtons and the properties
+     * inspector. This method should be called before the
+     * window is made visible with Window.show()
+     * 
+     * @param borderPane layout manager pane for primary application window
+     */
     private void configureSideStage (BorderPane borderPane)
     {
         // initialization
-        double xOrigin = borderPane.localToScreen (borderPane.getLayoutX (), borderPane.getLayoutY ()).getX ()
-                + borderPane.getWidth () - toolW;
+        double xOrigin = borderPane.localToScreen(
+            borderPane.getLayoutX (), borderPane.getLayoutY ()).getX () + borderPane.getWidth () - toolW;
         double anchorOffset = calculateOffset (borderPane);
         AnchorPane anchorPane = new AnchorPane ();
         VBox propSlider = configurePropSlider ();
@@ -326,13 +349,19 @@ public class AppCtrl
         sideStage.setX (xOrigin);
         sideStage.setY (0);
 
-        // Call toggleSlider() when Properties button is pressed
+        //*** Development / Debugging Buttons ***
+        //  Setting these event handlers requires traversing the JavaFX Scene Graph.
+        //  The code is UGLY but:
+        //     - it works :)
+        //     - this code (and the 2 buttons) will be eventually be deleted
+        //
+        // PropSlider button triggers toggleSlider()
         ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (4))
                 .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
+
+        // PrintStats button triggers ModelUtil.printStats()
         ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
                 .setOnAction (e -> ModelUtil.printStats (theGraph));
-        // anchorPane.setStyle("-fx-border-color: yellow; -fx-border-width:
-        // 5;");
 
         // listen for changes to appStage
         appStage.heightProperty ().addListener (appChangeH);
@@ -341,6 +370,14 @@ public class AppCtrl
         appStage.xProperty ().addListener (appChangeX);
     }
 
+    /**
+     * Create new Pane (sidePane) & add elements to it.
+     * This sidePane contains the toolButtons panel.
+     * This sidePane exists within the main
+     * anchorPane of the sideStage window.
+     * 
+     * @return the Pane that was created
+     */
     private Pane configureSidePane ()
     {
         // Initialization
@@ -348,12 +385,11 @@ public class AppCtrl
         Pane toolButtons = configureToolButtons ();
         Pane sidePane = new Pane (marginOverlay, toolButtons);
 
-        toolButtons.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 2;");
-
         // Background Colors
         sidePane.setBackground (transparent);
         marginOverlay.setBackground (marginBg);
         toolButtons.setBackground (marginBg);
+        toolButtons.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 2;");
 
         // Dimensions
         sidePane.prefHeightProperty ().bind (appScene.heightProperty ());
@@ -367,6 +403,13 @@ public class AppCtrl
         return sidePane;
     }
 
+    /**
+     * Create new Pane (toolButtons), add buttons,
+     * and set the buttonClick event handler. The
+     * toolButtons pane is contained by sidePane.
+     * 
+     * @return the Pane that was created
+     */
     private Pane configureToolButtons ()
     {
         /*
@@ -386,12 +429,11 @@ public class AppCtrl
                 + "dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );}" + ".button:selected {"
                 + "-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 );}";
 
-        // VBox arranges elements vertically in a single column
-        VBox buttonPanel;
+        VBox toolButtons;
         double panelSpacing = 25.0;
         Pos panelAlignment = Pos.CENTER;
-        buttonPanel = new VBox (panelSpacing);
-        buttonPanel.setAlignment (panelAlignment);
+        toolButtons = new VBox (panelSpacing);
+        toolButtons.setAlignment (panelAlignment);
 
         // create Button objects
         Button[] buttons = new Button[UCodes.length];
@@ -407,7 +449,7 @@ public class AppCtrl
             }
             buttons[i].setFont (buttonsFont);
             buttons[i].setStyle (buttonStyle);
-            buttonPanel.getChildren ().add (buttons[i]);
+            toolButtons.getChildren ().add (buttons[i]);
 
             if (i < ToolState.values ().length)
             {
@@ -416,17 +458,19 @@ public class AppCtrl
             }
         }
 
+        //*** Development / Debugging Buttons ***
+        // PropSlider
         Button showHide = new Button ();
         showHide.setText ("PropSlider");
         showHide.setPrefWidth (fontSize * 4.1);
-
+        // PrintStats
         Button printStats = new Button ();
         printStats.setText ("PrintStats");
         printStats.setPrefWidth (fontSize * 4.1);
-
-        buttonPanel.getChildren ().addAll (showHide, printStats);
-        buttonPanel.setPrefHeight ((fontSize + panelSpacing) * (UCodes.length) * 2.0);
-        return buttonPanel;
+        toolButtons.getChildren ().addAll (showHide, printStats);
+        
+        toolButtons.setPrefHeight ((fontSize + panelSpacing) * (UCodes.length) * 2.0);
+        return toolButtons;
     }
 
     public EventHandler<ActionEvent> buttonClick = new EventHandler<ActionEvent> ()
@@ -457,6 +501,14 @@ public class AppCtrl
         }
     };
 
+    /**
+     * Create new Pane (propSlider) & add elements to it.
+     * This propSlider contains the properties inspector.
+     * This propSlider pane exists within the main
+     * anchorPane of the sideStage window.
+     * 
+     * @return the Pane that was created
+     */
     private VBox configurePropSlider ()
     {
         // initialization
@@ -553,29 +605,24 @@ public class AppCtrl
     };
 
     /**
-     * This method takes a packaged Command and executes it on the prerequisite
-     * that the cmd action has all relevant data needed to call its associated
-     * methods.
+     * Route the provided Command to the appropriate controller for 
+     * execution. The value of cmd.actionScope (either CANVAS or PROPERTY)
+     * determines which controller will receive the Command.
      *
-     * @param cmd
-     *            the command to be executed
-     * @param isUndo
-     *            if this value is true then the command is from the History
-     *            class(inbound iteration 3)
-     * @return the command executed
+     * @param cmd the command to be executed
+     * @param isUndo if this value is true then the command is from the History class
+     * @return a boolean value
      */
     public boolean executeCommand (Command cmd, boolean isHistory)
     {
-
         /*
          * if(isHistory) { return false; }
          */
-
-        if (cmd.actionScope == Scope.CANVAS)
-        {
+        
+        if (cmd.actionScope == Scope.CANVAS) {
             canvasCtrl.executeCommand (cmd, isHistory);
-        } else if (cmd.actionScope == Scope.PROPERTY)
-        {
+        }
+        else if (cmd.actionScope == Scope.PROPERTY) {
             propCtrl.executeCommand (cmd, isHistory);
         }
 
