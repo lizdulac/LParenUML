@@ -1,7 +1,7 @@
 package controllers;
 
 import model.*;
-
+import sun.applet.Main;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
@@ -74,7 +74,7 @@ public class AppCtrl
         toolState = ToolState.SELECT;
         canvasCtrl = new CanvasCtrl (this);
         propCtrl = new PropertiesCtrl (this, canvasCtrl);
-        fileIO = new FileIO (this);
+        fileIO = new FileIO (this, canvasCtrl.canvasView);
 
         // appStage - configure primary application window
         appStage = stage;
@@ -248,14 +248,17 @@ public class AppCtrl
             fc.setTitle ("Save File");
 
             // Set extension filter
-            FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            //FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
             // For easier debugging:
-            // FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
+            FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
             fc.getExtensionFilters ().add (extFiler);
 
             File file = fc.showSaveDialog (appStage);
-            fileIO.save (file);
-            appStage.setTitle (appName + file.getName ());
+            if (file != null)
+            {
+                fileIO.save (file);
+                appStage.setTitle (appName + file.getName ());
+            }
         }
     };
 
@@ -268,14 +271,17 @@ public class AppCtrl
             fc.setTitle ("Open File");
 
             // Set extension filter
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
             // For easier debugging:
-            // FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
             fc.getExtensionFilters ().add (extFilter);
 
             File file = fc.showOpenDialog (appStage);
-            fileIO.open (file);
-            appStage.setTitle (appName + file.getName ());
+            if (file != null)
+            {
+                fileIO.open (file);
+                appStage.setTitle (appName + file.getName ());
+            }
         }
     };
 
@@ -289,6 +295,12 @@ public class AppCtrl
         {
             try
             {
+                System.out.println (AppCtrl.class.getResource ("AppCtrl.class"));
+                // jar:file:/C:/Users/Liz/Desktop/umleditor.jar!/controllers/AppCtrl.class
+                
+                // file:/C:/Users/Liz/workspace/LParen/controllers/AppCtrl.class
+
+                
                 Runtime.getRuntime ().exec ("java Main");
             } catch (IOException ex)
             {
