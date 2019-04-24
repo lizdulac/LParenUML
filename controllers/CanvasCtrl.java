@@ -262,6 +262,7 @@ public class CanvasCtrl
                 // dragging is over, the line can begin accepting mouse events
                 // again
                 currentEdge.setMouseTransparent (false);
+                lastClick.set (null);
             }
         }
     };

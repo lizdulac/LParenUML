@@ -1,7 +1,6 @@
 package controllers;
 
 import model.*;
-import sun.applet.Main;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
