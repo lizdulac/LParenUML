@@ -9,7 +9,7 @@ import java.util.*;
 import controllers.Command.Action;
 import controllers.Command.Scope;
 import javafx.geometry.Point2D;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,7 +23,6 @@ import java.io.PrintStream;
  * CAUTION: Functions in this class alter PrintStream "System.out" during
  * execution.
  * 
- * TODO: add locations to save/open
  * 
  * @author Liz and Christine
  *
@@ -33,7 +32,6 @@ public class FileIO
     /************************* FILEIO CLASS MEMBERS ***********************/
     private AppCtrl controller;
     private CanvasView view;
-    File f;
 
     /************************** FILEIO CONSTRUCTOR ************************/
     /**
@@ -158,8 +156,8 @@ public class FileIO
 
     /**
      * Open file; recreates UGraph with all UNodes and UEdges
-     * id;name;edges;edges;
-     * 1;a;0.45,0348;;;2,3;
+     * id;name;x;y;edges;edges;
+     * 1;a;0.45;34.8;;2,3;
      * 
      * @param file
      * @return
@@ -209,9 +207,9 @@ public class FileIO
                         // Args: Pane, Point2D start, Point2D end
                         VNode vn1 = view.getVNode (id);
                         VNode vn2 = view.getVNode (endNodeId);
-                        Pane node1 = vn1.getPane ();
+                        Region node1 = vn1.getRegion ();
                         Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
-                        Pane node2 = vn2.getPane ();
+                        Region node2 = vn2.getRegion ();
                         Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
 //                        String edgeName = "";
                         Object[] args2 = { node1, pt1, node2, pt2 };
@@ -243,9 +241,9 @@ public class FileIO
                         // Args: Pane, Point2D start, Point2D end
                         VNode vn1 = view.getVNode (startNodeId);
                         VNode vn2 = view.getVNode (id);
-                        Pane node1 = vn1.getPane ();
+                        Region node1 = vn1.getRegion ();
                         Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
-                        Pane node2 = vn2.getPane ();
+                        Region node2 = vn2.getRegion ();
                         Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
 //                        String edgeName = "";
                         Object[] args2 = { node1, pt1, node2, pt2 };

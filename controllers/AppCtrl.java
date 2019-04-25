@@ -43,8 +43,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
+/**
+ * 
+ * @author 
+ *
+ */
 public class AppCtrl
 {
+    /************************ APPCTRL CLASS MEMBERS ***********************/
     private static AppCtrl appCtrl;
     private PropertiesCtrl propCtrl;
     private CanvasCtrl canvasCtrl;
@@ -56,6 +62,7 @@ public class AppCtrl
     private Scene sideScene;
     private FileIO fileIO;
 
+    /*********************** APPCTRL FINAL VARIABLES *********************/
     private final String appName = "RParen - a UML Diagram Editor by LParen - ";
     private final double margin = 50;
     private final double cornerRadius = 50;
@@ -65,6 +72,11 @@ public class AppCtrl
     private final Background marginBg = new Background (new BackgroundFill (Color.WHITE, null, null));
     private final Background transparent = new Background (new BackgroundFill (Color.TRANSPARENT, null, null));
 
+    /************************* APPCTRL CONSTRUCTOR *********************/
+    /**
+     * 
+     * @param stage
+     */
     private AppCtrl (Stage stage)
     {
         // initialization
@@ -94,26 +106,81 @@ public class AppCtrl
         sideStage.setHeight (Screen.getPrimary ().getVisualBounds ().getHeight ());
     }
 
+
+    /*********************** APPCTRL GRAPH FUNCTIONS *******************/
+    /**
+     * 
+     * @return
+     */
     public UGraph getGraph ()
     {
         return theGraph;
     }
+    
+    /**
+     * 
+     * @param id
+     * @return
+     */
+    public UNode getNode(int id)
+    {
+        return theGraph.getNode (id);
+    }
+    
+    /**
+     * 
+     * @param n1
+     * @param n2
+     * @param edge
+     */
+    public void linkSingle (UNode n1, UNode n2, String edge)
+    {
+        theGraph.linkSingle (n1, n2, edge);
+    }
+    
+    /**
+     * 
+     * @param id
+     * @param name
+     */
+    public void addNode (Integer id, String name)
+    {
+        theGraph.addNode (id, name);
+    }
 
+    /*********************** APPCTRL GENERAL GETTERS *******************/
+    /**
+     * 
+     * @return
+     */
     public PropertiesCtrl getPropCtrl ()
     {
         return propCtrl;
     }
 
+    /**
+     * 
+     * @return
+     */
     public double getToolWidth ()
     {
         return toolW;
     }
 
+    /**
+     * 
+     * @return
+     */
     public ToolState getToolState ()
     {
         return toolState;
     }
 
+    /**
+     * 
+     * @param stage
+     * @return
+     */
     public static AppCtrl getAppController (Stage stage)
     {
         if (appCtrl == null)
@@ -123,6 +190,12 @@ public class AppCtrl
         return appCtrl;
     }
 
+    /*********************** APPCTRL CONFIGURATIONS ********************/
+    /**
+     * 
+     * @param borderPane
+     * @return
+     */
     private double calculateOffset (BorderPane borderPane)
     {
         double titleBarH = appScene.getY ();
@@ -137,6 +210,10 @@ public class AppCtrl
         return anchorOffset;
     }
 
+    /**
+     * 
+     * @return
+     */
     private BorderPane configureAppStage ()
     {
         double canvasW = 700;
@@ -165,6 +242,12 @@ public class AppCtrl
         return configureBorderPane (canvasW, canvasH);
     }
 
+    /**
+     * 
+     * @param canvasW
+     * @param canvasH
+     * @return
+     */
     private BorderPane configureBorderPane (double canvasW, double canvasH)
     {
         // elements
@@ -212,6 +295,11 @@ public class AppCtrl
         return borderPane;
     }
 
+    /**
+     * 
+     * @param canvasW
+     * @return
+     */
     private MenuBar configureMenuBar (double canvasW)
     {
         MenuBar menuBar = new MenuBar ();
@@ -238,76 +326,11 @@ public class AppCtrl
         return menuBar;
     }
 
-    public EventHandler<ActionEvent> saveFile = new EventHandler<ActionEvent> ()
-    {
-        @Override
-        public void handle (ActionEvent e)
-        {
-            FileChooser fc = new FileChooser ();
-            fc.setTitle ("Save File");
-
-            // Set extension filter
-            //FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-            // For easier debugging:
-            FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-            fc.getExtensionFilters ().add (extFiler);
-
-            File file = fc.showSaveDialog (appStage);
-            if (file != null)
-            {
-                fileIO.save (file);
-                appStage.setTitle (appName + file.getName ());
-            }
-        }
-    };
-
-    public EventHandler<ActionEvent> openFile = new EventHandler<ActionEvent> ()
-    {
-        @Override
-        public void handle (ActionEvent e)
-        {
-            FileChooser fc = new FileChooser ();
-            fc.setTitle ("Open File");
-
-            // Set extension filter
-            //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-            // For easier debugging:
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-            fc.getExtensionFilters ().add (extFilter);
-
-            File file = fc.showOpenDialog (appStage);
-            if (file != null)
-            {
-                fileIO.open (file);
-                appStage.setTitle (appName + file.getName ());
-            }
-        }
-    };
 
     /**
-     * re-launch this program in a new process
+     * 
+     * @param borderPane
      */
-    public EventHandler<ActionEvent> newFile = new EventHandler<ActionEvent> ()
-    {
-        @Override
-        public void handle (ActionEvent e)
-        {
-            try
-            {
-                System.out.println (AppCtrl.class.getResource ("AppCtrl.class"));
-                // jar:file:/C:/Users/Liz/Desktop/umleditor.jar!/controllers/AppCtrl.class
-                
-                // file:/C:/Users/Liz/workspace/LParen/controllers/AppCtrl.class
-
-                
-                Runtime.getRuntime ().exec ("java Main");
-            } catch (IOException ex)
-            {
-                System.out.println ("newFile exec error");
-            }
-        }
-    };
-
     private void configureSideStage (BorderPane borderPane)
     {
         // initialization
@@ -352,6 +375,10 @@ public class AppCtrl
         appStage.xProperty ().addListener (appChangeX);
     }
 
+    /**
+     * 
+     * @return
+     */
     private Pane configureSidePane ()
     {
         // Initialization
@@ -378,6 +405,10 @@ public class AppCtrl
         return sidePane;
     }
 
+    /**
+     * 
+     * @return
+     */
     private Pane configureToolButtons ()
     {
         /*
@@ -440,6 +471,9 @@ public class AppCtrl
         return buttonPanel;
     }
 
+    /**
+     * 
+     */
     public EventHandler<ActionEvent> buttonClick = new EventHandler<ActionEvent> ()
     {
         @Override
@@ -468,6 +502,10 @@ public class AppCtrl
         }
     };
 
+    /**
+     * 
+     * @return
+     */
     private VBox configurePropSlider ()
     {
         // initialization
@@ -487,7 +525,11 @@ public class AppCtrl
         propSlider.setPrefWidth (toolW);
         return propSlider;
     }
-
+    
+    /**
+     * 
+     * @param propSlider
+     */
     private void toggleSlider (Pane propSlider)
     {
         double endW;
@@ -519,7 +561,11 @@ public class AppCtrl
         timeline.getKeyFrames ().add (new KeyFrame (Duration.seconds (0.2), new KeyValue (currentW, endW)));
         timeline.play ();
     }
-
+    
+    /*********************** APPCTRL CHANGE LISTENERS *******************/
+    /**
+     * 
+     */
     public ChangeListener<Number> appChangeH = new ChangeListener<Number> ()
     {
         @Override
@@ -530,6 +576,9 @@ public class AppCtrl
         }
     };
 
+    /**
+     * 
+     */
     public ChangeListener<Number> appChangeW = new ChangeListener<Number> ()
     {
         @Override
@@ -541,6 +590,9 @@ public class AppCtrl
         }
     };
 
+    /**
+     * 
+     */
     private ChangeListener<Number> appChangeY = new ChangeListener<Number> ()
     {
         @Override
@@ -552,6 +604,9 @@ public class AppCtrl
         }
     };
 
+    /**
+     * 
+     */
     private ChangeListener<Number> appChangeX = new ChangeListener<Number> ()
     {
         @Override
@@ -562,6 +617,85 @@ public class AppCtrl
             sideStage.setX (sideStage.getX () + xDelta);
         }
     };
+    
+    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
+    /**
+     * 
+     */
+    public EventHandler<ActionEvent> saveFile = new EventHandler<ActionEvent> ()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            FileChooser fc = new FileChooser ();
+            fc.setTitle ("Save File");
+
+            // Set extension filter
+            //FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            // For easier debugging:
+            FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
+            fc.getExtensionFilters ().add (extFiler);
+
+            File file = fc.showSaveDialog (appStage);
+            if (file != null)
+            {
+                fileIO.save (file);
+                appStage.setTitle (appName + file.getName ());
+            }
+        }
+    };
+
+    /**
+     * 
+     */
+    public EventHandler<ActionEvent> openFile = new EventHandler<ActionEvent> ()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            FileChooser fc = new FileChooser ();
+            fc.setTitle ("Open File");
+
+            // Set extension filter
+            //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            // For easier debugging:
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
+            fc.getExtensionFilters ().add (extFilter);
+
+            File file = fc.showOpenDialog (appStage);
+            if (file != null)
+            {
+                fileIO.open (file);
+                appStage.setTitle (appName + file.getName ());
+            }
+        }
+    };
+
+    /**
+     * re-launch this program in a new process
+     */
+    public EventHandler<ActionEvent> newFile = new EventHandler<ActionEvent> ()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            try
+            {
+                System.out.println (AppCtrl.class.getResource ("AppCtrl.class"));
+                // jar:file:/C:/Users/Liz/Desktop/umleditor.jar!/controllers/AppCtrl.class
+                
+                // file:/C:/Users/Liz/workspace/LParen/controllers/AppCtrl.class
+
+                
+                Runtime.getRuntime ().exec ("java Main");
+            } catch (IOException ex)
+            {
+                System.out.println ("newFile exec error");
+            }
+        }
+    };
+
+    /*********************** APPCTRL EXECUTE COMMAND ********************/  
 
     /**
      * This method takes a packaged Command and executes it on the prerequisite

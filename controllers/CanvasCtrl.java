@@ -3,9 +3,9 @@ package controllers;
 import model.*;
 import views.*;
 
-import javafx.scene.Node;
 import javafx.scene.shape.Line;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseDragEvent;
 
@@ -16,11 +16,16 @@ import controllers.Command.Action;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+/**
+ * 
+ * @author 
+ *
+ */
 public class CanvasCtrl
 {
+    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
     private AppCtrl appCtrl;
     private PropertiesCtrl propCtrl;
-    private UGraph theGraph;
     protected CanvasView canvasView;
 
     private int uNodeId;
@@ -28,52 +33,59 @@ public class CanvasCtrl
     private Line currentEdge;
     private UNode currentNode;
     private final ObjectProperty<Point2D> lastClick;
+    private final ObjectProperty<Point2D> lastDrag;
 
+    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
+    /**
+     * 
+     * @param controller
+     */
     public CanvasCtrl (AppCtrl controller)
     {
         appCtrl = controller;
         propCtrl = appCtrl.getPropCtrl ();
-        theGraph = appCtrl.getGraph ();
-        canvasView = new CanvasView (this, theGraph);
+        canvasView = new CanvasView (this);
 
         uNodeId = 0;
         isCanvasRelease = true;
         currentEdge = new Line ();
         currentNode = null;
         lastClick = new SimpleObjectProperty<> ();
+        lastDrag = new SimpleObjectProperty<> ();
     }
 
+    /************************* CANVASCTRL GETTERS **********************/
+    /**
+     * 
+     * @return
+     */
     public Pane getCanvas ()
     {
         return canvasView.getCanvas ();
     }
 
+    /**
+     * 
+     * @return
+     */
     public Integer nextNodeId ()
     {
         return ++uNodeId;
     }
 
+    /**
+     * 
+     * @return
+     */
     public UNode getCurrentNode ()
     {
         return currentNode;
     }
 
+    /********************** CANVASCTRL EVENT HANDLERS *******************/
     /**
-     * Packages the parameters and the type of action into a Command class. The
-     * execute_command method or other invoker style methods are responsible for
-     * recasting the objects.
      * 
-     * @param type
-     *            declared in the Action enum in @Command.java
-     * @param objects
-     *            a templated list of parameters cast as objects.
      */
-    private Command packageAction (Action type, Scope scope, Object... objects)
-    {
-        // add scope
-        return new Command (type, scope, objects);
-    }
-
     public EventHandler<MouseEvent> canvasMousePress = new EventHandler<MouseEvent> ()
     {
         @Override
@@ -95,6 +107,9 @@ public class CanvasCtrl
         }
     };
 
+    /**
+     * 
+     */
     public EventHandler<MouseEvent> canvasMouseRelease = new EventHandler<MouseEvent> ()
     {
         @Override
@@ -108,11 +123,17 @@ public class CanvasCtrl
                 System.out.println ("ADD_EDGE: canvasMouseRelease");
             } else if (appCtrl.getToolState () == ToolState.SELECT)
             {
+                // TODO: may be unneeded
+                isCanvasRelease = true;
                 lastClick.set (null);
+                lastDrag.set (null);
             }
         }
     };
 
+    /**
+     * 
+     */
     public EventHandler<MouseEvent> uNodeMousePress = new EventHandler<MouseEvent> ()
     {
         @Override
@@ -121,10 +142,11 @@ public class CanvasCtrl
             Point2D clickPoint = new Point2D (e.getSceneX (), e.getSceneY ());
             lastClick.set (clickPoint);
 
-            Pane srcNode = (Pane) ((Node) e.getSource ()).getParent ();
+            Region srcNode = (Region) e.getSource ();
+            int id = (int) srcNode.getUserData ();
 
             // appCtrl.getNode ()
-            UNode uNode = theGraph.getNode ((int) srcNode.getUserData ());
+            UNode uNode = appCtrl.getNode (id);
 
             if (appCtrl.getToolState () == ToolState.SELECT)
             {
@@ -141,12 +163,15 @@ public class CanvasCtrl
                 currentEdge.setMouseTransparent (true);
             } else if (appCtrl.getToolState () == ToolState.DELETE)
             {
-                canvasView.deleteNode (srcNode);
+                canvasView.getVNode (id).delete ();
             }
             // System.out.println ("U-NODE: uNode clicked");
         }
     };
 
+    /**
+     * 
+     */
     public EventHandler<MouseEvent> uNodeMouseRelease = new EventHandler<MouseEvent> ()
     {
         @Override
@@ -167,6 +192,9 @@ public class CanvasCtrl
         }
     };
 
+    /**
+     * 
+     */
     public EventHandler<MouseEvent> uNodeDragDetected = new EventHandler<MouseEvent> ()
     {
         @Override
@@ -174,7 +202,7 @@ public class CanvasCtrl
         {
             // default assumption is true, may be falsified by another handler
             isCanvasRelease = true;
-            Pane srcNode = (Pane) e.getSource ();
+            Region srcNode = (Region) e.getSource ();
 
             // System.out.println("startFullDrag: "+srcNode.getUserData());
 
@@ -186,12 +214,15 @@ public class CanvasCtrl
         }
     };
 
+    /**
+     * 
+     */
     public EventHandler<MouseEvent> uNodeDrag = new EventHandler<MouseEvent> ()
     {
         @Override
         public void handle (MouseEvent e)
         {
-            Pane srcNode = (Pane) e.getSource ();
+            Region srcNode = (Region) e.getSource ();
 
             if (appCtrl.getToolState () == ToolState.SELECT)
             {
@@ -214,6 +245,9 @@ public class CanvasCtrl
         }
     };
 
+    /**
+     * 
+     */
     public EventHandler<MouseEvent> canvasDrag = new EventHandler<MouseEvent> ()
     {
         @Override
@@ -224,38 +258,41 @@ public class CanvasCtrl
                 Point2D clickPoint = new Point2D (e.getX (), e.getY ());
                 System.out.printf ("CANVAS: Enter Canvas drag to (%5.2f, %5.2f)\n", clickPoint.getX (),
                         clickPoint.getY ());
-                if (lastClick.get () != null)
+                if (lastDrag.get () != null)
                 {
-                    System.out.printf (" from (%5.2f, %5.2f)\n", lastClick.get ().getX (), lastClick.get ().getY ());
-                    canvasView.shiftScene (lastClick.get (), clickPoint);
+                    System.out.printf (" from (%5.2f, %5.2f)\n", lastDrag.get ().getX (), lastDrag.get ().getY ());
+                    canvasView.shiftScene (lastDrag.get (), clickPoint);
                 }
                 System.out.println ();
-                lastClick.set (clickPoint);
+                lastDrag.set (clickPoint);
             }
         }
 
     };
 
+    /**
+     * 
+     */
     public EventHandler<MouseDragEvent> uNodeDragRelease = new EventHandler<MouseDragEvent> ()
     {
         @Override
         public void handle (MouseDragEvent e)
         {
             // mouse released within a UNode
-            isCanvasRelease = false;
+            isCanvasRelease = true;
 
-            Pane srcNode = (Pane) e.getSource ();
-            UNode uNode = theGraph.getNode ((int) srcNode.getUserData ());
+            Region srcNode = (Region) e.getSource ();
+            UNode uNode = appCtrl.getNode ((int) srcNode.getUserData ());
 
             if (appCtrl.getToolState () == ToolState.ADD_EDGE)
             {
                 Point2D releasePoint = new Point2D (e.getX (), e.getY ());
 
-                UNode start = theGraph.getNode ((int) currentEdge.getUserData ());
+                UNode start = appCtrl.getNode ((int) currentEdge.getUserData ());
                 UNode end = uNode;
                 String edgeName = start.getName () + end.getName ();
                 // appctrl._______()
-                theGraph.linkSingle (start, end, edgeName);
+                appCtrl.linkSingle (start, end, edgeName);
 
                 canvasView.endEdgeDraw (srcNode, currentEdge, releasePoint);
 
@@ -267,6 +304,23 @@ public class CanvasCtrl
         }
     };
 
+    /********************** CANVASCTRL EXECUTE COMMAND ******************/
+    /**
+     * Packages the parameters and the type of action into a Command class. The
+     * execute_command method or other invoker style methods are responsible for
+     * recasting the objects.
+     * 
+     * @param type
+     *            declared in the Action enum in @Command.java
+     * @param objects
+     *            a templated list of parameters cast as objects.
+     */
+    private Command packageAction (Action type, Scope scope, Object... objects)
+    {
+        // add scope
+        return new Command (type, scope, objects);
+    }
+    
     /**
      * data[0] - id data[1] - name data[2] - x data[3] - y
      * 
@@ -292,8 +346,8 @@ public class CanvasCtrl
                 return false;
             }
 
-            theGraph.addNode ((Integer) data[0], (String) data[1]);
-            VNode vn = canvasView.drawNode ((double) data[2], (double) data[3], theGraph.getNode ((Integer) data[0]));
+            appCtrl.addNode ((Integer) data[0], (String) data[1]);
+            canvasView.drawNode ((double) data[2], (double) data[3], (int) data[0]);
             System.out.println ("EXECMD: CanvasCtrl added node");
             return true;
         } else if (cmd.actionType == Action.ADD_EDGE)
@@ -307,8 +361,8 @@ public class CanvasCtrl
                 System.out.println ("Data list expected 3 items but had: " + data.length);
                 return false;
             }
-            Line l = canvasView.beginEdgeDraw ((Pane) data[0], (Point2D) data[1]);
-            canvasView.endEdgeDraw ((Pane) data[2], l, (Point2D) data[3]);
+            Line l = canvasView.beginEdgeDraw ((Region) data[0], (Point2D) data[1]);
+            canvasView.endEdgeDraw ((Region) data[2], l, (Point2D) data[3]);
         }
 
         return false;
