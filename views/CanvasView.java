@@ -3,24 +3,17 @@ package views;
 import java.util.HashMap;
 import java.util.Map;
 
-import controllers.*;
-import model.*;
+import controllers.CanvasCtrl;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.control.TextArea;
+import javafx.scene.layout.Region;
 import javafx.beans.binding.Bindings;
 
 public class CanvasView
 {
     private CanvasCtrl canvasCtrl;
-    // TODO: delete
-//    private UGraph theGraph;
     private Pane canvas;
     private Map<Integer, VNode> nodes;
 
@@ -31,11 +24,9 @@ public class CanvasView
      * @param graph UGraph that this view is representing
      */
     // TODO: delete UGraph
-    public CanvasView (CanvasCtrl controller, UGraph graph)
+    public CanvasView (CanvasCtrl controller)
     {
         canvasCtrl = controller;
-        // TODO: delete
- //       theGraph = graph;
         nodes = new HashMap<Integer, VNode>();
 
         canvas = new Pane ();
@@ -76,19 +67,18 @@ public class CanvasView
      */
 //    public StackPane drawNode (double x, double y, int uNodeId)
     // TODO: check this
-    public VNode drawNode (double x, double y, UNode unode)
+    public VNode drawNode (double x, double y, int id)
     {
-        VNode visual = new VNode (x, y, unode);
-        StackPane nodeBody = visual.pane;
+        VNode visual = new VNode (x, y, id);
+        Region uNode = visual.getRegion ();
 
         // ***** REGISTER EVENT HANDLERS *****
         // Different pieces of the visual "uNode" need seperate handlers
 
         // nodeBody
-        nodeBody.setOnMousePressed (canvasCtrl.uNodeMousePress);
-        nodeBody.setOnDragDetected (canvasCtrl.uNodeDragDetected);
+        uNode.setOnMousePressed (canvasCtrl.uNodeMousePress);
+        uNode.setOnDragDetected (canvasCtrl.uNodeDragDetected);
 
-        VBox uNode = visual.uNode;
         // uNode
         uNode.setOnMouseDragged (canvasCtrl.uNodeDrag);
         uNode.setOnMouseReleased (canvasCtrl.uNodeMouseRelease);
@@ -96,7 +86,6 @@ public class CanvasView
 
         canvas.getChildren ().add (uNode);
         // add Pane to map "nodes"
-        Integer id = new Integer (unode.getId ());
         nodes.put(id, visual);
         return visual;
     }
@@ -109,27 +98,6 @@ public class CanvasView
      * @param lastClick last registered mouse location
      * @param dragPoint most recently registered mouse location
      */
-    public void moveNode (Pane theNode, Point2D lastClick, Point2D dragPoint)
-    {
-        double offsetX = dragPoint.getX () - lastClick.getX ();
-        double offsetY = dragPoint.getY () - lastClick.getY ();
-        
-        moveNode (theNode, offsetX, offsetY);
-    }
-    
-    /**
-     * 
-     * @param theNode
-     * @param xTrans
-     * @param yTrans
-     */
-    // TODO: determine if this is necessary
-    public void moveNode (Pane theNode, double xTrans, double yTrans)
-    {
-        // move/animate the node across the canvas
-        theNode.setLayoutX (theNode.getLayoutX () + xTrans);
-        theNode.setLayoutY (theNode.getLayoutY () + yTrans);        
-    }
 
     /**
      * Remove the visual representation of a Node from the window
@@ -137,10 +105,6 @@ public class CanvasView
      * @param theNode JavaFX Pane containing all visual elements of the
      * Node to be deleted
      */
-    public void deleteNode (Pane theNode)
-    {
-        canvas.getChildren ().remove (theNode);
-    }
     
     /**
      * 
@@ -157,13 +121,12 @@ public class CanvasView
             v.moveNode (x, y);
             return v;
         });
-//            entry.getValue ().moveNode (x, y);
-//            moveNode(entry.getValue ().pane, x, y);
     }
     
+    // TODO: this
     public Point2D getLocation (Integer nodeId)
     {
-        StackPane pane = nodes.get (nodeId).pane;
+        //StackPane pane = nodes.get (nodeId).pane;
         return null;
     }
 
@@ -178,7 +141,7 @@ public class CanvasView
      * @param sceneClickPoint the click point location is in the coordinate space of the scene
      * @return the javaFX Line that was created
      */
-    public Line beginEdgeDraw (Pane srcNode, Point2D sceneClickPoint)
+    public Line beginEdgeDraw (Region srcNode, Point2D sceneClickPoint)
     {
         Line theEdge;
         Point2D localPoint;
@@ -214,7 +177,7 @@ public class CanvasView
      * @param theEdge Line that was previously created & 'bound' to srcNode at one end
      * @param dragPoint current location of mouse cursor in the drag operation
      */
-    public void animateEdge (Pane srcNode, Line theEdge, Point2D dragPoint)
+    public void animateEdge (Region srcNode, Line theEdge, Point2D dragPoint)
     {
         theEdge.setEndX (srcNode.getLayoutX () + dragPoint.getX ());
         theEdge.setEndY (srcNode.getLayoutY () + dragPoint.getY ());
@@ -228,7 +191,7 @@ public class CanvasView
      * @param theEdge Line that was previously created & 'bound' to srcNode at one end
      * @param releasePoint location of the mouse cursor when mouse button is released and drag operation ends
      */
-    public void endEdgeDraw (Pane srcNode, Line theEdge, Point2D releasePoint)
+    public void endEdgeDraw (Region srcNode, Line theEdge, Point2D releasePoint)
     {
         // bind/attach the ending point of the line to the srcNode
         theEdge.endXProperty ().bind (Bindings.add (srcNode.layoutXProperty (), releasePoint.getX ()));
