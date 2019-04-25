@@ -23,7 +23,7 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public class CanvasCtrl
 {
-    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
+    /********************** CANVASCTRL CLASS MEMBERS ********************/
     private AppCtrl appCtrl;
     private PropertiesCtrl propCtrl;
     protected CanvasView canvasView;
@@ -35,7 +35,7 @@ public class CanvasCtrl
     private final ObjectProperty<Point2D> lastClick;
     private final ObjectProperty<Point2D> lastDrag;
 
-    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
+    /************************ CANVASCTRL CONSTRUCTOR ********************/
     /**
      * 
      * @param controller
@@ -322,8 +322,12 @@ public class CanvasCtrl
     }
     
     /**
-     * data[0] - id data[1] - name data[2] - x data[3] - y
+     * Add Node Arguments:
+     * (Integer id, String name, double x, double y)
      * 
+     * Add Edge Arguments:
+     * (Region node1, Point2D location1, Region node2, Point2D location2)
+     *
      * @param cmd
      * @param isHistory
      * @return
