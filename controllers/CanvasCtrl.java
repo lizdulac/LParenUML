@@ -23,7 +23,7 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public class CanvasCtrl
 {
-    /********************** CANVASCTRL CLASS MEMBERS ********************/
+    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
     private AppCtrl appCtrl;
     private PropertiesCtrl propCtrl;
     protected CanvasView canvasView;
@@ -35,7 +35,7 @@ public class CanvasCtrl
     private final ObjectProperty<Point2D> lastClick;
     private final ObjectProperty<Point2D> lastDrag;
 
-    /************************ CANVASCTRL CONSTRUCTOR ********************/
+    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
     /**
      * 
      * @param controller
@@ -99,6 +99,9 @@ public class CanvasCtrl
                     String name = ((Character) ((char) (id + 96))).toString ();
                     appCtrl.executeCommand (
                             packageAction (Action.ADD_NODE, Scope.CANVAS, id, name, e.getX (), e.getY ()), false);
+                } else if (appCtrl.getToolState () == ToolState.SELECT)
+                {
+                    System.out.println ("CanvasCtrl: anticipate drag?");
                 } else
                 {
                     System.out.println ("CANVAS: canvas clicked, no action");
@@ -124,7 +127,6 @@ public class CanvasCtrl
             } else if (appCtrl.getToolState () == ToolState.SELECT)
             {
                 // TODO: may be unneeded
-                isCanvasRelease = true;
                 lastClick.set (null);
                 lastDrag.set (null);
             }
@@ -145,7 +147,6 @@ public class CanvasCtrl
             Region srcNode = (Region) e.getSource ();
             int id = (int) srcNode.getUserData ();
 
-            // appCtrl.getNode ()
             UNode uNode = appCtrl.getNode (id);
 
             if (appCtrl.getToolState () == ToolState.SELECT)
@@ -163,6 +164,7 @@ public class CanvasCtrl
                 currentEdge.setMouseTransparent (true);
             } else if (appCtrl.getToolState () == ToolState.DELETE)
             {
+                appCtrl.removeNode (id);
                 canvasView.getVNode (id).delete ();
             }
             // System.out.println ("U-NODE: uNode clicked");
@@ -253,7 +255,7 @@ public class CanvasCtrl
         @Override
         public void handle (MouseEvent e)
         {
-            if (appCtrl.getToolState () == ToolState.SELECT && !isCanvasRelease)
+            if (appCtrl.getToolState () == ToolState.SELECT)
             {
                 Point2D clickPoint = new Point2D (e.getX (), e.getY ());
                 System.out.printf ("CANVAS: Enter Canvas drag to (%5.2f, %5.2f)\n", clickPoint.getX (),
@@ -279,7 +281,7 @@ public class CanvasCtrl
         public void handle (MouseDragEvent e)
         {
             // mouse released within a UNode
-            isCanvasRelease = true;
+            isCanvasRelease = false;
 
             Region srcNode = (Region) e.getSource ();
             UNode uNode = appCtrl.getNode ((int) srcNode.getUserData ());
@@ -322,12 +324,8 @@ public class CanvasCtrl
     }
     
     /**
-     * Add Node Arguments:
-     * (Integer id, String name, double x, double y)
+     * data[0] - id data[1] - name data[2] - x data[3] - y
      * 
-     * Add Edge Arguments:
-     * (Region node1, Point2D location1, Region node2, Point2D location2)
-     *
      * @param cmd
      * @param isHistory
      * @return

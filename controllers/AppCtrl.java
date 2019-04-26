@@ -147,6 +147,15 @@ public class AppCtrl
     {
         theGraph.addNode (id, name);
     }
+    
+    /**
+     * 
+     * @param id
+     */
+    public void removeNode (Integer id)
+    {
+        theGraph.removeNode (id);
+    }
 
     /*********************** APPCTRL GENERAL GETTERS *******************/
     /**
