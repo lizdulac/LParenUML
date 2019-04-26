@@ -2,6 +2,8 @@ package model;
 
 import java.util.*;
 
+import javafx.collections.ObservableList;
+
 /**
  * A UGraph is a collection of unique UNodes that have UEdge's connecting the UNodes.
  * UGraph is owned by the 'Controller', UNodes and UEdges are created by the Controller via the UGraph.
@@ -30,10 +32,10 @@ public class UGraph {
 	 * @param nodeName name of new UNode
 	 * @return false if the id exists in the map already
 	 */
-	public boolean addNode(Integer id, String nodeName)
+	public boolean addNode(Integer id, String nodeName, ObservableList<String> atr)
 	{
 	    System.out.printf ("UGraph: Node %d added named %s\n", id, nodeName);
-		if (uNodes.put( id, new UNode( id, nodeName)) == null) { 
+		if (uNodes.put( id, new UNode( id, nodeName, atr)) == null) { 
 			return true;
 		}
 		

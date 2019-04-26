@@ -1,10 +1,15 @@
 package controllers;
 
 import model.*;
+import views.CanvasView;
+import views.VNode;
+
 import java.util.*;
 
 import controllers.Command.Action;
 import controllers.Command.Scope;
+import javafx.geometry.Point2D;
+import javafx.scene.layout.Region;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,7 +23,6 @@ import java.io.PrintStream;
  * CAUTION: Functions in this class alter PrintStream "System.out" during
  * execution.
  * 
- * TODO: add locations to save/open
  * 
  * @author Liz and Christine
  *
@@ -27,16 +31,17 @@ public class FileIO
 {
     /************************* FILEIO CLASS MEMBERS ***********************/
     private AppCtrl controller;
-    File f;
+    private CanvasView view;
 
     /************************** FILEIO CONSTRUCTOR ************************/
     /**
      * 
      * @param gui
      */
-    public FileIO (AppCtrl gui)
+    public FileIO (AppCtrl gui, CanvasView v)
     {
         controller = gui;
+        view = v;
     }
 
     /*************************** FILEIO FUNCTIONS *************************/
@@ -77,11 +82,14 @@ public class FileIO
             UNode node = g.getNode (intArray[i]);
             Integer nodeID = node.getId ();
             String nodeName = node.getName ();
+            VNode vn = view.getVNode (nodeID);
+            double x = vn.getX ();
+            double y = vn.getY ();
 
             ArrayList<UNode> nodeIns = inEdgesList (node.getInEdges (), g);
             ArrayList<UNode> nodeOuts = outEdgesList (node.getOutEdges (), g);
 
-            System.out.printf ("%d;%s;", nodeID, nodeName);
+            System.out.printf ("%d;%s;%f;%f;", nodeID, nodeName, x, y);
             if (nodeIns.size () >= 1)
             {
                 System.out.print (nodeIns.get (0).getId ());
@@ -148,6 +156,8 @@ public class FileIO
 
     /**
      * Open file; recreates UGraph with all UNodes and UEdges
+     * id;name;x;y;edges;edges;
+     * 1;a;0.45;34.8;;2,3;
      * 
      * @param file
      * @return
@@ -168,8 +178,11 @@ public class FileIO
                 lineScanner.useDelimiter (";");
                 int id = lineScanner.nextInt ();
                 String name = lineScanner.next ();
+                double x = lineScanner.nextDouble ();
+                double y = lineScanner.nextDouble ();
+                        
                 // add node
-                Object[] args = { id, name, 90.0, 90.0 };
+                Object[] args = { id, name, x, y };
                 Command cmd = new Command (Action.ADD_NODE, Scope.CANVAS, args);
                 controller.executeCommand (cmd, true);
                 // controller.theGraph.addNode (id, name);
@@ -191,6 +204,17 @@ public class FileIO
                         System.out.println ("Opening error: node of edge null");
                     } else
                     {
+                        // Args: Pane, Point2D start, Point2D end
+                        VNode vn1 = view.getVNode (id);
+                        VNode vn2 = view.getVNode (endNodeId);
+                        Region node1 = vn1.getRegion ();
+                        Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
+                        Region node2 = vn2.getRegion ();
+                        Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
+//                        String edgeName = "";
+                        Object[] args2 = { node1, pt1, node2, pt2 };
+                        Command cmd2 = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
+                        controller.executeCommand (cmd2, true);
                         controller.theGraph.linkSingle (controller.theGraph.getNode (id),
                                 controller.theGraph.getNode (endNodeId), "");
                     }
@@ -214,6 +238,17 @@ public class FileIO
                         System.out.println ("Opening error: node of edge null");
                     } else
                     {
+                        // Args: Pane, Point2D start, Point2D end
+                        VNode vn1 = view.getVNode (startNodeId);
+                        VNode vn2 = view.getVNode (id);
+                        Region node1 = vn1.getRegion ();
+                        Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
+                        Region node2 = vn2.getRegion ();
+                        Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
+//                        String edgeName = "";
+                        Object[] args2 = { node1, pt1, node2, pt2 };
+                        Command cmd2 = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
+                        controller.executeCommand (cmd2, true);
                         controller.theGraph.linkSingle (controller.theGraph.getNode (startNodeId),
                                 controller.theGraph.getNode (id), "");
                     }

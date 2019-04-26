@@ -1,5 +1,4 @@
 package controllers;
-import java.util.*;
 
 
 /**
@@ -73,10 +72,6 @@ public class Command {
 	{
 		data = list;
 	}
-	
-	
-	
-	
 }
 
 

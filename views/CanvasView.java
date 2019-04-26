@@ -1,23 +1,23 @@
 package views;
-import controllers.*;
-import model.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import controllers.CanvasCtrl;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.control.TextArea;
+import javafx.scene.layout.Region;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ObservableList;
 
 public class CanvasView
 {
-    /*********************** CanvasView CLASS MEMBERS ***********************/
     private CanvasCtrl canvasCtrl;
-    private UGraph theGraph;
     private Pane canvas;
+    private Map<Integer, VNode> nodes;
 
     /**
      * CanvasView constructor
@@ -25,14 +25,16 @@ public class CanvasView
      * @param controller CanvasController containing all canvas eventhandlers
      * @param graph UGraph that this view is representing
      */
-    public CanvasView (CanvasCtrl controller, UGraph graph)
+    // TODO: delete UGraph
+    public CanvasView (CanvasCtrl controller)
     {
         canvasCtrl = controller;
-        theGraph = graph;
+        nodes = new HashMap<Integer, VNode>();
 
         canvas = new Pane ();
-        canvas.setOnMousePressed(canvasCtrl.canvasMousePress);
-        canvas.setOnMouseReleased(canvasCtrl.canvasMouseRelease);
+        canvas.setOnMousePressed (canvasCtrl.canvasMousePress);
+        canvas.setOnMouseReleased (canvasCtrl.canvasMouseRelease);
+        canvas.setOnMouseDragged (canvasCtrl.canvasDrag);
     }
 
     /**
@@ -41,12 +43,16 @@ public class CanvasView
      */
     public Pane getCanvas ()
     {
-    	return canvas;
+        return canvas;
     }
-
 
     /*************************** NODE FUNCTIONS ***************************/
 
+    public VNode getVNode(Integer i)
+    {
+        return nodes.get (i);
+    }
+    
     /**
      * Draw the visual representation of a UNode.
      * 
@@ -61,64 +67,29 @@ public class CanvasView
      *            id of UNode represented by this display
      * @return JavaFX StackPane containing all visual elements of a UNode
      */
-    public StackPane drawNode (double x, double y, int uNodeId)
+//    public StackPane drawNode (double x, double y, int uNodeId)
+    // TODO: check this
+    public VNode drawNode (double x, double y, int id)
     {
-        // TODO: only include necessary textboxes
-        VBox uNode;
-        int textHeight = 30;
-        int height = 4 * textHeight;
-        int width = 100;
-        Font nodeFont = Font.font ("sans-serif", FontWeight.MEDIUM, 12);
-        UNode graphNode = theGraph.getNode (uNodeId);
+        VNode visual = new VNode (x, y, id, canvasCtrl.appCtrl.getNode(id).getName(), canvasCtrl.appCtrl.getNode(id).getAttributeList());
+        ListView<ListView<String>> uNode = visual.getRegion ();
 
-        // StackPane allows visual elements to be layered
-        StackPane nodeBody = new StackPane ();
+        // ***** REGISTER EVENT HANDLERS *****
+        // Different pieces of the visual "uNode" need seperate handlers
 
-        nodeBody.setPrefHeight (height);
-        nodeBody.setPrefWidth (width);
-        nodeBody.relocate (x, y);
-        nodeBody.setStyle ( "-fx-background-color: white;"+
-                            "-fx-border-color: black;");
+        // nodeBody
+        //uNode.setOnMousePressed (canvasCtrl.uNodeMousePress);
+        //uNode.setOnDragDetected (canvasCtrl.uNodeDragDetected);
 
-        // TODO: replace TextAreas with Text or TextBoxes
-        // TODO: determine num of required textboxes
-        TextArea ta = new TextArea ();
-        for (int i = 0; i < 1/*4*/; ++i)
-        {
-            ta.setText (graphNode.getName ());
-            ta.setPrefRowCount (1);
-            ta.setPrefWidth (width);
-            ta.setPrefHeight (textHeight);
-            ta.setFont (nodeFont);
-            ta.setLayoutX (x);
-            ta.setLayoutY (y + i * textHeight);
-            ta.setStyle ("-fx-border-color: black; -fx-border-style: solid solid none solid;");
-        }
-
-        // VBox uNode contains TextArea ta and StackPane nodeBody 
-        uNode = new VBox (ta, nodeBody);
-
-        uNode.setPrefHeight (height);
-        uNode.setPrefWidth (width);
-        uNode.relocate (x, y);
-        // this id matches with the model
-        uNode.setUserData (uNodeId);
-
-
-     // ***** REGISTER EVENT HANDLERS *****
-     // Different pieces of the visual "uNode" need seperate handlers
-
-     // nodeBody
-        nodeBody.setOnMousePressed (canvasCtrl.uNodeMousePress);
-        nodeBody.setOnDragDetected (canvasCtrl.uNodeDragDetected);
-
-     // uNode
-        uNode.setOnMouseDragged (canvasCtrl.uNodeDrag);
-        uNode.setOnMouseReleased (canvasCtrl.uNodeMouseRelease);
-        uNode.setOnMouseDragReleased (canvasCtrl.uNodeDragRelease);
-
+        // uNode
+        //uNode.setOnMouseDragged (canvasCtrl.uNodeDrag);
+        //uNode.setOnMouseReleased (canvasCtrl.uNodeMouseRelease);
+        //uNode.setOnMouseDragReleased (canvasCtrl.uNodeDragRelease);
+        
         canvas.getChildren ().add (uNode);
-        return nodeBody;
+        // add Pane to map "nodes"
+        nodes.put(id, visual);
+        return visual;
     }
 
     /**
@@ -129,15 +100,6 @@ public class CanvasView
      * @param lastClick last registered mouse location
      * @param dragPoint most recently registered mouse location
      */
-    public void moveNode (Pane theNode, Point2D lastClick, Point2D dragPoint)
-    {
-        double offsetX = dragPoint.getX() - lastClick.getX();
-        double offsetY = dragPoint.getY() - lastClick.getY();
-
-        // move/animate the node across the canvas
-        theNode.setLayoutX(theNode.getLayoutX() + offsetX);
-        theNode.setLayoutY(theNode.getLayoutY() + offsetY);
-    }
 
     /**
      * Remove the visual representation of a Node from the window
@@ -145,11 +107,30 @@ public class CanvasView
      * @param theNode JavaFX Pane containing all visual elements of the
      * Node to be deleted
      */
-    public void deleteNode (Pane theNode)
+    
+    /**
+     * 
+     * @param mouseOriginal
+     * @param mouseCurrent
+     */
+    public void shiftScene (Point2D mouseOriginal, Point2D mouseCurrent)
     {
-        canvas.getChildren ().remove(theNode);
+        System.out.println ("VIEW: shiftScene");
+        double x = mouseCurrent.getX () - mouseOriginal.getX ();
+        double y = mouseCurrent.getY () - mouseOriginal.getY ();
+        
+        nodes.replaceAll ((k,v) -> {
+            v.moveNode (x, y);
+            return v;
+        });
     }
-
+    
+    // TODO: this
+    public Point2D getLocation (Integer nodeId)
+    {
+        //StackPane pane = nodes.get (nodeId).pane;
+        return null;
+    }
 
     /*************************** EDGE FUNCTIONS ***************************/
    
@@ -162,7 +143,7 @@ public class CanvasView
      * @param sceneClickPoint the click point location is in the coordinate space of the scene
      * @return the javaFX Line that was created
      */
-    public Line beginEdgeDraw(Pane srcNode, Point2D sceneClickPoint)
+    public Line beginEdgeDraw (Region srcNode, Point2D sceneClickPoint)
     {
         Line theEdge;
         Point2D localPoint;
@@ -172,20 +153,18 @@ public class CanvasView
         // into the local coordinate space of this Node.
         localPoint = srcNode.sceneToLocal (sceneClickPoint);
 
-        theEdge = new Line();
+        theEdge = new Line ();
         theEdge.setStrokeWidth (strokeWidth);
-        // disallow parent container node from changing/managing size & layout 
-        theEdge.setManaged(false);
+        // disallow parent container node from changing/managing size & layout
+        theEdge.setManaged (false);
 
         // bind/attach the starting point of the line to the srcNode
-        theEdge.startXProperty ().bind(
-            Bindings.add (srcNode.layoutXProperty (), localPoint.getX ()));
-        theEdge.startYProperty ().bind(
-            Bindings.add (srcNode.layoutYProperty (), localPoint.getY ()));
+        theEdge.startXProperty ().bind (Bindings.add (srcNode.layoutXProperty (), localPoint.getX ()));
+        theEdge.startYProperty ().bind (Bindings.add (srcNode.layoutYProperty (), localPoint.getY ()));
 
         // move ending point of the line to clickPoint/cursor to be dragged
-        theEdge.setEndX(srcNode.getLayoutX () + localPoint.getX ());
-        theEdge.setEndY(srcNode.getLayoutY () + localPoint.getY ());
+        theEdge.setEndX (srcNode.getLayoutX () + localPoint.getX ());
+        theEdge.setEndY (srcNode.getLayoutY () + localPoint.getY ());
 
         canvas.getChildren ().add (theEdge);
         return theEdge;
@@ -200,10 +179,10 @@ public class CanvasView
      * @param theEdge Line that was previously created & 'bound' to srcNode at one end
      * @param dragPoint current location of mouse cursor in the drag operation
      */
-    public void animateEdge(Pane srcNode, Line theEdge, Point2D dragPoint)
+    public void animateEdge (Region srcNode, Line theEdge, Point2D dragPoint)
     {
-        theEdge.setEndX(srcNode.getLayoutX() + dragPoint.getX());
-        theEdge.setEndY(srcNode.getLayoutY() + dragPoint.getY());
+        theEdge.setEndX (srcNode.getLayoutX () + dragPoint.getX ());
+        theEdge.setEndY (srcNode.getLayoutY () + dragPoint.getY ());
     }
 
     /**
@@ -214,11 +193,11 @@ public class CanvasView
      * @param theEdge Line that was previously created & 'bound' to srcNode at one end
      * @param releasePoint location of the mouse cursor when mouse button is released and drag operation ends
      */
-    public void endEdgeDraw(Pane srcNode, Line theEdge, Point2D releasePoint)
+    public void endEdgeDraw (Region srcNode, Line theEdge, Point2D releasePoint)
     {
         // bind/attach the ending point of the line to the srcNode
-        theEdge.endXProperty ().bind(Bindings.add (srcNode.layoutXProperty (), releasePoint.getX ()));
-        theEdge.endYProperty ().bind(Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));
+        theEdge.endXProperty ().bind (Bindings.add (srcNode.layoutXProperty (), releasePoint.getX ()));
+        theEdge.endYProperty ().bind (Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));
     }
 
     /**
@@ -226,7 +205,7 @@ public class CanvasView
      * 
      * @param theEdge Edge to be removed from view
      */ 
-    public void removeEdge(Line theEdge)
+    public void removeEdge (Line theEdge)
     {
         canvas.getChildren ().remove (theEdge);
     }

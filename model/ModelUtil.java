@@ -20,6 +20,7 @@ public final class ModelUtil {
 			System.out.println ("------ Node ------\n");
 			System.out.println ("       id: " + uNode.getId ());
 			System.out.println ("     name: " + uNode.getName ());
+			System.out.println ("      atr: " + uNode.getAttributeList());
 			
 			System.out.println ("  inEdges: ");
 			for (UEdge edge: uNode.getInEdges ())
