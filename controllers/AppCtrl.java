@@ -421,12 +421,12 @@ public class AppCtrl
     private Pane configureToolButtons ()
     {
         /*
-         * UniCode numbers for characters on buttons in order: move, createNode,
+         * UniCode numbers for characters on buttons in order: move, select, createNode,
          * createEdge, delete, edit, undo, redo
          */
         double fontSize = 20;
-        final int[] UCodes = new int[] { 0x261D, 0x274F, 8594, 0x2620 };
-        final String[] buttonNames = new String[] { "Select", "Create Node", "Create Edge", "Delete" };
+        final int[] UCodes = new int[] { 0x2723, 0x261D, 0x274F, 8594, 0x2620 };
+        final String[] buttonNames = new String[] { "Move", "Select", "Create Node", "Create Edge", "Delete" };
 
         Font buttonsFont = Font.font ("sans-serif", FontWeight.BOLD, fontSize);
 
@@ -492,6 +492,9 @@ public class AppCtrl
 
             switch (sourceButton)
             {
+            case MOVE:
+                toolState = ToolState.MOVE;
+                break;
             case SELECT:
                 toolState = ToolState.SELECT;
                 break;

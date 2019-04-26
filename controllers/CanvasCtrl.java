@@ -33,7 +33,6 @@ public class CanvasCtrl
     private Line currentEdge;
     private UNode currentNode;
     private final ObjectProperty<Point2D> lastClick;
-    private final ObjectProperty<Point2D> lastDrag;
 
     /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
     /**
@@ -51,7 +50,6 @@ public class CanvasCtrl
         currentEdge = new Line ();
         currentNode = null;
         lastClick = new SimpleObjectProperty<> ();
-        lastDrag = new SimpleObjectProperty<> ();
     }
 
     /************************* CANVASCTRL GETTERS **********************/
@@ -99,9 +97,6 @@ public class CanvasCtrl
                     String name = ((Character) ((char) (id + 96))).toString ();
                     appCtrl.executeCommand (
                             packageAction (Action.ADD_NODE, Scope.CANVAS, id, name, e.getX (), e.getY ()), false);
-                } else if (appCtrl.getToolState () == ToolState.SELECT)
-                {
-                    System.out.println ("CanvasCtrl: anticipate drag?");
                 } else
                 {
                     System.out.println ("CANVAS: canvas clicked, no action");
@@ -128,7 +123,6 @@ public class CanvasCtrl
             {
                 // TODO: may be unneeded
                 lastClick.set (null);
-                lastDrag.set (null);
             }
         }
     };
@@ -255,18 +249,18 @@ public class CanvasCtrl
         @Override
         public void handle (MouseEvent e)
         {
-            if (appCtrl.getToolState () == ToolState.SELECT)
+            if (appCtrl.getToolState () == ToolState.MOVE)
             {
                 Point2D clickPoint = new Point2D (e.getX (), e.getY ());
                 System.out.printf ("CANVAS: Enter Canvas drag to (%5.2f, %5.2f)\n", clickPoint.getX (),
                         clickPoint.getY ());
-                if (lastDrag.get () != null)
+                if (lastClick.get () != null)
                 {
-                    System.out.printf (" from (%5.2f, %5.2f)\n", lastDrag.get ().getX (), lastDrag.get ().getY ());
-                    canvasView.shiftScene (lastDrag.get (), clickPoint);
+                    System.out.printf (" from (%5.2f, %5.2f)\n", lastClick.get ().getX (), lastClick.get ().getY ());
+                    canvasView.shiftScene (lastClick.get (), clickPoint);
                 }
                 System.out.println ();
-                lastDrag.set (clickPoint);
+                lastClick.set (clickPoint);
             }
         }
 
