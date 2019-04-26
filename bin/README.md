@@ -1,1 +1,0 @@
-![LParen](LParen.jpg "LParen")
