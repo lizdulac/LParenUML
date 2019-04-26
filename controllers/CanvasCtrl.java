@@ -214,8 +214,12 @@ public class CanvasCtrl
 
             if (appCtrl.getToolState () == ToolState.ADD_EDGE)
             {
-                Point2D releasePoint = new Point2D(e.getX(), e.getY());
-
+            	
+            	AnchorMgr am = new AnchorMgr(srcNode);
+                Point2D releasePoint = am.getNearAnchor(new Point2D(e.getX(), e.getY()));
+                canvasView.highlightAnchors(am);
+                
+              //this needs to go through exec_cmd;
                 UNode start = theGraph.getNode ((int) currentEdge.getUserData ());
                 UNode end = uNode;
                 String edgeName = start.getName () + end.getName ();
@@ -223,12 +227,19 @@ public class CanvasCtrl
                 theGraph.linkSingle (start, end, edgeName);
 
                 canvasView.endEdgeDraw(srcNode, currentEdge, releasePoint);
+                
 
                 // dragging is over, the line can begin accepting mouse events again
                 currentEdge.setMouseTransparent(false);
             }
         }
     };
+    
+    
+    public void highlightAnchors(AnchorMgr am) {
+    	
+    	
+    }
     
     /**
      * data[0] - id

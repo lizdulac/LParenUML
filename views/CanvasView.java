@@ -3,9 +3,11 @@ import controllers.*;
 import model.*;
 
 import javafx.geometry.Point2D;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -80,23 +82,10 @@ public class CanvasView
         nodeBody.setStyle ( "-fx-background-color: white;"+
                             "-fx-border-color: black;");
 
-        // TODO: replace TextAreas with Text or TextBoxes
-        // TODO: determine num of required textboxes
-        TextArea ta = new TextArea ();
-        for (int i = 0; i < 1/*4*/; ++i)
-        {
-            ta.setText (graphNode.getName ());
-            ta.setPrefRowCount (1);
-            ta.setPrefWidth (width);
-            ta.setPrefHeight (textHeight);
-            ta.setFont (nodeFont);
-            ta.setLayoutX (x);
-            ta.setLayoutY (y + i * textHeight);
-            ta.setStyle ("-fx-border-color: black; -fx-border-style: solid solid none solid;");
-        }
+
 
         // VBox uNode contains TextArea ta and StackPane nodeBody 
-        uNode = new VBox (ta, nodeBody);
+        uNode = new VBox (nodeBody);
 
         uNode.setPrefHeight (height);
         uNode.setPrefWidth (width);
@@ -148,6 +137,49 @@ public class CanvasView
     public void deleteNode (Pane theNode)
     {
         canvas.getChildren ().remove(theNode);
+    }
+    
+    
+    
+    /**
+     * Visually highlights all anchors on a Node.
+     * 
+     * @param am - the associated AnchorMgr
+     * @return the list of highlighted circles
+     */
+    public Circle[] highlightAnchors(AnchorMgr am) {
+    	
+    	Point2D[] anchorList = am.getAnchorlist();
+    	
+    	Circle[] anchors = new Circle[anchorList.length];
+    	
+    	for(int i =0; i<anchorList.length; ++i) { 
+    	  anchors[i] = new Circle();
+	      anchors[i].setCenterX(anchorList[i].getX()); 
+	      anchors[i].setCenterY(anchorList[i].getY()); 
+	      anchors[i].setRadius(10.0f);
+	      anchors[i].setStrokeWidth(3);
+	      anchors[i].setStroke(Color.LIGHTSEAGREEN);
+    	}
+    	
+    	for (int i =0; i<anchors.length; ++i) {
+			
+    		canvas.getChildren ().add ( anchors[i]);
+    	}
+    	return anchors;
+    }
+    
+    
+    /**
+     * Remove the visual representation of anchor highlights from the window.
+     * 
+     * @param the list of circles representing highlights to be deleted.
+     */
+    public void deleteNode (Circle[] anchors)
+    {
+    	for (int i =0; i<anchors.length; ++i) {
+    		canvas.getChildren ().remove(anchors[i]);
+    	}
     }
 
 

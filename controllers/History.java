@@ -18,10 +18,11 @@ import java.util.*;
 
 
 public final class History {
-	private static History instance = null;
 	private final Stack<Command> undoStack = new Stack<Command>();
 	private final Stack<Command> redoStack = new Stack<Command>();
+
 	
+	//deprecated?
 	public void execute (final Command cmd)
 	{
 		undoStack.push(cmd);
@@ -50,19 +51,7 @@ public final class History {
 	}
 
 	
-	
-	public static History getInstance()
-	{
-		if ( History.instance == null) {
-			sychronized (History.class) {
-				if ( History.instance == null ) {
-					History.instance = new History ();
-				}
-			}
-		}
-		return History.instance;
-	}
-	private History() {}//;??
+
 }
 
 
