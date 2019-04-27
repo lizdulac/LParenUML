@@ -1,6 +1,5 @@
 package views;
 
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -110,13 +109,4 @@ public class VNode
         xTrans += x;
         yTrans += y;
     }
-    
-    /**
-     * 
-     */
-    public void delete()
-    {
-        Pane canvas = (Pane) region.getParent ();
-        canvas.getChildren ().remove (this);
-    } 
 }

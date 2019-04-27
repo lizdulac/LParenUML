@@ -1,5 +1,6 @@
 package views;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import controllers.CanvasCtrl;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
+import javafx.util.Pair;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.beans.binding.Bindings;
@@ -16,6 +18,7 @@ public class CanvasView
     private CanvasCtrl canvasCtrl;
     private Pane canvas;
     private Map<Integer, VNode> nodes;
+    private Map<Integer, Line> edges;
 
     /**
      * CanvasView constructor
@@ -28,6 +31,7 @@ public class CanvasView
     {
         canvasCtrl = controller;
         nodes = new HashMap<Integer, VNode>();
+        edges = new HashMap<Integer, Line>();
 
         canvas = new Pane ();
         canvas.setOnMousePressed (canvasCtrl.canvasMousePress);
@@ -73,7 +77,7 @@ public class CanvasView
         Region uNode = visual.getRegion ();
 
         // ***** REGISTER EVENT HANDLERS *****
-        // Different pieces of the visual "uNode" need seperate handlers
+        // Different pieces of the visual "uNode" need separate handlers
 
         // nodeBody
         uNode.setOnMousePressed (canvasCtrl.uNodeMousePress);
@@ -91,20 +95,17 @@ public class CanvasView
     }
 
     /**
-     * Translate visual representation of a Node by difference between
-     * lastClicked point, and dragPoint.
-     * 
-     * @param theNode JavaFX Pane containing all visual elements of a Node
-     * @param lastClick last registered mouse location
-     * @param dragPoint most recently registered mouse location
-     */
-
-    /**
      * Remove the visual representation of a Node from the window
      * 
-     * @param theNode JavaFX Pane containing all visual elements of the
-     * Node to be deleted
+     * @param id
      */
+    public void removeNode (int id)
+    {
+        System.out.printf ("CanvasView: removing Node %d\n", id);
+        VNode node = getVNode(id);
+        canvas.getChildren ().remove (node.getRegion ());
+        nodes.remove (node);
+    }
     
     /**
      * 
@@ -113,7 +114,6 @@ public class CanvasView
      */
     public void shiftScene (Point2D mouseOriginal, Point2D mouseCurrent)
     {
-        System.out.println ("VIEW: shiftScene");
         double x = mouseCurrent.getX () - mouseOriginal.getX ();
         double y = mouseCurrent.getY () - mouseOriginal.getY ();
         
@@ -191,11 +191,14 @@ public class CanvasView
      * @param theEdge Line that was previously created & 'bound' to srcNode at one end
      * @param releasePoint location of the mouse cursor when mouse button is released and drag operation ends
      */
-    public void endEdgeDraw (Region srcNode, Line theEdge, Point2D releasePoint)
+    public void endEdgeDraw (Region srcNode, Line theEdge, Point2D releasePoint, int id)
     {
         // bind/attach the ending point of the line to the srcNode
         theEdge.endXProperty ().bind (Bindings.add (srcNode.layoutXProperty (), releasePoint.getX ()));
         theEdge.endYProperty ().bind (Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));
+        theEdge.setUserData (id);
+        theEdge.setOnMouseClicked (canvasCtrl.deleteEdge);
+        edges.put (id, theEdge);
     }
 
     /**
@@ -205,6 +208,14 @@ public class CanvasView
      */ 
     public void removeEdge (Line theEdge)
     {
-        canvas.getChildren ().remove (theEdge);
+        int id = (int) theEdge.getUserData ();
+        removeEdge(id);
+    }
+    
+    public void removeEdge (Integer id)
+    {
+        Line edge = edges.get (id);
+        canvas.getChildren ().remove (edge);
+        edges.remove (id);
     }
 }
