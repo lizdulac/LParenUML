@@ -33,6 +33,7 @@ import javafx.event.EventHandler;
 import java.io.File;
 import java.io.IOException;
 
+import controllers.Command.Action;
 // import controllers.Command.Action;
 import controllers.Command.Scope;
 import javafx.animation.KeyFrame;
@@ -133,9 +134,9 @@ public class AppCtrl
      * @param n2
      * @param edge
      */
-    public void linkSingle (UNode n1, UNode n2, String edge)
+    public void linkSingle (Integer id, UNode n1, UNode n2, String edge)
     {
-        theGraph.linkSingle (n1, n2, edge);
+        theGraph.linkSingle (id, n1, n2, edge);
     }
     
     /**
@@ -154,8 +155,80 @@ public class AppCtrl
      */
     public void removeNode (Integer id)
     {
+        cleanEdges (getNode(id));
         theGraph.removeNode (id);
     }
+    
+    /**
+     * 
+     * @param id
+     * @return
+     */
+    public UEdge getEdge (Integer id)
+    {
+        return theGraph.getEdge (id);
+    }
+    
+    /**
+     * 
+     * @param id
+     */
+    public void removeEdge (Integer id)
+    {
+        theGraph.removeEdge (id);
+        eraseEdge(id);
+    }
+    
+    /*************************** UNODE FUNCTIONS **************************/
+    /**
+     *  Clean the edges off of a Node.
+     * 
+     * @version 3.0 Inbound Iteration 3 
+     */
+    public void cleanEdges(UNode n)
+    {
+        //clean outgoing edges and their ends       
+        for (UEdge e: n.getOutEdges())
+        {
+            e.getEndNode().getInEdges ().remove (e);
+            eraseEdge(e.getId ());
+        }
+        
+        //clean incoming edges and their starts
+        for (UEdge e : n.getInEdges())
+        {
+            e.getStartNode().getOutEdges ().remove (e);
+            eraseEdge(e.getId ());
+        }
+    }
+    
+    /**
+     * Erases Line representing Edge from canvas,
+     * but leaves model unchanged
+     * 
+     * @param id
+     */
+    public void eraseEdge (Integer id)
+    {
+        executeCommand (packageAction(Action.DELETE_EDGE, Scope.CANVAS, id), false);
+    }  
+    
+    /**
+     * Packages the parameters and the type of action into a Command class. The
+     * execute_command method or other invoker style methods are responsible for
+     * recasting the objects.
+     * 
+     * @param type
+     *            declared in the Action enum in @Command.java
+     * @param objects
+     *            a templated list of parameters cast as objects.
+     */
+    private Command packageAction (Action type, Scope scope, Object... objects)
+    {
+        // add scope
+        return new Command (type, scope, objects);
+    }
+    
 
     /*********************** APPCTRL GENERAL GETTERS *******************/
     /**
@@ -370,9 +443,9 @@ public class AppCtrl
         sideStage.setY (0);
 
         // Call toggleSlider() when Properties button is pressed
-        ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (4))
-                .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
         ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
+                .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
+        ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (6))
                 .setOnAction (e -> ModelUtil.printStats (theGraph));
         // anchorPane.setStyle("-fx-border-color: yellow; -fx-border-width:
         // 5;");
