@@ -8,7 +8,6 @@ import controllers.CanvasCtrl;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
-import javafx.util.Pair;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.beans.binding.Bindings;
