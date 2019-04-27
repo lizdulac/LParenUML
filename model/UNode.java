@@ -276,16 +276,16 @@ public class UNode {
 	 * 
 	 * @param e new edge
 	 */
-	public void addOutEdge( UEdge e){
-		edgeStart.add(e);											
+	public boolean addOutEdge( UEdge e){
+		return edgeStart.add(e);											
 	}
 	
 	/**
 	 * Adds a new Edge to incoming edges.
 	 * @param e new edge
 	 */
-	public void addInEdge( UEdge e){
-		edgeEnd.add(e);
+	public boolean addInEdge( UEdge e){
+		return edgeEnd.add(e);
 	}
 	
 	/**
@@ -305,26 +305,4 @@ public class UNode {
 	public ArrayList<UEdge> getOutEdges(){
 		return edgeStart;
 	}
-
-    /*************************** UNODE FUNCTIONS **************************/
-	/**
-	 *  Clean the outgoing edges off of a Node.
-	 * 
-	 * @version 3.0 Inbound Iteration 3 
-	 */
-	public void cleanEdges()
-	{
-		//clean outgoing edges and their ends		
-	    for (UEdge e: edgeStart)
-	    {
-	        e.start.getOutEdges ().remove (e);
-	    }
-		
-		//clean incoming edges and their starts
-		for (UEdge e: edgeEnd)
-		{
-		    e.end.getInEdges ().remove (e);
-		}
-	}
-	
 }

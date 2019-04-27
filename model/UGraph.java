@@ -13,6 +13,7 @@ public class UGraph {
 	
 	// Map of Nodes
 	private Map< Integer ,UNode> uNodes;
+	private Map<Integer, UEdge> uEdges;
 	
 	
    /**
@@ -20,7 +21,8 @@ public class UGraph {
     */
 	public UGraph()
 	{
-		uNodes = new HashMap<Integer , UNode>();	
+		uNodes = new HashMap<Integer , UNode>();
+		uEdges = new HashMap<Integer, UEdge>();
 	}
 		
 	/**
@@ -64,9 +66,21 @@ public class UGraph {
 	 */
 	public void removeNode (int id)
 	{
-		uNodes.get(id).cleanEdges();
 		uNodes.remove(id); //hard remove; See undo/redo/History.java
-	}	
+	}
+	
+	public UEdge getEdge(Integer id)
+	{
+	    return uEdges.get (id);
+	}
+	
+	public void removeEdge(Integer id)
+	{
+	    UEdge e = getEdge(id);
+	    e.getStartNode ().getOutEdges ().remove (e);
+	    e.getEndNode ().getInEdges ().remove (e);
+	    uEdges.remove (id);
+	}
 	
 	/**
 	 * Links two given UNodes with a directional UEdge.
@@ -75,11 +89,12 @@ public class UGraph {
 	 * @param n2 ending node
 	 * @param edge edge name
 	 */
-	public void linkSingle(UNode n1, UNode n2, String edge)
+	public void linkSingle(Integer id, UNode n1, UNode n2, String edge)
 	{
-		UEdge e = new UEdge(n1, n2, edge);
+		UEdge e = new UEdge(id, n1, n2, edge);
 		n1.addOutEdge(e);
 		n2.addInEdge(e);
+		uEdges.put (id, e);
 	}
 
 	/**
@@ -93,6 +108,5 @@ public class UGraph {
         System.arraycopy (temp, 0, keys, 0, temp.length);
         Arrays.sort (keys);
         return keys;
-}
-
+     }
 }

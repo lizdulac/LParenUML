@@ -7,6 +7,7 @@ package model;
  *
  */
 public class UEdge {
+    protected Integer id;
 	protected String name;
 	protected UNode end, start;
 
@@ -16,7 +17,8 @@ public class UEdge {
 	 * @param n1 start node
 	 * @param n2 end node
 	 */
-	public UEdge(UNode n1, UNode n2) {
+	public UEdge(int i, UNode n1, UNode n2) {
+	    id = i;
 		start = n1;
 		end = n2;
 		name = "";
@@ -29,12 +31,18 @@ public class UEdge {
 	 * @param n2 end node
 	 * @param name name of edge
 	 */
-	public UEdge(UNode n1, UNode n2, String name) {
+	public UEdge(int i, UNode n1, UNode n2, String name) {
+		id = i;
 		start = n1;
 		end = n2;
 		this.name = name;
 	}
 
+	public Integer getId()
+	{
+	    return id;
+	}
+	
 	/**
 	 * Exposes the name of the edge.
 	 * 
@@ -89,9 +97,9 @@ class general extends UEdge {
 	 * @param f1 end multiplicity minimum
 	 * @param f2 first multiplicity maximum
 	 */
-	public general(UNode n1, UNode n2, char s1, char s2, char f1, char f2)
+	public general(Integer id, UNode n1, UNode n2, char s1, char s2, char f1, char f2)
 	{
-		super(n1, n2);
+		super(id, n1, n2);
 		this.s1 =s1;
 		this.s2 =s2;
 		this.f1 =f1;
@@ -163,9 +171,9 @@ class aggregate extends UEdge {
 	 * @param s1 start multiplicity minimum
 	 * @param s2 start multiplicity maximum
 	 */
-	public aggregate(UNode n1, UNode n2, char s1, char s2)
+	public aggregate(Integer id, UNode n1, UNode n2, char s1, char s2)
 	{
-		super(n1, n2);
+		super(id, n1, n2);
 		this.s1 =s1;
 		this.s2 =s2;
 	}
@@ -211,9 +219,9 @@ class composite extends UEdge {
 	 * @param s1 start multiplicity minimum
 	 * @param s2 start multiplicity maximum
 	 */
-	public composite(UNode n1, UNode n2, char s1, char s2)
+	public composite(Integer id, UNode n1, UNode n2, char s1, char s2)
 	{
-		super(n1, n2);
+		super(id, n1, n2);
 		this.s1 =s1;
 		this.s2 =s2;
 	}
