@@ -215,7 +215,7 @@ public class FileIO
                         Object[] args2 = { node1, pt1, node2, pt2 };
                         Command cmd2 = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (cmd2, true);
-                        controller.theGraph.linkSingle (controller.theGraph.getNode (id),
+                        controller.theGraph.addEdge (id, controller.theGraph.getNode (id),
                                 controller.theGraph.getNode (endNodeId), "");
                     }
                 }
@@ -249,7 +249,7 @@ public class FileIO
                         Object[] args2 = { node1, pt1, node2, pt2 };
                         Command cmd2 = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (cmd2, true);
-                        controller.theGraph.linkSingle (controller.theGraph.getNode (startNodeId),
+                        controller.theGraph.addEdge (id, controller.theGraph.getNode (startNodeId),
                                 controller.theGraph.getNode (id), "");
                     }
                 }
