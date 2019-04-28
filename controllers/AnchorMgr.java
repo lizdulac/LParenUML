@@ -1,10 +1,9 @@
-package views;
+package controllers;
 
 import java.util.*;
-
-import javafx.scene.layout.Pane;
-import javafx.geometry.*;
 import java.lang.Math;
+import javafx.geometry.*;
+import javafx.scene.layout.Pane;
 
 /**
  * This class creates a number of Point2D objects on each edge of given Pane.
