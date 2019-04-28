@@ -74,7 +74,7 @@ public class VNode
      */
     public double getX ()
     {
-        return xTrans;
+        return region.getLayoutX ();
     }
  
     /**
@@ -83,7 +83,7 @@ public class VNode
      */
     public double getY ()
     {
-        return yTrans;
+        return region.getLayoutY ();
     }
 
     /**
