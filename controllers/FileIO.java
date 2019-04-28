@@ -131,7 +131,6 @@ public class FileIO
         }
         else
         System.out.print(delim);
-        
     }
 
     /**
@@ -276,12 +275,9 @@ public class FileIO
                         Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
                         Region node2 = vn2.getRegion ();
                         Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
-//                        String edgeName = "";
                         Object[] args2 = { node1, pt1, node2, pt2, edgeId };
                         Command addEdge = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (addEdge, true);
-//                        controller.theGraph.linkSingle (edgeId, controller.theGraph.getNode (id),
-//                                controller.theGraph.getNode (endNodeId), "");
                     }
                 }
                 endEdgeScanner.close ();
@@ -311,12 +307,9 @@ public class FileIO
                         Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
                         Region node2 = vn2.getRegion ();
                         Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
-//                        String edgeName = "";
                         Object[] args2 = { node1, pt1, node2, pt2, edgeId  };
                         Command addEdge = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (addEdge, true);
-                        //controller.theGraph.linkSingle (edgeId, controller.theGraph.getNode (startNodeId),
-                               // controller.theGraph.getNode (id), "");
                     }
                 }
                 startEdgeScanner.close ();

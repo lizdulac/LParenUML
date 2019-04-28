@@ -106,6 +106,9 @@ public class CanvasCtrl
                 {
                     int id = nextNodeId ();
                     String name = ((Character) ((char) (id + 96))).toString ();
+                    
+                    // appCtrl.addNode() AND canvasView.drawNode()
+                  
                     appCtrl.executeCommand (
                             packageAction (Action.ADD_NODE, Scope.CANVAS, id, name, e.getX (), e.getY ()), false);
                 } else
@@ -130,7 +133,7 @@ public class CanvasCtrl
                 canvasView.removeEdge (currentEdge);
                 currentEdge = null;
 
-                System.out.println ("ADD_EDGE: canvasMouseRelease");
+                System.out.println ("CVSCTR: edge creation ");
             }
         }
     };
@@ -157,13 +160,17 @@ public class CanvasCtrl
                         packageAction (Action.SELECT_NODE, Scope.PROPERTY, uNode.getId (), uNode.getName ()), false);
                 System.out.println ("U-NODE: this node selected: " + currentNode);
             }
-            if (appCtrl.getToolState () == ToolState.ADD_EDGE)
-            {
-                currentEdge = canvasView.beginEdgeDraw (srcNode, lastClick.get ());
-                currentEdge.setUserData (uNode.getId ());
 
+            else if (appCtrl.getToolState () == ToolState.ADD_EDGE) {
+            // DO NOT package these ADD_EDGE actions and send to executeCommand()
+            // all necessary ADD_EDGE actions are taken care of in uNodeDragRelease
+                
+                currentEdge = canvasView.beginEdgeDraw (srcNode, lastClick.get ());                
+                // currentEdge ID must be the same as startNode ID 
+                currentEdge.setUserData (uNode.getId ());
                 // line must be temporarily transparent to any mouse clicks
                 currentEdge.setMouseTransparent (true);
+              
             } else if (appCtrl.getToolState () == ToolState.DELETE)
             {
                 appCtrl.executeCommand(packageAction (Action.DELETE_NODE, Scope.CANVAS, id), false);
@@ -183,14 +190,15 @@ public class CanvasCtrl
             // mouse is released within some element other than the canvas
             if (!isCanvasRelease)
             {
-                // consume MouseEvent, prevent canvasMouseRelease from getting
-                // it
+
+                // consume MouseEvent, prevent canvasMouseRelease from getting it
+
                 e.consume ();
             }
 
             if (appCtrl.getToolState () == ToolState.ADD_EDGE)
             {
-                System.out.println ("isCanvasRelease: " + isCanvasRelease);
+                System.out.println ("CVSRLS: canvas release is " + isCanvasRelease);
             }
         }
     };
@@ -285,7 +293,6 @@ public class CanvasCtrl
                 lastClick.set (clickPoint);
             }
         }
-
     };
 
     /**
@@ -299,31 +306,36 @@ public class CanvasCtrl
             // mouse released within a UNode
             isCanvasRelease = false;
 
-            Region srcNode = (Region) e.getSource ();
-            UNode uNode = appCtrl.getNode ((int) srcNode.getUserData ());
+            Region startRgn = canvasView.getVNode ((int) currentEdge.getUserData ()).getRegion ();
+            Region endRgn = (Region) e.getSource ();
 
             if (appCtrl.getToolState () == ToolState.ADD_EDGE)
             {
+                Point2D currentEdgeStart = lastClick.get ();
                 Point2D releasePoint = new Point2D (e.getX (), e.getY ());
 
-                UNode start = appCtrl.getNode ((int) currentEdge.getUserData ());
-                UNode end = uNode;
-                String edgeName = start.getName () + end.getName ();
-                // appctrl._______()
-                
-                int id = nextEdgeId();
-                appCtrl.linkSingle (id, start, end, edgeName);
+                // @ line #315:
+                // AnchorMgr functionality is currently disabled
+                AnchorMgr a = new AnchorMgr((Pane) e.getSource ());
+                //Point2D releasePoint = a.getNearAnchor (new Point2D (e.getX (), e.getY ()));
 
-                canvasView.endEdgeDraw (srcNode, currentEdge, releasePoint, id);
+                int id = nextEdgeId ();
+                String name = "edgeName";
+                UNode startNode = appCtrl.getNode ((int) currentEdge.getUserData ());
+                UNode endNode = appCtrl.getNode ((int) endRgn.getUserData ());
 
-                // dragging is over, the line can begin accepting mouse events
-                // again
-                currentEdge.setMouseTransparent (false);
-                lastClick.set (null);
+                getCanvas().getChildren().remove(currentEdge);
+                currentEdge = null;
+                appCtrl.executeCommand (
+                    packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint), false);
             }
+
+            // dragging over, the line can begin accepting mouse events again
+            currentEdge.setMouseTransparent (false);
+            lastClick.set (null);
         }
     };
-
+    
     /********************** CANVASCTRL EXECUTE COMMAND ******************/
     /**
      * Packages the parameters and the type of action into a Command class. The
@@ -342,7 +354,10 @@ public class CanvasCtrl
     }
     
     /**
-     * data[0] - id data[1] - name data[2] - x data[3] - y
+     * data[0] - id
+     * data[1] - name
+     * data[2] - x
+     * data[3] - y
      * 
      * @param cmd
      * @param isHistory
@@ -350,63 +365,94 @@ public class CanvasCtrl
      */
     public boolean executeCommand (Command cmd, boolean isHistory)
     {
-
         /*
          * if(isHistory) { return false; }
          */
-        Object[] data = cmd.getData ();
-
-        if (cmd.actionType == Action.ADD_NODE)
+        
+        Object[] data = cmd.getData ();        
+        Action currentAction = cmd.actionType;
+        
+        switch (currentAction)
         {
-            System.out.printf ("CanvasCtrl: ADD_NODE Command\n");
+        case ADD_NODE:          
+        //(Action.ADD_NODE, Scope.CANVAS, id, name, e.getX (), e.getY ())
+            
             if (data.length != 4)
             {
-                System.out.println ("Data for adding a node is incorrect");
+                System.out.println ("Data for adding a node is incorrect.");
                 System.out.println ("Data list expected 4 items but had: " + data.length);
                 return false;
             }
-
+            // addNode (Integer id, String name)
             appCtrl.addNode ((Integer) data[0], (String) data[1]);
+            
+            // drawNode (double x, double y, int id)
             canvasView.drawNode ((double) data[2], (double) data[3], (int) data[0]);
-            System.out.println ("EXECMD: CanvasCtrl added node");
-            return true;
-        } else if (cmd.actionType == Action.ADD_EDGE)
-        {
-            // Arguments; Node1 pane, Node1 location as Point2D, Node2 pane, Node2 location as Point2D, EdgeId (int)
-            System.out.println ("CanvasCtrl: ADD_EDGE Command");
-            // public void linkSingle(UNode n1, UNode n2, String edge)
-            if (data.length != 5/* change */)
+            System.out.println ("CVSCTR: Command executed ADD_NODE with id of " + (int) data[0]);    
+       
+        return true;            
+        case ADD_EDGE:
+        //(Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint)
+            
+            if (data.length != 8)
             {
-                System.out.println ("Data for adding a node is incorrect");
-                System.out.println ("Data list expected 5 items but had: " + data.length);
+                System.out.println ("Data for adding an edge is incorrect.");
+                System.out.println ("Data list expected 8 items but had: " + data.length);
                 return false;
-            }
-            Line l = canvasView.beginEdgeDraw ((Region) data[0], (Point2D) data[1]);
-            canvasView.endEdgeDraw ((Region) data[2], l, (Point2D) data[3], (int) data[4]);
-        } else if (cmd.actionType == Action.DELETE_NODE)
-        {
-            if (data.length != 1/* change */)
+            }            
+            // addEdge (Integer id, UNode n1, UNode n2, String name)
+            appCtrl.addEdge ((Integer) data[0], (UNode) data[2], (UNode) data[3], (String) data[1]);
+            
+            // beginEdgeDraw (Region startRgn, Point2D sceneClickPoint)
+            currentEdge = canvasView.beginEdgeDraw ((Region) data[4], (Point2D) data[6]);
+            
+            // endEdgeDraw (int id, Region endRgn, Line theEdge, Point2D releasePoint)
+            canvasView.endEdgeDraw ((int) data[0], (Region) data[5], (Line) currentEdge, (Point2D) data[7]);            
+            System.out.println ("CVSCTR: Command executed ADD_EDGE with id of " + (int) data[0]);
+            
+        return true;
+        case DELETE_NODE:
+        //(Action.DELETE_NODE, Scope.CANVAS, id)
+
+            if (data.length != 1)
             {
-                System.out.println ("Data for deleting a node is incorrect");
+                System.out.println ("Data for deleting a node is incorrect.");
                 System.out.println ("Data list expected 1 items but had: " + data.length);
                 return false;
-            }
+            }    
+            
             int id = (int) data[0];
-            System.out.printf ("CanvasCtrl: DELETE_NODE %d\n", id);
             appCtrl.removeNode (id);
             canvasView.removeNode (id);
-        } else if (cmd.actionType == Action.DELETE_EDGE)
-        {
-            if (data.length != 1/* change */)
+            System.out.println ("CVSCTR: Command executed DELETE_NODE");
+            
+        return true;
+        case DELETE_EDGE:
+        //data[0] - id
+
+            if (data.length != 1)
             {
-                System.out.println ("Data for deleting an edge is incorrect");
+                System.out.println ("Data for deleting an edge is incorrect.");
                 System.out.println ("Data list expected 1 items but had: " + data.length);
                 return false;
-            }
-            //data[0] - id
-            canvasView.removeEdge ((int) data[0]); 
-        }
+            }    
+            
+            canvasView.removeEdge ((int) data[0]);
+            System.out.println ("CVSCTR: Command executed DELETE_EDGE");
+            return true;
+        
+        case ZOOM:
+        //data[0] - percent
 
-        return false;
+            if (data.length != 1)
+            {
+                System.out.println ("Data for zooming is incorrect.");
+                System.out.println ("Data list expected 1 items but had: " + data.length);
+                return false;
+            }    
+            
+            canvasView.zoomIn ((double) data[0]);
+        default: return false;
+        }
     }
 }
