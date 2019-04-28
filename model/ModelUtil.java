@@ -24,24 +24,42 @@ public final class ModelUtil
             if (uNode != null)
             {
                 System.out.println ("------ Node ------\n");
-                System.out.println ("       id: " + uNode.getId ());
-                System.out.println ("     name: " + uNode.getName ());
-
-                System.out.println ("  inEdges: ");
+                System.out.println ("         id: " + uNode.getId ());
+                System.out.println ("       name: " + uNode.getName ());
+                
+                System.out.println (" attributes: ");
+                for (String attribute : uNode.getAttributes ())
+                {
+                    System.out.println ("             " + attribute);
+                }
+                
+                System.out.println ("  functions: ");
+                for (String function : uNode.getFunctions ())
+                {
+                    System.out.println ("             " + function);
+                }
+                
+                System.out.println ("       misc: ");
+                for (String misc : uNode.getMiscs ())
+                {
+                    System.out.println ("             " + misc);
+                }
+                
+                System.out.println ("    inEdges: ");
                 for (UEdge edge : uNode.getInEdges ())
                 {
                     edgeTotal++;
                     UNode start = edge.getStartNode ();
                     UNode end = edge.getEndNode ();
-                    System.out.println ("           " + start.getName () + " -> " + end.getName ());
+                    System.out.println ("             " + start.getName () + " -> " + end.getName ());
                 }
 
-                System.out.println (" outEdges: ");
+                System.out.println ("   outEdges: ");
                 for (UEdge edge : uNode.getOutEdges ())
                 {
                     UNode start = edge.getStartNode ();
                     UNode end = edge.getEndNode ();
-                    System.out.println ("           " + start.getName () + " -> " + end.getName ());
+                    System.out.println ("             " + start.getName () + " -> " + end.getName ());
                 }
 
                 System.out.print ("\n");

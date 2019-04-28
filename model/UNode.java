@@ -13,9 +13,9 @@ public class UNode {
     /************************** UNODE CLASS MEMBERS ***********************/
 	private Integer id;
 	private String name;
-	private ArrayList<String> attributes;
-	private ArrayList<String> functions;
-	private ArrayList<String> misc;
+	private ArrayList<String> attributes = new ArrayList<String> ();
+	private ArrayList<String> functions = new ArrayList<String> ();
+	private ArrayList<String> misc = new ArrayList<String> ();
 
 	private ArrayList<UEdge> edgeStart = new ArrayList<UEdge>();
 	private ArrayList<UEdge> edgeEnd = new ArrayList<UEdge>();
@@ -43,7 +43,6 @@ public class UNode {
 	{
 		this.id = id;
 		this.name = name;
-		
 	}
 	
 	/**
@@ -304,5 +303,20 @@ public class UNode {
 	 */
 	public ArrayList<UEdge> getOutEdges(){
 		return edgeStart;
+	}
+	
+	public ArrayList<String> getAttributes()
+	{
+	    return attributes;
+	}
+	
+	public ArrayList<String> getFunctions()
+	{
+	    return functions;
+	}
+	
+	public ArrayList<String> getMiscs ()
+	{
+	    return misc;
 	}
 }
