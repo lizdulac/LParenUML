@@ -49,7 +49,7 @@ public class CanvasCtrl
         uNodeId = 0;
         uEdgeId = 0;
         isCanvasRelease = true;
-        currentEdge = new Line ();
+        currentEdge = null;
         currentNode = null;
         lastClick = new SimpleObjectProperty<> ();
     }
@@ -125,7 +125,7 @@ public class CanvasCtrl
         public void handle (MouseEvent e)
         {
             lastClick.set (null);
-            if (appCtrl.getToolState () == ToolState.ADD_EDGE)
+            if (appCtrl.getToolState () == ToolState.ADD_EDGE && currentEdge != null)
             {
                 canvasView.removeEdge (currentEdge);
                 currentEdge = null;
@@ -385,12 +385,24 @@ public class CanvasCtrl
             canvasView.endEdgeDraw ((Region) data[2], l, (Point2D) data[3], (int) data[4]);
         } else if (cmd.actionType == Action.DELETE_NODE)
         {
+            if (data.length != 1/* change */)
+            {
+                System.out.println ("Data for deleting a node is incorrect");
+                System.out.println ("Data list expected 1 items but had: " + data.length);
+                return false;
+            }
             int id = (int) data[0];
             System.out.printf ("CanvasCtrl: DELETE_NODE %d\n", id);
             appCtrl.removeNode (id);
             canvasView.removeNode (id);
         } else if (cmd.actionType == Action.DELETE_EDGE)
         {
+            if (data.length != 1/* change */)
+            {
+                System.out.println ("Data for deleting an edge is incorrect");
+                System.out.println ("Data list expected 1 items but had: " + data.length);
+                return false;
+            }
             //data[0] - id
             canvasView.removeEdge ((int) data[0]); 
         }

@@ -46,7 +46,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 
 /**
  * 
- * @author 
+ * @author
  *
  */
 public class AppCtrl
@@ -56,6 +56,7 @@ public class AppCtrl
     private PropertiesCtrl propCtrl;
     private CanvasCtrl canvasCtrl;
     private ToolState toolState;
+    private Button prevState;
     protected UGraph theGraph;
     private Stage appStage;
     private Scene appScene;
@@ -65,11 +66,22 @@ public class AppCtrl
 
     /*********************** APPCTRL FINAL VARIABLES *********************/
     private final String appName = "RParen - a UML Diagram Editor by LParen - ";
+    private final String selected =  ".button {-fx-background-color:linear-gradient(#f8f8f8, #dcdcdc),"
+            + "linear-gradient(#ffffff 0%, #dfdfdf 20%, #dcdcdc 100%),linear-gradient(#e0e0e0 0%, #fcfcfc 50%);"
+            + "-fx-background-color: white;-fx-background-radius: 8,7,6;-fx-background-insets: 0,1,2;"
+            + "-fx-focus-color: transparent;-fx-effect: dropshadow( three-pass-box , #5ccecc , 10, 0 , 0 , 1 );"
+            + "-fx-text-fill: #5ccecc;-fx-border-color:#aaaaaa;-fx-border-width: 2 2 2 2;"//#75eae8;";
+            + "-fx-border-radius: 8,7,6;";
+    private final String unselected = ".button {" + "-fx-background-color:linear-gradient(#f2f2f2, #d6d6d6),"
+            + "linear-gradient(#fcfcfc 0%, #d9d9d9 20%, #d6d6d6 100%),linear-gradient(#dddddd 0%, #f6f6f6 50%);"
+            + "-fx-background-radius: 8,7,6;-fx-background-insets: 0,1,2;-fx-text-fill: black;"
+            + "-fx-focus-color: transparent;}";
     private final double margin = 50;
     private final double cornerRadius = 50;
     private final double toolW = cornerRadius + margin;
     private final String canvasBgHex = "#F2F2F2";
-    // private final Background canvasBg = new Background (new BackgroundFill (Color.web (canvasBgHex), null, null));
+    // private final Background canvasBg = new Background (new BackgroundFill
+    // (Color.web (canvasBgHex), null, null));
     private final Background marginBg = new Background (new BackgroundFill (Color.WHITE, null, null));
     private final Background transparent = new Background (new BackgroundFill (Color.TRANSPARENT, null, null));
 
@@ -107,7 +119,6 @@ public class AppCtrl
         sideStage.setHeight (Screen.getPrimary ().getVisualBounds ().getHeight ());
     }
 
-
     /*********************** APPCTRL GRAPH FUNCTIONS *******************/
     /**
      * 
@@ -117,17 +128,17 @@ public class AppCtrl
     {
         return theGraph;
     }
-    
+
     /**
      * 
      * @param id
      * @return
      */
-    public UNode getNode(int id)
+    public UNode getNode (int id)
     {
         return theGraph.getNode (id);
     }
-    
+
     /**
      * 
      * @param n1
@@ -138,7 +149,7 @@ public class AppCtrl
     {
         theGraph.linkSingle (id, n1, n2, edge);
     }
-    
+
     /**
      * 
      * @param id
@@ -148,17 +159,17 @@ public class AppCtrl
     {
         theGraph.addNode (id, name);
     }
-    
+
     /**
      * 
      * @param id
      */
     public void removeNode (Integer id)
     {
-        cleanEdges (getNode(id));
+        cleanEdges (getNode (id));
         theGraph.removeNode (id);
     }
-    
+
     /**
      * 
      * @param id
@@ -168,7 +179,7 @@ public class AppCtrl
     {
         return theGraph.getEdge (id);
     }
-    
+
     /**
      * 
      * @param id
@@ -176,43 +187,42 @@ public class AppCtrl
     public void removeEdge (Integer id)
     {
         theGraph.removeEdge (id);
-        eraseEdge(id);
+        eraseEdge (id);
     }
-    
+
     /*************************** UNODE FUNCTIONS **************************/
     /**
-     *  Clean the edges off of a Node.
+     * Clean the edges off of a Node.
      * 
-     * @version 3.0 Inbound Iteration 3 
+     * @version 3.0 Inbound Iteration 3
      */
-    public void cleanEdges(UNode n)
+    public void cleanEdges (UNode n)
     {
-        //clean outgoing edges and their ends       
-        for (UEdge e: n.getOutEdges())
+        // clean outgoing edges and their ends
+        for (UEdge e : n.getOutEdges ())
         {
-            e.getEndNode().getInEdges ().remove (e);
-            eraseEdge(e.getId ());
+            e.getEndNode ().getInEdges ().remove (e);
+            eraseEdge (e.getId ());
         }
-        
-        //clean incoming edges and their starts
-        for (UEdge e : n.getInEdges())
+
+        // clean incoming edges and their starts
+        for (UEdge e : n.getInEdges ())
         {
-            e.getStartNode().getOutEdges ().remove (e);
-            eraseEdge(e.getId ());
+            e.getStartNode ().getOutEdges ().remove (e);
+            eraseEdge (e.getId ());
         }
     }
-    
+
     /**
-     * Erases Line representing Edge from canvas,
-     * but leaves model unchanged
+     * Erases Line representing Edge from canvas, but leaves model unchanged
      * 
      * @param id
      */
     public void eraseEdge (Integer id)
     {
-        executeCommand (packageAction(Action.DELETE_EDGE, Scope.CANVAS, id), false);
-    }  
-    
+        executeCommand (packageAction (Action.DELETE_EDGE, Scope.CANVAS, id), false);
+    }
+
     /**
      * Packages the parameters and the type of action into a Command class. The
      * execute_command method or other invoker style methods are responsible for
@@ -228,7 +238,6 @@ public class AppCtrl
         // add scope
         return new Command (type, scope, objects);
     }
-    
 
     /*********************** APPCTRL GENERAL GETTERS *******************/
     /**
@@ -408,7 +417,6 @@ public class AppCtrl
         return menuBar;
     }
 
-
     /**
      * 
      * @param borderPane
@@ -494,21 +502,14 @@ public class AppCtrl
     private Pane configureToolButtons ()
     {
         /*
-         * UniCode numbers for characters on buttons in order: move, select, createNode,
-         * createEdge, delete, edit, undo, redo
+         * UniCode numbers for characters on buttons in order: move, select,
+         * createNode, createEdge, delete, edit, undo, redo
          */
         double fontSize = 20;
         final int[] UCodes = new int[] { 0x2723, 0x261D, 0x274F, 8594, 0x2620 };
         final String[] buttonNames = new String[] { "Move", "Select", "Create Node", "Create Edge", "Delete" };
 
         Font buttonsFont = Font.font ("sans-serif", FontWeight.BOLD, fontSize);
-
-        // Gross CSS code to style buttons
-        String buttonStyle = ".button {" + "-fx-background-color:linear-gradient(#f2f2f2, #d6d6d6),"
-                + "linear-gradient(#fcfcfc 0%, #d9d9d9 20%, #d6d6d6 100%),linear-gradient(#dddddd 0%, #f6f6f6 50%);"
-                + "-fx-background-radius: 8,7,6;-fx-background-insets: 0,1,2;-fx-text-fill: black;-fx-effect:"
-                + "dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );}" + ".button:selected {"
-                + "-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 );}";
 
         // VBox arranges elements vertically in a single column
         VBox buttonPanel;
@@ -530,7 +531,7 @@ public class AppCtrl
                 buttons[i].setTooltip (tt);
             }
             buttons[i].setFont (buttonsFont);
-            buttons[i].setStyle (buttonStyle);
+            buttons[i].setStyle (unselected);
             buttonPanel.getChildren ().add (buttons[i]);
 
             if (i < ToolState.values ().length)
@@ -561,9 +562,10 @@ public class AppCtrl
         @Override
         public void handle (ActionEvent e)
         {
-            ToolState sourceButton = (ToolState) ((Node) e.getSource ()).getUserData ();
+            Button sourceButton = (Button) e.getSource ();
+            ToolState buttonState = (ToolState) (sourceButton.getUserData ());
 
-            switch (sourceButton)
+            switch (buttonState)
             {
             case MOVE:
                 toolState = ToolState.MOVE;
@@ -584,6 +586,12 @@ public class AppCtrl
                 toolState = ToolState.SELECT;
             }
             System.out.println ("TSTATE: changed to " + toolState);
+            sourceButton.setStyle (selected);
+            if (prevState != null && prevState != sourceButton)
+            {
+                prevState.setStyle (unselected);
+            }
+            prevState = sourceButton;
         }
     };
 
@@ -610,7 +618,7 @@ public class AppCtrl
         propSlider.setPrefWidth (toolW);
         return propSlider;
     }
-    
+
     /**
      * 
      * @param propSlider
@@ -646,7 +654,7 @@ public class AppCtrl
         timeline.getKeyFrames ().add (new KeyFrame (Duration.seconds (0.2), new KeyValue (currentW, endW)));
         timeline.play ();
     }
-    
+
     /*********************** APPCTRL CHANGE LISTENERS *******************/
     /**
      * 
@@ -702,7 +710,7 @@ public class AppCtrl
             sideStage.setX (sideStage.getX () + xDelta);
         }
     };
-    
+
     /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
     /**
      * 
@@ -716,7 +724,8 @@ public class AppCtrl
             fc.setTitle ("Save File");
 
             // Set extension filter
-            //FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            // FileChooser.ExtensionFilter extFiler = new
+            // FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
             // For easier debugging:
             FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
             fc.getExtensionFilters ().add (extFiler);
@@ -742,7 +751,8 @@ public class AppCtrl
             fc.setTitle ("Open File");
 
             // Set extension filter
-            //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            // FileChooser.ExtensionFilter extFilter = new
+            // FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
             // For easier debugging:
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
             fc.getExtensionFilters ().add (extFilter);
@@ -768,11 +778,23 @@ public class AppCtrl
             {
                 System.out.println (AppCtrl.class.getResource ("AppCtrl.class"));
                 // jar:file:/C:/Users/Liz/Desktop/umleditor.jar!/controllers/AppCtrl.class
-                
+                // 
+                //...file: /C:/Users/Liz/Desktop/umleditor.jar | !/con...
                 // file:/C:/Users/Liz/workspace/LParen/controllers/AppCtrl.class
 
+                String prefix = "jar:file:";
+                String postfix = ".jar!";
+                String fullPath = AppCtrl.class.getResource ("AppCtrl.class").toString ();
+                int begin = fullPath.indexOf (prefix) + prefix.length ();
+                int end = fullPath.indexOf (postfix) + postfix.length () - 1;
+                
+                if (begin < end)
+                {
+                    //String 
+                }
                 
                 Runtime.getRuntime ().exec ("java Main");
+                Runtime.getRuntime ().exec ("java -jar ");
             } catch (IOException ex)
             {
                 System.out.println ("newFile exec error");
@@ -780,7 +802,7 @@ public class AppCtrl
         }
     };
 
-    /*********************** APPCTRL EXECUTE COMMAND ********************/  
+    /*********************** APPCTRL EXECUTE COMMAND ********************/
 
     /**
      * This method takes a packaged Command and executes it on the prerequisite
