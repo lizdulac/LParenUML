@@ -1,6 +1,7 @@
 package controllers;
-import model.*;
 import controllers.Command.Scope;
+import controllers.Command.Action;
+import model.*;
 
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -40,8 +41,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
+/**
+ * 
+ * @author 
+ *
+ */
 public class AppCtrl
 {
+    /************************ APPCTRL CLASS MEMBERS ***********************/
     private static AppCtrl appCtrl;
     private PropertiesCtrl propCtrl;
     private CanvasCtrl canvasCtrl;
@@ -53,6 +60,7 @@ public class AppCtrl
     private Scene sideScene;
     private FileIO fileIO;
 
+    /*********************** APPCTRL FINAL VARIABLES *********************/
     private final double margin = 50;
     private final double cornerRadius = 50;
     private final double toolW = cornerRadius + margin;
@@ -62,6 +70,7 @@ public class AppCtrl
     private final Background marginBg = new Background (new BackgroundFill (Color.WHITE, null, null));
     private final Background transparent = new Background (new BackgroundFill (Color.TRANSPARENT, null, null));
 
+    /************************* APPCTRL CONSTRUCTOR *********************/
     /**
      * AppCtrl follows a singleton pattern so that
      * only one instance is ever created. This is the
@@ -78,7 +87,7 @@ public class AppCtrl
         toolState = ToolState.SELECT;
         canvasCtrl = new CanvasCtrl (this);
         propCtrl = new PropertiesCtrl (this, canvasCtrl);
-        fileIO = new FileIO (this);
+        fileIO = new FileIO (this, canvasCtrl.canvasView);
 
         // appStage - configure primary application window
         appStage = stage;
@@ -98,9 +107,138 @@ public class AppCtrl
         sideStage.setHeight (Screen.getPrimary ().getVisualBounds ().getHeight ());
     }
 
+
+    /*********************** APPCTRL GRAPH FUNCTIONS *******************/
+    /**
+     * 
+     * @return
+     */
     public UGraph getGraph ()
     {
         return theGraph;
+    }
+    
+    /**
+     * 
+     * @param id
+     * @param name
+     */
+    public void addNode (Integer id, String name)
+    {
+        theGraph.addNode (id, name);
+    }
+    
+    /**
+     * 
+     * @param id
+     * @return
+     */
+    public UNode getNode(int id)
+    {
+        return theGraph.getNode (id);
+    }
+    
+    /**
+     * 
+     * @param id
+     */
+    public void removeNode (Integer id)
+    {
+        cleanEdges (getNode(id));
+        theGraph.removeNode (id);
+    }
+    
+    /**
+     * 
+     * @param n1
+     * @param n2
+     * @param edge
+     */
+    public void addEdge (Integer id, UNode n1, UNode n2, String name)
+    {
+        theGraph.addEdge (id, n1, n2, name);
+    }
+    
+    /**
+     * 
+     * @param id
+     * @return
+     */
+    public UEdge getEdge (Integer id)
+    {
+        return theGraph.getEdge (id);
+    }
+    
+    /**
+     * 
+     * @param id
+     */
+    public void removeEdge (Integer id)
+    {
+        theGraph.removeEdge (id);
+        eraseEdge(id);
+    }
+    
+    /*************************** UNODE FUNCTIONS **************************/
+    /**
+     *  Clean the edges off of a Node.
+     * 
+     * @version 3.0 Inbound Iteration 3 
+     */
+    public void cleanEdges(UNode n)
+    {    	
+        //clean outgoing edges and their ends  
+        for (UEdge e: n.getOutEdges())
+        {
+        	theGraph.removeEdgeFromIn(e.getId ());
+            eraseEdge(e.getId ());
+        }
+        
+        //clean incoming edges and their starts
+        for (UEdge e : n.getInEdges())
+        {
+        	theGraph.removeEdgeFromOut(e.getId ());
+            eraseEdge(e.getId ());
+        }
+    }
+    
+    /**
+     * Erases Line representing Edge from canvas,
+     * but leaves model unchanged
+     * 
+     * @param id
+     */
+    public void eraseEdge (Integer id)
+    {
+    	
+        executeCommand (packageAction(Action.DELETE_EDGE, Scope.CANVAS, id), false);
+    }  
+    
+    /**
+     * Packages the parameters and the type of action into a Command class. The
+     * execute_command method or other invoker style methods are responsible for
+     * recasting the objects.
+     * 
+     * @param type
+     *            declared in the Action enum in @Command.java
+     * @param objects
+     *            a templated list of parameters cast as objects.
+     */
+    private Command packageAction (Action type, Scope scope, Object... objects)
+    {
+        // add scope
+        return new Command (type, scope, objects);
+    }
+    
+
+    /*********************** APPCTRL GENERAL GETTERS *******************/
+    /**
+     * 
+     * @return
+     */
+    public PropertiesCtrl getPropCtrl ()
+    {
+        return propCtrl;
     }
 
     /**
@@ -125,11 +263,6 @@ public class AppCtrl
         return toolState;
     }
 
-    public PropertiesCtrl getPropCtrl ()
-    {
-        return propCtrl;
-    }
-
     /**
      * Enforces a singleton pattern, ensuring that
      * only a single instance of AppCtrl is ever created.
@@ -146,6 +279,7 @@ public class AppCtrl
         return appCtrl;
     }
 
+    /*********************** APPCTRL CONFIGURATIONS ********************/
     /**
      * This offset is necessary to overcome platform inconsistencies
      * in how a window is maximized vertically. Essentially the
@@ -291,63 +425,6 @@ public class AppCtrl
         return menuBar;
     }
 
-    public EventHandler<ActionEvent> saveFile = new EventHandler<ActionEvent> ()
-    {
-        @Override
-        public void handle (ActionEvent e)
-        {
-            FileChooser fc = new FileChooser ();
-            fc.setTitle ("Save File");
-
-            // Set extension filter
-            FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-            // For easier debugging:
-            // FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-            fc.getExtensionFilters ().add (extFiler);
-
-            File file = fc.showSaveDialog (appStage);
-            fileIO.save (file);
-            appStage.setTitle (appName + file.getName ());
-        }
-    };
-
-    public EventHandler<ActionEvent> openFile = new EventHandler<ActionEvent> ()
-    {
-        @Override
-        public void handle (ActionEvent e)
-        {
-            FileChooser fc = new FileChooser ();
-            fc.setTitle ("Open File");
-
-            // Set extension filter
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-            // For easier debugging:
-            // FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-            fc.getExtensionFilters ().add (extFilter);
-
-            File file = fc.showOpenDialog (appStage);
-            fileIO.open (file);
-            appStage.setTitle (appName + file.getName ());
-        }
-    };
-
-    /**
-     * re-launch this program in a new process
-     */
-    public EventHandler<ActionEvent> newFile = new EventHandler<ActionEvent> ()
-    {
-        @Override
-        public void handle (ActionEvent e)
-        {
-            try
-            {
-                Runtime.getRuntime ().exec ("java Main");
-            } catch (IOException ex)
-            {
-                System.out.println ("newFile exec error");
-            }
-        }
-    };
 
     /**
      * Configure settings for the secondary window (sideStage).
@@ -360,8 +437,8 @@ public class AppCtrl
     private void configureSideStage (BorderPane borderPane)
     {
         // initialization
-        double xOrigin = borderPane.localToScreen(
-            borderPane.getLayoutX (), borderPane.getLayoutY ()).getX () + borderPane.getWidth () - toolW;
+        double xOrigin = borderPane.localToScreen (borderPane.getLayoutX (), borderPane.getLayoutY ()).getX ()
+                + borderPane.getWidth () - toolW;
         double anchorOffset = calculateOffset (borderPane);
         AnchorPane anchorPane = new AnchorPane ();
         VBox propSlider = configurePropSlider ();
@@ -379,7 +456,7 @@ public class AppCtrl
         // propSlider
         propSlider.setLayoutX (cornerRadius);
 
-        // sideStage
+     // sideStage
         sideStage.initStyle (StageStyle.TRANSPARENT);
         sideScene.setFill (Color.TRANSPARENT);
         sideStage.initOwner (appStage);
@@ -399,12 +476,12 @@ public class AppCtrl
         //     - this code (and the 2 buttons) will be eventually be deleted
         //
         // PropSlider button triggers toggleSlider()
-        ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (4))
-                .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
-
-        // PrintStats button triggers ModelUtil.printStats()
         ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
-                .setOnAction (e -> ModelUtil.printStats (theGraph));
+                .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
+        
+        // PrintStats button triggers ModelUtil.printStats()
+        ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (6))
+                .setOnAction (e -> ModelUtil.printStats (getGraph()));
     }
 
     /**
@@ -451,11 +528,11 @@ public class AppCtrl
     {
         /*
          * Unicode numbers for button icons, in order:
-         * SELECT, ADD_NODE, ADD_EDGE, DELETE
+         * MOVE, SELECT, ADD_NODE, ADD_EDGE, DELETE
          */
         double fontSize = 20;
-        final int[] UCodes = new int[] { 0x261D, 0x274F, 8594, 0x2620 };
-        final String[] buttonNames = new String[] { "Select", "Create Node", "Create Edge", "Delete" };
+        final int[] UCodes = new int[] { 0x2723, 0x261D, 0x274F, 8594, 0x2620 };
+        final String[] buttonNames = new String[] { "Move", "Select", "Create Node", "Create Edge", "Delete" };
 
         Font buttonsFont = Font.font ("sans-serif", FontWeight.BOLD, fontSize);
 
@@ -569,7 +646,7 @@ public class AppCtrl
         propSlider.setPrefWidth (toolW);
         return propSlider;
     }
-
+    
     /**
      * The slider has two possible states: hidden or visible.
      * This method toggles the slider from its current state
@@ -606,7 +683,8 @@ public class AppCtrl
         timeline.getKeyFrames ().add (new KeyFrame (Duration.seconds (0.2), new KeyValue (currentW, endW)));
         timeline.play ();
     }
-
+    
+    /*********************** APPCTRL CHANGE LISTENERS *******************/
     /**
      * Whenever the height of appStage changes,
      * set the height of sideStage to match.
@@ -661,6 +739,85 @@ public class AppCtrl
             sideStage.setX (sideStage.getX () + xDelta);
         }
     };
+    
+    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
+    /**
+     * 
+     */
+    public EventHandler<ActionEvent> saveFile = new EventHandler<ActionEvent> ()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            FileChooser fc = new FileChooser ();
+            fc.setTitle ("Save File");
+
+            // Set extension filter
+            //FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            // For easier debugging:
+            FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
+            fc.getExtensionFilters ().add (extFiler);
+
+            File file = fc.showSaveDialog (appStage);
+            if (file != null)
+            {
+                fileIO.save (file);
+                appStage.setTitle (appName + file.getName ());
+            }
+        }
+    };
+
+    /**
+     * 
+     */
+    public EventHandler<ActionEvent> openFile = new EventHandler<ActionEvent> ()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            FileChooser fc = new FileChooser ();
+            fc.setTitle ("Open File");
+
+            // Set extension filter
+            //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            // For easier debugging:
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
+            fc.getExtensionFilters ().add (extFilter);
+
+            File file = fc.showOpenDialog (appStage);
+            if (file != null)
+            {
+                fileIO.open (file);
+                appStage.setTitle (appName + file.getName ());
+            }
+        }
+    };
+
+    /**
+     * re-launch this program in a new process
+     */
+    public EventHandler<ActionEvent> newFile = new EventHandler<ActionEvent> ()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            try
+            {
+                System.out.println (AppCtrl.class.getResource ("AppCtrl.class"));
+                // jar:file:/C:/Users/Liz/Desktop/umleditor.jar!/controllers/AppCtrl.class
+                
+                // file:/C:/Users/Liz/workspace/LParen/controllers/AppCtrl.class
+
+                
+                Runtime.getRuntime ().exec ("java Main");
+            } catch (IOException ex)
+            {
+                System.out.println ("newFile exec error");
+            }
+        }
+    };
+
+    /*********************** APPCTRL EXECUTE COMMAND ********************/  
 
     /**
      * Route the provided Command to the appropriate controller for 

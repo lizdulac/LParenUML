@@ -10,12 +10,17 @@ import java.util.*;
  */
 public class UNode {
 
+    /************************** UNODE CLASS MEMBERS ***********************/
 	private Integer id;
 	private String name;
+	private ArrayList<String> attributes;
+	private ArrayList<String> functions;
+	private ArrayList<String> misc;
 
 	private ArrayList<UEdge> edgeStart = new ArrayList<UEdge>();
 	private ArrayList<UEdge> edgeEnd = new ArrayList<UEdge>();
-	
+
+    /************************** UNODE CONSTRUCTORS ************************/
 	/**
 	 * Blank constructor for a UNode. This constructor should never be called.
 	 * 
@@ -56,7 +61,186 @@ public class UNode {
 		edgeEnd = end;
 		edgeStart = start;		
 	}
-	
+
+    /************************** UNODE TEXT EDITING ************************/
+	/**
+	 * 
+	 * @param index
+	 * @return
+	 */
+    public String getAttribute (int index)
+    {
+        return attributes.get (index);
+    }
+    
+    /**
+     * 
+     * @param index
+     * @param s
+     */
+    public void setAttribute (int index, String s)
+    {
+        attributes.set (index, s);
+    }
+    
+    /**
+     * 
+     * @param attribute
+     */
+    public void addAttribute (String attribute)
+    {
+        attributes.add (attribute);
+    }
+    
+    /**
+     * 
+     * @param attribute
+     */
+    public void removeAttribute (String attribute)
+    {
+        attributes.remove (attribute);
+    }
+    
+    /**
+     * 
+     * @param index
+     */
+    public void removeAttribute (int index)
+    {
+        attributes.remove (index);
+    }
+    
+    /**
+     * 
+     * @param index1
+     * @param index2
+     */
+    public void swapAttributes (int index1, int index2)
+    {
+        String temp = attributes.get (index1);
+        attributes.set (index1, attributes.get (index2));
+        attributes.set (index2, temp);
+    }
+    
+    /**
+     * 
+     * @param index
+     * @return
+     */
+    public String getFunction (int index)
+    {
+        return functions.get (index);
+    }
+    
+    /**
+     * 
+     * @param index
+     * @param s
+     */
+    public void setFunction (int index, String s)
+    {
+        functions.set (index, s);
+    }
+    
+    /**
+     * 
+     * @param function
+     */
+    public void addFunction (String function)
+    {
+        functions.add (function);
+    }
+    
+    /**
+     * 
+     * @param function
+     */
+    public void removeFunction (String function)
+    {
+        functions.remove (function);
+    }
+    
+    /**
+     * 
+     * @param index
+     */
+    public void removeFunction (int index)
+    {
+        functions.remove (index);
+    }
+    
+    /**
+     * 
+     * @param index1
+     * @param index2
+     */
+    public void swapFunctions (int index1, int index2)
+    {
+        String temp = functions.get (index1);
+        functions.set (index1, functions.get (index2));
+        functions.set (index1, temp);
+    }
+    
+    /**
+     * 
+     * @param index
+     * @return
+     */
+    public String getMisc (int index)
+    {
+        return misc.get (index);
+    }
+    
+    /**
+     * 
+     * @param index
+     * @param s
+     */
+    public void setMisc (int index, String s)
+    {
+        misc.set (index, s);
+    }
+    
+    /**
+     * 
+     * @param m
+     */
+    public void addMisc (String m)
+    {
+        misc.add (m);
+    }
+
+    /**
+     * 
+     * @param m
+     */
+    public void removeMisc (String m)
+    {
+        misc.remove (m);
+    }
+    
+    /**
+     * 
+     * @param index
+     */
+    public void removeMisc (int index)
+    {
+        misc.remove (index);
+    }
+    
+    /**
+     * 
+     * @param index1
+     * @param index2
+     */
+    public void swapMisc (int index1, int index2)
+    {
+        String temp = misc.get (index1);
+        misc.set (index1, misc.get (index2));
+        misc.set (index2, temp);
+    }
+    
+    /************************* UNODE GENERAL GETTERS **********************/
 	/**
 	 * Exposes the id attribute.
 	 * 
@@ -92,16 +276,16 @@ public class UNode {
 	 * 
 	 * @param e new edge
 	 */
-	public void addOutEdge( UEdge e){
-		edgeStart.add(e);											
+	public boolean addOutEdge( UEdge e){
+		return edgeStart.add(e);											
 	}
 	
 	/**
 	 * Adds a new Edge to incoming edges.
 	 * @param e new edge
 	 */
-	public void addInEdge( UEdge e){
-		edgeEnd.add(e);
+	public boolean addInEdge( UEdge e){
+		return edgeEnd.add(e);
 	}
 	
 	/**
@@ -121,27 +305,4 @@ public class UNode {
 	public ArrayList<UEdge> getOutEdges(){
 		return edgeStart;
 	}
-	
-	
-	
-	/**
-	 *  Clean the outgoing edges off of a Node.
-	 * 
-	 * @version 3.0 Inbound Iteration 3 
-	 */
-	public void cleanEdges()
-	{
-		//clean outgoing edges and their ends		
-	    for (UEdge e: edgeStart)
-	    {
-	        e.start.getOutEdges ().remove (e);
-	    }
-		
-		//clean incoming edges and their starts
-		for (UEdge e: edgeEnd)
-		{
-		    e.end.getInEdges ().remove (e);
-		}
-	}
-	
 }

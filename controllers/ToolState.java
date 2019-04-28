@@ -2,7 +2,7 @@ package controllers;
 
 public enum ToolState
 {
-	SELECT (0), ADD_NODE (1), ADD_EDGE (2), DELETE (3);
+	MOVE (0), SELECT (1), ADD_NODE (2), ADD_EDGE (3), DELETE (4);
 
 	private final int value; 
 
