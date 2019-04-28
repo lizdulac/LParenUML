@@ -288,45 +288,48 @@ public class CanvasCtrl
                 lastClick.set (clickPoint);
             }
         }
-
-    };
+};
 
     /**
      * 
      */
     public EventHandler<MouseDragEvent> uNodeDragRelease = new EventHandler<MouseDragEvent> ()
     {
-        @Override
-        public void handle (MouseDragEvent e)
-        {
-        	// mouse released within a UNode
-        	isCanvasRelease = false;
-        	
-            Region startRgn = canvasView.getVNode ((int) currentEdge.getUserData ()).getRegion ();
-            Region endRgn = (Region) e.getSource ();
-            
-            if (appCtrl.getToolState () == ToolState.ADD_EDGE)
-            {
-            	Point2D currentEdgeStart = lastClick.get ();
-            	Point2D releasePoint = new Point2D (e.getX (), e.getY ());
-            	
-            	int id = nextEdgeId ();
-            	String name = "edgeName";
-            	UNode startNode = appCtrl.getNode ((int) currentEdge.getUserData ());
-            	UNode endNode = appCtrl.getNode ((int) endRgn.getUserData ());
-            	
-            	getCanvas().getChildren().remove(currentEdge);
-            	currentEdge = null;
-            	            	       	            	
-            	appCtrl.executeCommand (
-            			packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint), false);            	
-            }
-            
-            // dragging over, the line can begin accepting mouse events again
-            currentEdge.setMouseTransparent (false);
-            lastClick.set (null);
-        }
-    };
+    	@Override
+    	public void handle (MouseDragEvent e)
+    	{
+    		// mouse released within a UNode
+			isCanvasRelease = false;
+
+			Region startRgn = canvasView.getVNode ((int) currentEdge.getUserData ()).getRegion ();
+			Region endRgn = (Region) e.getSource ();
+
+			if (appCtrl.getToolState () == ToolState.ADD_EDGE)
+			{
+				Point2D currentEdgeStart = lastClick.get ();
+				Point2D releasePoint = new Point2D (e.getX (), e.getY ());
+
+				// @ line #315:
+				// AnchorMgr functionality is currently disabled
+				AnchorMgr a = new AnchorMgr((Pane) e.getSource ());
+				//Point2D releasePoint = a.getNearAnchor (new Point2D (e.getX (), e.getY ()));
+
+				int id = nextEdgeId ();
+				String name = "edgeName";
+				UNode startNode = appCtrl.getNode ((int) currentEdge.getUserData ());
+				UNode endNode = appCtrl.getNode ((int) endRgn.getUserData ());
+
+				getCanvas().getChildren().remove(currentEdge);
+				currentEdge = null;
+				appCtrl.executeCommand (
+					packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint), false);
+			}
+
+			// dragging over, the line can begin accepting mouse events again
+			currentEdge.setMouseTransparent (false);
+			lastClick.set (null);
+		}
+	};
 
     /********************** CANVASCTRL EXECUTE COMMAND ******************/
     /**
