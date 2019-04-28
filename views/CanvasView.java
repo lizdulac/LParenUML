@@ -8,7 +8,6 @@ import controllers.CanvasCtrl;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
-import javafx.util.Pair;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.beans.binding.Bindings;
@@ -101,7 +100,7 @@ public class CanvasView
      */
     public void removeNode (int id)
     {
-        System.out.printf ("CanvasView: removing Node %d\n", id);
+        System.out.printf ("CVS-VW: removing Node %d\n", id);
         VNode node = getVNode(id);
         canvas.getChildren ().remove (node.getRegion ());
         nodes.remove (node);
@@ -123,6 +122,21 @@ public class CanvasView
         });
     }
     
+    public void zoomIn (double percent)
+    {
+        Point2D center = new Point2D (canvas.getWidth () / 2.0, canvas.getHeight () / 2.0);
+        nodes.replaceAll ((k,v) -> {
+            double newX = percent * (center.getX () - v.getX ());
+            double newY = percent * (center.getY () - v.getY ());
+            v.moveNode (newX, newY);
+            
+            v.region.setScaleX (v.region.getScaleX () * (1.0 - percent));
+            v.region.setScaleY (v.region.getScaleY () * (1.0 - percent));
+            
+            return v;
+        });
+    }
+    
     // TODO: this
     public Point2D getLocation (Integer nodeId)
     {
@@ -134,14 +148,14 @@ public class CanvasView
    
     /**
      * The first of the 3 functions required to draw an edge. Creates a
-     * new Line that is 'bound' to srcNode at localPoint. The other end  
+     * new Line that is 'bound' to startRgn at localPoint. The other end  
      * of the line remains 'unbound' and is temporarily set to localPoint.
      *
-     * @param srcNode node that was clicked
+     * @param startRgn node that was clicked
      * @param sceneClickPoint the click point location is in the coordinate space of the scene
      * @return the javaFX Line that was created
      */
-    public Line beginEdgeDraw (Region srcNode, Point2D sceneClickPoint)
+    public Line beginEdgeDraw (Region startRgn, Point2D sceneClickPoint)
     {
         Line theEdge;
         Point2D localPoint;
@@ -149,20 +163,20 @@ public class CanvasView
 
         // Transforms a point from the coordinate space of the scene
         // into the local coordinate space of this Node.
-        localPoint = srcNode.sceneToLocal (sceneClickPoint);
+        localPoint = startRgn.sceneToLocal (sceneClickPoint);
 
         theEdge = new Line ();
         theEdge.setStrokeWidth (strokeWidth);
         // disallow parent container node from changing/managing size & layout
         theEdge.setManaged (false);
 
-        // bind/attach the starting point of the line to the srcNode
-        theEdge.startXProperty ().bind (Bindings.add (srcNode.layoutXProperty (), localPoint.getX ()));
-        theEdge.startYProperty ().bind (Bindings.add (srcNode.layoutYProperty (), localPoint.getY ()));
+        // bind/attach the starting point of the line to the startRgn
+        theEdge.startXProperty ().bind (Bindings.add (startRgn.layoutXProperty (), localPoint.getX ()));
+        theEdge.startYProperty ().bind (Bindings.add (startRgn.layoutYProperty (), localPoint.getY ()));
 
         // move ending point of the line to clickPoint/cursor to be dragged
-        theEdge.setEndX (srcNode.getLayoutX () + localPoint.getX ());
-        theEdge.setEndY (srcNode.getLayoutY () + localPoint.getY ());
+        theEdge.setEndX (startRgn.getLayoutX () + localPoint.getX ());
+        theEdge.setEndY (startRgn.getLayoutY () + localPoint.getY ());
 
         canvas.getChildren ().add (theEdge);
         return theEdge;
@@ -187,15 +201,15 @@ public class CanvasView
      * The third and final function required to draw an edge. The
      * 'unbound' end of the line is 'bound' to the releasePoint.
      *  
-     * @param srcNode node that was originally clicked
+     * @param endRgn node that was originally clicked
      * @param theEdge Line that was previously created & 'bound' to srcNode at one end
      * @param releasePoint location of the mouse cursor when mouse button is released and drag operation ends
      */
-    public void endEdgeDraw (Region srcNode, Line theEdge, Point2D releasePoint, int id)
+    public void endEdgeDraw (int id, Region endRgn, Line theEdge, Point2D releasePoint)
     {
         // bind/attach the ending point of the line to the srcNode
-        theEdge.endXProperty ().bind (Bindings.add (srcNode.layoutXProperty (), releasePoint.getX ()));
-        theEdge.endYProperty ().bind (Bindings.add (srcNode.layoutYProperty (), releasePoint.getY ()));
+        theEdge.endXProperty ().bind (Bindings.add (endRgn.layoutXProperty (), releasePoint.getX ()));
+        theEdge.endYProperty ().bind (Bindings.add (endRgn.layoutYProperty (), releasePoint.getY ()));
         theEdge.setUserData (id);
         theEdge.setOnMouseClicked (canvasCtrl.deleteEdge);
         edges.put (id, theEdge);
