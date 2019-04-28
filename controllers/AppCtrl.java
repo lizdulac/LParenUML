@@ -1,6 +1,7 @@
 package controllers;
-import model.*;
 import controllers.Command.Scope;
+import controllers.Command.Action;
+import model.*;
 
 import javafx.scene.Node;
 import javafx.scene.Scene;
