@@ -32,7 +32,9 @@ import javafx.event.EventHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
+import controllers.Command.Action;
 // import controllers.Command.Action;
 import controllers.Command.Scope;
 import javafx.animation.KeyFrame;
@@ -40,7 +42,6 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -121,6 +122,16 @@ public class AppCtrl
     /**
      * 
      * @param id
+     * @param name
+     */
+    public void addNode (Integer id, String name)
+    {
+        theGraph.addNode (id, name);
+    }
+    
+    /**
+     * 
+     * @param id
      * @return
      */
     public UNode getNode(int id)
@@ -130,24 +141,96 @@ public class AppCtrl
     
     /**
      * 
+     * @param id
+     */
+    public void removeNode (Integer id)
+    {
+        cleanEdges (getNode(id));
+        theGraph.removeNode (id);
+    }
+    
+    /**
+     * 
      * @param n1
      * @param n2
      * @param edge
      */
-    public void linkSingle (UNode n1, UNode n2, String edge)
+    public void addEdge (Integer id, UNode n1, UNode n2, String name)
     {
-        theGraph.linkSingle (n1, n2, edge);
+        theGraph.addEdge (id, n1, n2, name);
     }
     
     /**
      * 
      * @param id
-     * @param name
+     * @return
      */
-    public void addNode (Integer id, String name, ObservableList<String> atr)
+    public UEdge getEdge (Integer id)
     {
-        theGraph.addNode (id, name, atr);
+        return theGraph.getEdge (id);
     }
+    
+    /**
+     * 
+     * @param id
+     */
+    public void removeEdge (Integer id)
+    {
+        theGraph.removeEdge (id);
+        eraseEdge(id);
+    }
+    
+    /*************************** UNODE FUNCTIONS **************************/
+    /**
+     *  Clean the edges off of a Node.
+     * 
+     * @version 3.0 Inbound Iteration 3 
+     */
+    public void cleanEdges(UNode n)
+    {    	
+        //clean outgoing edges and their ends  
+        for (UEdge e: n.getOutEdges())
+        {
+        	theGraph.removeEdgeFromIn(e.getId ());
+            eraseEdge(e.getId ());
+        }
+        
+        //clean incoming edges and their starts
+        for (UEdge e : n.getInEdges())
+        {
+        	theGraph.removeEdgeFromOut(e.getId ());
+            eraseEdge(e.getId ());
+        }
+    }
+    
+    /**
+     * Erases Line representing Edge from canvas,
+     * but leaves model unchanged
+     * 
+     * @param id
+     */
+    public void eraseEdge (Integer id)
+    {
+    	
+        executeCommand (packageAction(Action.DELETE_EDGE, Scope.CANVAS, id), false);
+    }  
+    
+    /**
+     * Packages the parameters and the type of action into a Command class. The
+     * execute_command method or other invoker style methods are responsible for
+     * recasting the objects.
+     * 
+     * @param type
+     *            declared in the Action enum in @Command.java
+     * @param objects
+     *            a templated list of parameters cast as objects.
+     */
+    private Command packageAction (Action type, Scope scope, Object... objects)
+    {
+        // add scope
+        return new Command (type, scope, objects);
+    }
+    
 
     /*********************** APPCTRL GENERAL GETTERS *******************/
     /**
@@ -362,10 +445,10 @@ public class AppCtrl
         sideStage.setY (0);
 
         // Call toggleSlider() when Properties button is pressed
-        ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (4))
-                .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
         ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
-                .setOnAction (e -> ModelUtil.printStats (theGraph));
+                .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
+        ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (6))
+                .setOnAction (e -> ModelUtil.printStats (getGraph()));
         // anchorPane.setStyle("-fx-border-color: yellow; -fx-border-width:
         // 5;");
 
@@ -413,12 +496,12 @@ public class AppCtrl
     private Pane configureToolButtons ()
     {
         /*
-         * UniCode numbers for characters on buttons in order: move, createNode,
+         * UniCode numbers for characters on buttons in order: move, select, createNode,
          * createEdge, delete, edit, undo, redo
          */
         double fontSize = 20;
-        final int[] UCodes = new int[] { 0x261D, 0x274F, 8594, 0x2620 };
-        final String[] buttonNames = new String[] { "Select", "Create Node", "Create Edge", "Delete" };
+        final int[] UCodes = new int[] { 0x2723, 0x261D, 0x274F, 8594, 0x2620 };
+        final String[] buttonNames = new String[] { "Move", "Select", "Create Node", "Create Edge", "Delete" };
 
         Font buttonsFont = Font.font ("sans-serif", FontWeight.BOLD, fontSize);
 
@@ -484,6 +567,9 @@ public class AppCtrl
 
             switch (sourceButton)
             {
+            case MOVE:
+                toolState = ToolState.MOVE;
+                break;
             case SELECT:
                 toolState = ToolState.SELECT;
                 break;

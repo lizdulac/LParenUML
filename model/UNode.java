@@ -1,7 +1,6 @@
 package model;
 
 import java.util.*;
-import javafx.collections.*;
 
 /**
  * The UNode class keeps a list of outgoing edges and incoming edges. 
@@ -14,7 +13,7 @@ public class UNode {
     /************************** UNODE CLASS MEMBERS ***********************/
 	private Integer id;
 	private String name;
-	private ObservableList<String> attributes;
+	private ArrayList<String> attributes;
 	private ArrayList<String> functions;
 	private ArrayList<String> misc;
 
@@ -40,18 +39,10 @@ public class UNode {
 	 * @param id id of node
 	 * @param name name of node
 	 */
-	public UNode(Integer id, String name)
+	public UNode( Integer id, String name)
 	{
 		this.id = id;
 		this.name = name;
-		
-	}
-	
-	public UNode(Integer id, String name, ObservableList<String> attributes)
-	{
-		this.id = id;
-		this.name = name;
-		this.attributes = attributes;
 		
 	}
 	
@@ -72,16 +63,6 @@ public class UNode {
 	}
 
     /************************** UNODE TEXT EDITING ************************/
-	/**
-	 * 
-	 * @param index
-	 * @return
-	 */
-    public ObservableList<String> getAttributeList ()
-    {
-        return attributes;
-    }
-    
 	/**
 	 * 
 	 * @param index
@@ -295,16 +276,16 @@ public class UNode {
 	 * 
 	 * @param e new edge
 	 */
-	public void addOutEdge( UEdge e){
-		edgeStart.add(e);											
+	public boolean addOutEdge( UEdge e){
+		return edgeStart.add(e);											
 	}
 	
 	/**
 	 * Adds a new Edge to incoming edges.
 	 * @param e new edge
 	 */
-	public void addInEdge( UEdge e){
-		edgeEnd.add(e);
+	public boolean addInEdge( UEdge e){
+		return edgeEnd.add(e);
 	}
 	
 	/**
@@ -324,26 +305,4 @@ public class UNode {
 	public ArrayList<UEdge> getOutEdges(){
 		return edgeStart;
 	}
-
-    /*************************** UNODE FUNCTIONS **************************/
-	/**
-	 *  Clean the outgoing edges off of a Node.
-	 * 
-	 * @version 3.0 Inbound Iteration 3 
-	 */
-	public void cleanEdges()
-	{
-		//clean outgoing edges and their ends		
-	    for (UEdge e: edgeStart)
-	    {
-	        e.start.getOutEdges ().remove (e);
-	    }
-		
-		//clean incoming edges and their starts
-		for (UEdge e: edgeEnd)
-		{
-		    e.end.getInEdges ().remove (e);
-		}
-	}
-	
 }

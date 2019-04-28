@@ -2,8 +2,6 @@ package model;
 
 import java.util.*;
 
-import javafx.collections.ObservableList;
-
 /**
  * A UGraph is a collection of unique UNodes that have UEdge's connecting the UNodes.
  * UGraph is owned by the 'Controller', UNodes and UEdges are created by the Controller via the UGraph.
@@ -14,7 +12,8 @@ import javafx.collections.ObservableList;
 public class UGraph {
 	
 	// Map of Nodes
-	private Map< Integer ,UNode> uNodes;
+	protected Map<Integer, UNode> uNodes;
+	private Map<Integer, UEdge> uEdges;
 	
 	
    /**
@@ -22,7 +21,8 @@ public class UGraph {
     */
 	public UGraph()
 	{
-		uNodes = new HashMap<Integer , UNode>();	
+		uNodes = new HashMap<Integer, UNode>();
+		uEdges = new HashMap<Integer, UEdge>();
 	}
 		
 	/**
@@ -32,10 +32,10 @@ public class UGraph {
 	 * @param nodeName name of new UNode
 	 * @return false if the id exists in the map already
 	 */
-	public boolean addNode(Integer id, String nodeName, ObservableList<String> atr)
+	public boolean addNode(Integer id, String nodeName)
 	{
-	    System.out.printf ("UGraph: Node %d added named %s\n", id, nodeName);
-		if (uNodes.put( id, new UNode( id, nodeName, atr)) == null) { 
+	    System.out.printf ("UGRAPH: Node %d added named %s\n", id, nodeName);
+		if (uNodes.put( id, new UNode( id, nodeName)) == null) { 
 			return true;
 		}
 		
@@ -66,22 +66,50 @@ public class UGraph {
 	 */
 	public void removeNode (int id)
 	{
-		uNodes.get(id).cleanEdges();
 		uNodes.remove(id); //hard remove; See undo/redo/History.java
-	}	
+	}
+	
+	public UEdge getEdge(Integer id)
+	{
+	    return uEdges.get (id);
+	}
+	
+	public void removeEdge(Integer id)
+	{
+	    UEdge e = getEdge(id);
+	    e.getStartNode ().getOutEdges ().remove (e);
+	    e.getEndNode ().getInEdges ().remove (e);
+	    uEdges.remove (id);
+	}
+	
+	public void removeEdgeFromIn(Integer id)
+	{
+	    UEdge e = getEdge(id);
+	    e.getEndNode ().getInEdges ().remove (e);
+	    uEdges.remove (id);
+	}
+	
+	public void removeEdgeFromOut(Integer id)
+	{
+	    UEdge e = getEdge(id);
+	    e.getStartNode ().getOutEdges ().remove (e);
+	    uEdges.remove (id);
+	}
 	
 	/**
 	 * Links two given UNodes with a directional UEdge.
 	 * 
+	 * @param id edge id
 	 * @param n1 starting node 
 	 * @param n2 ending node
 	 * @param edge edge name
 	 */
-	public void linkSingle(UNode n1, UNode n2, String edge)
+	public void addEdge(Integer id, UNode n1, UNode n2, String edge)
 	{
-		UEdge e = new UEdge(n1, n2, edge);
+		UEdge e = new UEdge(id, n1, n2, edge);
 		n1.addOutEdge(e);
 		n2.addInEdge(e);
+		uEdges.put (id, e);
 	}
 
 	/**
@@ -95,6 +123,5 @@ public class UGraph {
         System.arraycopy (temp, 0, keys, 0, temp.length);
         Arrays.sort (keys);
         return keys;
-}
-
+     }
 }
