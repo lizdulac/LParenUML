@@ -2,6 +2,9 @@ package model;
 
 import java.util.*;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 /**
  * The UNode class keeps a list of outgoing edges and incoming edges. 
  * 
@@ -13,7 +16,7 @@ public class UNode {
     /************************** UNODE CLASS MEMBERS ***********************/
 	private Integer id;
 	private String name;
-	private ArrayList<String> attributes;
+	private ObservableList<String> attributes;
 	private ArrayList<String> functions;
 	private ArrayList<String> misc;
 
@@ -43,6 +46,7 @@ public class UNode {
 	{
 		this.id = id;
 		this.name = name;
+		this.attributes = FXCollections.observableArrayList("<attribute1>");
 		
 	}
 	
@@ -63,6 +67,15 @@ public class UNode {
 	}
 
     /************************** UNODE TEXT EDITING ************************/
+	/**
+	 * 
+	 * @param index
+	 * @return
+	 */
+    public ObservableList<String> getAttributes ()
+    {
+        return attributes;
+    }
 	/**
 	 * 
 	 * @param index

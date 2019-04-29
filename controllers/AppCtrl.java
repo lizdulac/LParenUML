@@ -56,7 +56,7 @@ public class AppCtrl
     protected UGraph theGraph;
     private Stage appStage;
     private Scene appScene;
-    private Stage sideStage;
+    protected Stage sideStage;
     private Scene sideScene;
     private FileIO fileIO;
 
@@ -86,7 +86,7 @@ public class AppCtrl
         theGraph = new UGraph ();
         toolState = ToolState.SELECT;
         canvasCtrl = new CanvasCtrl (this);
-        propCtrl = new PropertiesCtrl (this, canvasCtrl);
+        propCtrl = new PropertiesCtrl (this);
         fileIO = new FileIO (this, canvasCtrl.canvasView);
 
         // appStage - configure primary application window
@@ -240,6 +240,11 @@ public class AppCtrl
     {
         return propCtrl;
     }
+    
+    public CanvasCtrl getCanvasCtrl ()
+    {
+        return canvasCtrl;
+    }
 
     /**
      * Exposes the tool width, which
@@ -322,7 +327,7 @@ public class AppCtrl
         appStage.setMinHeight (canvasH);
         appStage.initStyle (StageStyle.DECORATED);
         appStage.setTitle (appName + "Untitled Document");
-
+        
         // Set app titlebar icon to LParen logo.
         // Logo image file should be in root directory with Main.java
         try {
@@ -452,6 +457,7 @@ public class AppCtrl
         anchorPane.getChildren ().addAll (propSlider, sidePane);
         AnchorPane.setBottomAnchor (sidePane, anchorOffset);
         anchorPane.setBackground (transparent);
+        //anchorPane.setStyle("-fx-border-color: yellow; -fx-border-width: 5px;");
 
         // propSlider
         propSlider.setLayoutX (cornerRadius);
@@ -503,7 +509,7 @@ public class AppCtrl
         sidePane.setBackground (transparent);
         marginOverlay.setBackground (marginBg);
         toolButtons.setBackground (marginBg);
-        toolButtons.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 2;");
+        toolButtons.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 2 2 2;");
 
         // Dimensions
         sidePane.prefHeightProperty ().bind (appScene.heightProperty ());
@@ -675,8 +681,11 @@ public class AppCtrl
         {
             endW = propW;
             propCtrl.toggleVisible ();
-            timeline.setOnFinished (
-                event -> System.out.println ("PROPTY: visible changed to " + propCtrl.isVisible ()));
+            timeline.setOnFinished (event ->
+            {
+            	propCtrl.propView.focusOnProp(-1);
+            	System.out.println ("PROPTY: visible changed to " + propCtrl.isVisible ());            	
+            });
         }
 
         currentW.addListener ( (obs, oldV, newV) -> propSlider.setPrefWidth (newV.doubleValue ()));

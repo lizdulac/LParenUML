@@ -1,26 +1,28 @@
 package views;
 import controllers.*;
 import model.*;
-
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 
 public class PropertiesView
 {
 	private PropertiesCtrl propCtrl;
-    private CanvasCtrl canvasCtrl;
-    private StackPane properties;
-
-
-
-    public PropertiesView (PropertiesCtrl pController, CanvasCtrl cController)
+    private AnchorPane properties;
+    ListView<String> listView;
+   
+    public PropertiesView (PropertiesCtrl pController)
     {
         propCtrl = pController;
-        canvasCtrl = cController;
-        properties = new StackPane ();
-        //updateView( );
+        properties = new AnchorPane ();
     }
 
     public Pane getProperties ()
@@ -28,32 +30,27 @@ public class PropertiesView
     	return properties;
     }
     
-    public void drawNode (int uNodeId, String name) {
-    	Label idLabel = new Label(uNodeId + "\n");
-    	Label nameLabel = new Label("\n" + name);
-    	
+    public void drawNode (ListView<String> lv) {    	
+    	listView = lv;
+        listView.setPrefWidth(180.0);
+        listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+            	listView.edit(listView.getSelectionModel().getSelectedIndex());
+                System.out.println("clicked on " + listView.getSelectionModel().getSelectedItem());
+            }
+        });
+        
         properties.getChildren().clear();
-        properties.getChildren().addAll(idLabel, nameLabel);
-        properties.setAlignment(idLabel, Pos.TOP_RIGHT);
-        properties.setAlignment(nameLabel, Pos.TOP_RIGHT);
+        properties.getChildren().add(listView);
+        AnchorPane.setRightAnchor(listView, 0.0);
     }
-
-    public void updateView ()
+    
+    public void focusOnProp (int i)
     {
-        Label idLabel = new Label(canvasCtrl.getCurrentNode().getId().toString() + "\n");
-        Label nameLabel = new Label("\n" + canvasCtrl.getCurrentNode().getName());
-
-        System.out.println (idLabel.getText());
-        System.out.println (nameLabel.getText()); 
-
-        //Label idLabel = new Label("emptyId.");
-        //Label nameLabel = new Label("emptyName.");
-
-        properties.getChildren().clear();
-        properties.getChildren().addAll(idLabel, nameLabel);
-        properties.setAlignment(idLabel, Pos.TOP_RIGHT);
-        properties.setAlignment(nameLabel, Pos.TOP_RIGHT);
-       
-        System.out.println("updateView.");
+    	listView.requestFocus();
+        listView.getSelectionModel().select(i);
+        listView.getFocusModel().focus(i);
+    	listView.edit(i);
     }
 }
