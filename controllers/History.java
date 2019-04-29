@@ -19,7 +19,16 @@ import java.util.*;
  * you can spam. 
  * peaking at the top of the stack and see what the latest action is when
  * redo / undo is called to see if the action is redoable or undoable.
- *
+ ******
+ * For multi-levels of undo. Instead of remembering the latest command, 
+ * Keep a list of all commands and a reference to the 'current' one.
+ * When we execute a command, we append it to the list and that 
+ * represent where we currently are. 
+ * When undo(), we undo() the current command and move the current
+ * pointer back. When redo(), we advance the pointer and then 
+ * re-execute the cmd. But if they choose to have a new Action
+ * after undoing some already before, everything in the list after
+ * the current cmd will be wiped. 
  */
 
 
@@ -30,7 +39,7 @@ public final class History {
 
 	//Keeping a list of commands, executes, undoes and redoes 
 	//by using the concept of history
-	private List<Command> commands;
+	private List<Command> command_sequence();
 	
 	public void execute (final Command cmd)
 	{
@@ -70,7 +79,7 @@ public final class History {
 			redoCmd = undoStack.top();
 			undoStack.push(redoCmd);
 
-			redoCmd.execute
+			//redoCmd.execute ???????
 		}
 		else {
 			System.out.println ("Nothing to redo here");
