@@ -59,6 +59,7 @@ public class AppCtrl
     protected Stage sideStage;
     private Scene sideScene;
     private FileIO fileIO;
+    private History history;
 
     /*********************** APPCTRL FINAL VARIABLES *********************/
     private final double margin = 50;
@@ -88,6 +89,7 @@ public class AppCtrl
         canvasCtrl = new CanvasCtrl (this);
         propCtrl = new PropertiesCtrl (this);
         fileIO = new FileIO (this, canvasCtrl.canvasView);
+        history = new History (this);
 
         // appStage - configure primary application window
         appStage = stage;
@@ -483,11 +485,11 @@ public class AppCtrl
         //
         // PropSlider button triggers toggleSlider()
         ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
-                .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
+                .setOnAction (e -> history.undo());
         
         // PrintStats button triggers ModelUtil.printStats()
         ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (6))
-                .setOnAction (e -> ModelUtil.printStats (getGraph()));
+                .setOnAction (e -> history.redo());
     }
 
     /**
@@ -581,11 +583,11 @@ public class AppCtrl
         //*** Development / Debugging Buttons ***
         // PropSlider
         Button showHide = new Button ();
-        showHide.setText ("PropSlider");
+        showHide.setText ("Undo");
         showHide.setPrefWidth (fontSize * 4.1);
         // PrintStats
         Button printStats = new Button ();
-        printStats.setText ("PrintStats");
+        printStats.setText ("Redo");
         printStats.setPrefWidth (fontSize * 4.1);
         toolButtons.getChildren ().addAll (showHide, printStats);
         
@@ -664,33 +666,7 @@ public class AppCtrl
      */
     private void toggleSlider (Pane propSlider)
     {
-        double endW;
-        DoubleProperty currentW = new SimpleDoubleProperty (propSlider.getWidth ());
-        double propW = propCtrl.getWidth ();
-        Timeline timeline = new Timeline ();
-
-        if (propCtrl.isVisible ())
-        {
-            endW = 0;
-            timeline.setOnFinished (event ->
-            {
-                propCtrl.toggleVisible ();
-                System.out.println ("PROPTY: visible changed to " + propCtrl.isVisible ());
-            });
-        } else
-        {
-            endW = propW;
-            propCtrl.toggleVisible ();
-            timeline.setOnFinished (event ->
-            {
-            	propCtrl.propView.focusOnProp(-1);
-            	System.out.println ("PROPTY: visible changed to " + propCtrl.isVisible ());            	
-            });
-        }
-
-        currentW.addListener ( (obs, oldV, newV) -> propSlider.setPrefWidth (newV.doubleValue ()));
-        timeline.getKeyFrames ().add (new KeyFrame (Duration.seconds (0.2), new KeyValue (currentW, endW)));
-        timeline.play ();
+    	history.undo();
     }
     
     /*********************** APPCTRL CHANGE LISTENERS *******************/
@@ -839,7 +815,15 @@ public class AppCtrl
      */
     public boolean executeCommand (Command cmd, boolean isHistory)
     {
-        // if(isHistory) { return false; }
+    	if(isHistory)
+    	{
+    		Action opposite = Action.values ()[cmd.actionType.getValue () * 2 - 1];
+    		//System.out.println("Action.values: " + Action.values ()[cmd.actionType.getValue () * 2 - 1]);
+    		cmd.actionType = opposite;
+    	}
+    	else {
+    		history.execute(cmd);
+    	}
 
         if (cmd.actionScope == Scope.CANVAS) {
             canvasCtrl.executeCommand (cmd, isHistory);
