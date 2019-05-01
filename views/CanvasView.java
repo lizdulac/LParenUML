@@ -2,9 +2,11 @@ package views;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import controllers.CanvasCtrl;
-
+import controllers.Command.Action;
+import controllers.Command.Scope;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
 import javafx.scene.input.MouseDragEvent;
@@ -50,18 +52,15 @@ public class CanvasView
     }
 
     /*************************** NODE FUNCTIONS ***************************/
-
+    /**
+     * 
+     * @param i
+     * @return
+     */
     public VNode getVNode(Integer i)
     {
         return nodes.get (i);
     }
-    
-    /*
-    public void redrawVNode(Integer i, String name, String atr)
-    {
-        nodes.get(i).refreshData(name, atr);
-    }
-    */
     
     /**
      * Draw the visual representation of a UNode.
@@ -128,11 +127,18 @@ public class CanvasView
         });
     }
     
+    /**
+     * 
+     */
     public void zoomReset ()
     {
         zoomIn (1.0 - (1.0 / scale));
     }
     
+    /**
+     * 
+     * @param percent
+     */
     public void zoomIn (double percent)
     {
         scale *= (1.0 - percent);
@@ -150,11 +156,9 @@ public class CanvasView
         });
     }
     
-    // TODO: this
-    public Point2D getLocation (Integer nodeId)
+    public Set<Integer> getNodeKeys ()
     {
-        //StackPane pane = nodes.get (nodeId).pane;
-        return null;
+        return nodes.keySet ();
     }
 
     /*************************** EDGE FUNCTIONS ***************************/
@@ -239,6 +243,10 @@ public class CanvasView
         removeEdge(id);
     }
     
+    /**
+     * 
+     * @param id
+     */
     public void removeEdge (Integer id)
     {
         Line edge = edges.get (id);
