@@ -12,12 +12,21 @@ public class Command {
 	
 	/**
 	 * Enum of Actions that are able to be undone/redone
+	 * Actions are paired up with their negative counter-part
 	 */
 	public enum Action
 	{
-	   ADD_NODE (0), ADD_EDGE (1), DELETE_NODE (2), DELETE_EDGE(3), SELECT_NODE(4);
+		ADD_NODE (1), DELETE_NODE (-1),
+		ADD_EDGE (2), DELETE_EDGE(-2),
+		ZOOM_IN  (3), ZOOM_OUT(-3),
+		SELECT_NODE(4), RENAME_NODE(5), UPDATE_ATR(6);
 	    
-	    private final int value; 
+	    private final int value;
+	    
+	    public int getValue ()
+	    {
+	    	return value;
+	    }
 	    
 	    Action (int value) { 
 	        this.value = value; 
