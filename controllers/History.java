@@ -38,19 +38,18 @@ public class History {
 	private AppCtrl appCtrl;
 
 	
-	//Keeping a list of commands, executes, undoes and redoes 
-	//by using the concept of history
-	//private List<Command> command_sequence();
-	
+	/**
+	 * Actions that execute gets push into the undoStack() to have undo function
+	 */
 	public void execute (Command cmd)
 	{
 		undoStack.push(cmd);
-		//cmd.execute();
 	}
 	
 	/**
 	 * undo() will take the cmd from the undoStack and pop the top cmd
-	 * for it to be disapear from the view
+	 * .that cmd will then be send over to appCtrl to do the opposite of it 
+	 *  i.e: if undoCmd has ADD_NODE then appCtrl will execute the opposite, DELETE_NODE
 	 */
 	public void undo()
 	{
@@ -62,22 +61,21 @@ public class History {
 			Command undoCmd = undoStack.pop();
 			appCtrl.executeCommand(undoCmd, true);
 			redoStack.push(undoCmd);
-			//cmd.undo();
 		} else {
 			System.out.println ("Nothing to undo here");
 		}
 	}
 
 	/**
-	 * redo() must leave exactly the same setate as execute(). 
-	 * very similar to execute
+	 *  redo() will be called when there is an item on the stack. 
+	 *  popping the top cmd and put it in redoCmd, sending it 
+	 *  over to appCtrl to run its opposite. 
+	 *  i.e: if DELETE_NODE was in redoCmd, then appCtrl will 
+	 *       do its opposite
 	 */
 	public void redo()
 	{
 		System.out.println("redo()");
-		//When calling redo(), pop the top command from redoStack
-		//send it over to appCtrl
-		//push that cmd over to undoStack
 		if ( !redoStack.isEmpty())
 		{
 			Command redoCmd = undoStack.pop();
