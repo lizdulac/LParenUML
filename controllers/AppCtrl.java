@@ -808,6 +808,10 @@ public class AppCtrl
      * Route the provided Command to the appropriate controller for 
      * execution. The value of cmd.actionScope (either CANVAS or PROPERTY)
      * determines which controller will receive the Command.
+     * 
+     * It also determines whether a command is sent from history. 
+     * If so, it will grab the opposite Action that was sent and 
+     * call on it, to do undo() and redo() from History
      *
      * @param cmd the command to be executed
      * @param isHistory if this value is true then the command is from the History class
