@@ -32,16 +32,17 @@ import java.util.*;
  */
 
 
-public final class History {
-	private static History instance = null;
-	private final Stack<Command> undoStack = new Stack<Command>();
-	private final Stack<Command> redoStack = new Stack<Command>();
+public class History {
+	private Stack<Command> undoStack = new Stack<Command>();
+	private Stack<Command> redoStack = new Stack<Command>();
+	private AppCtrl appCtrl;
 
+	
 	//Keeping a list of commands, executes, undoes and redoes 
 	//by using the concept of history
-	private List<Command> command_sequence();
+	//private List<Command> command_sequence();
 	
-	public void execute (final Command cmd)
+	public void execute (Command cmd)
 	{
 		undoStack.push(cmd);
 		//cmd.execute();
@@ -53,11 +54,13 @@ public final class History {
 	 */
 	public void undo()
 	{
+		System.out.println("undo()");
 		//If the undoStack is not empty (ie, there's things to be undone)
 		//pop the top command of undo and push that cmd int the redo stack
 		if (!undoStack.isEmpty())
 		{
 			Command undoCmd = undoStack.pop();
+			appCtrl.executeCommand(undoCmd, true);
 			redoStack.push(undoCmd);
 			//cmd.undo();
 		} else {
@@ -71,24 +74,24 @@ public final class History {
 	 */
 	public void redo()
 	{
-		//If the redo stack is not empty and the command is redoAble
-		// pop the cmd from redo stack and push it over to undoStack
-		// Redo would re-execute the 
+		System.out.println("redo()");
+		//When calling redo(), pop the top command from redoStack
+		//send it over to appCtrl
+		//push that cmd over to undoStack
 		if ( !redoStack.isEmpty())
 		{
-			redoCmd = undoStack.top();
+			Command redoCmd = undoStack.pop();
+			appCtrl.executeCommand(redoCmd,true);
 			undoStack.push(redoCmd);
 
-			//redoCmd.execute ???????
 		}
 		else {
 			System.out.println ("Nothing to redo here");
 		}
 	}
-	
+
+	public History(AppCtrl controller)
+	{
+		appCtrl = controller; 
 	}
-	private History() {}
 }
-
-
-
