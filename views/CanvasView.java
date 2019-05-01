@@ -1,6 +1,5 @@
 package views;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,9 +7,12 @@ import controllers.CanvasCtrl;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
+import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ObservableList;
 
 public class CanvasView
 {
@@ -18,6 +20,7 @@ public class CanvasView
     private Pane canvas;
     private Map<Integer, VNode> nodes;
     private Map<Integer, Line> edges;
+    private double scale = 1.0;
 
     /**
      * CanvasView constructor
@@ -25,7 +28,6 @@ public class CanvasView
      * @param controller CanvasController containing all canvas eventhandlers
      * @param graph UGraph that this view is representing
      */
-    // TODO: delete UGraph
     public CanvasView (CanvasCtrl controller)
     {
         canvasCtrl = controller;
@@ -34,8 +36,8 @@ public class CanvasView
 
         canvas = new Pane ();
         canvas.setOnMousePressed (canvasCtrl.canvasMousePress);
-        canvas.setOnMouseReleased (canvasCtrl.canvasMouseRelease);
         canvas.setOnMouseDragged (canvasCtrl.canvasDrag);
+        canvas.setOnMouseDragReleased (canvasCtrl.canvasDragRelease);
     }
 
     /**
@@ -54,6 +56,11 @@ public class CanvasView
         return nodes.get (i);
     }
     
+    public void redrawVNode(Integer i, String name, String atr)
+    {
+        nodes.get(i).refreshData(name, atr);
+    }
+    
     /**
      * Draw the visual representation of a UNode.
      * 
@@ -70,27 +77,24 @@ public class CanvasView
      */
 //    public StackPane drawNode (double x, double y, int uNodeId)
     // TODO: check this
-    public VNode drawNode (double x, double y, int id)
+    public VNode drawNode (double x, double y, int id, String name, ObservableList<String> atr)
     {
-        VNode visual = new VNode (x, y, id);
-        Region uNode = visual.getRegion ();
-
-        // ***** REGISTER EVENT HANDLERS *****
-        // Different pieces of the visual "uNode" need separate handlers
-
-        // nodeBody
-        uNode.setOnMousePressed (canvasCtrl.uNodeMousePress);
-        uNode.setOnDragDetected (canvasCtrl.uNodeDragDetected);
-
-        // uNode
-        uNode.setOnMouseDragged (canvasCtrl.uNodeDrag);
-        uNode.setOnMouseReleased (canvasCtrl.uNodeMouseRelease);
-        uNode.setOnMouseDragReleased (canvasCtrl.uNodeDragRelease);
-
-        canvas.getChildren ().add (uNode);
-        // add Pane to map "nodes"
-        nodes.put(id, visual);
-        return visual;
+        VNode vNode = new VNode (x, y, id, scale, name, atr);
+        vNode.relocate(x, y);
+        
+        // Deal with mouse events:
+        // Each one is registered as an event filter rather than an event handler
+        vNode.addEventFilter(MouseEvent.MOUSE_PRESSED, canvasCtrl.uNodeMousePress);
+        vNode.addEventFilter(MouseEvent.MOUSE_RELEASED, canvasCtrl.uNodeMouseRelease);
+        // Dragging
+        vNode.addEventFilter(MouseEvent.DRAG_DETECTED, canvasCtrl.uNodeDragDetected);       
+        vNode.addEventFilter(MouseEvent.MOUSE_DRAGGED, canvasCtrl.uNodeDrag);       
+        vNode.addEventFilter(MouseDragEvent.MOUSE_DRAG_RELEASED, canvasCtrl.uNodeDragRelease);
+        
+        // add VNode to map of nodes
+        nodes.put(id, vNode);
+        canvas.getChildren ().add (vNode);
+        return vNode;
     }
 
     /**
@@ -102,7 +106,7 @@ public class CanvasView
     {
         System.out.printf ("CVS-VW: removing Node %d\n", id);
         VNode node = getVNode(id);
-        canvas.getChildren ().remove (node.getRegion ());
+        canvas.getChildren ().remove (node);
         nodes.remove (node);
     }
     
@@ -122,16 +126,23 @@ public class CanvasView
         });
     }
     
+    public void zoomReset ()
+    {
+        zoomIn (1.0 - (1.0 / scale));
+    }
+    
     public void zoomIn (double percent)
     {
+        scale *= (1.0 - percent);
         Point2D center = new Point2D (canvas.getWidth () / 2.0, canvas.getHeight () / 2.0);
         nodes.replaceAll ((k,v) -> {
             double newX = percent * (center.getX () - v.getX ());
             double newY = percent * (center.getY () - v.getY ());
             v.moveNode (newX, newY);
             
-            v.region.setScaleX (v.region.getScaleX () * (1.0 - percent));
-            v.region.setScaleY (v.region.getScaleY () * (1.0 - percent));
+            // iterate through children of the region, too
+            v.setScaleX (scale);
+            v.setScaleY (scale);
             
             return v;
         });
