@@ -1,9 +1,12 @@
 package model;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 
 /**
  * The UNode class keeps a list of outgoing edges and incoming edges. 
@@ -17,8 +20,8 @@ public class UNode {
     private Integer id;
     private String name;
     private ObservableList<String> attributes;
-    private ObservableList<String> functions = FXCollections.observableArrayList();
-    private ObservableList<String> misc = FXCollections.observableArrayList();
+    private ObservableList<String> functions;
+    private ObservableList<String> misc;
 
     private ArrayList<UEdge> edgeStart = new ArrayList<UEdge>();
     private ArrayList<UEdge> edgeEnd = new ArrayList<UEdge>();
@@ -42,11 +45,13 @@ public class UNode {
      * @param id id of node
      * @param name name of node
      */
-    public UNode( Integer id, String name)
+    public UNode(Integer id, String name)
     {
         this.id = id;
         this.name = name;
         this.attributes = FXCollections.observableArrayList("<attribute1>");
+        this.functions = FXCollections.observableArrayList("<function1>");
+        this.misc = FXCollections.observableArrayList("<misc1>");
     }
     
     /**
@@ -322,5 +327,39 @@ public class UNode {
     public ObservableList<String> getMiscs ()
     {
         return misc;
+    }
+    
+    public ObservableList<String> getAsList()
+    {
+    	String sizeCode = "";
+    	ObservableList<String> nodeData = FXCollections.observableArrayList(id.toString(), name);
+    	Field[] uNodeFields = this.getClass().getDeclaredFields();
+    	
+    	for (Field field : uNodeFields) { try {
+    		if (field.get(this) instanceof ObservableList) {
+    			
+    			// store the number of elements of each section
+    			sizeCode += ((ObservableList<String>) field.get(this)).size();
+    			
+    			for(String s : (ObservableList<String>) field.get(this)) {
+    				nodeData.add(s);    				
+    			}
+    		}
+    	}
+    	catch (IllegalArgumentException | IllegalAccessException e) { e.printStackTrace(); } }
+    	
+    	// the last String in the list stores the length of the 3 sublists
+    	nodeData.add(sizeCode);
+    	return nodeData;
+    }
+    
+    //
+    public void setFromList(ObservableList<String> nodeData)
+    {
+    	System.out.println(nodeData);
+    	this.setName(nodeData.get(1));
+    	this.setAttribute(0, nodeData.get(2));
+    	this.setFunction(0, nodeData.get(3));
+    	this.setMisc(0, nodeData.get(4));
     }
 }

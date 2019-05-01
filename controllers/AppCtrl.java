@@ -37,6 +37,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -223,7 +224,47 @@ public class AppCtrl
     {
         
         executeCommand (packageAction(Action.DELETE_EDGE, Scope.CANVAS, id), false);
-    }  
+    }
+    
+    /**
+     *
+     * 
+     * @param id
+     */
+    public ObservableList<String> getAsList(Integer id)
+    {
+    	return theGraph.getNode(id).getAsList();
+    }
+    
+    /**
+    *
+    * 
+    * @param id
+    */
+   public void setFromList(Integer id, ObservableList<String> nodeData)
+   {
+	   theGraph.getNode(id).setFromList(nodeData);
+   }
+    
+    /**
+    *
+    * 
+    * @param
+    */
+    public void refreshPropData(ObservableList<String> nodeData)
+    {
+    	propCtrl.refreshPropData(nodeData);
+    }
+    
+    /**
+    *
+    * 
+    * @param
+    */
+    public void refreshVNode(Integer id, String name)
+    {
+    	canvasCtrl.refreshVNode(id, name);
+    }
     
     /**
      * Packages the parameters and the type of action into a Command class. The
@@ -243,10 +284,9 @@ public class AppCtrl
     
 
     /*********************** APPCTRL GENERAL GETTERS *******************/
-    /**
+/*
      * 
      * @return
-     */
     public PropertiesCtrl getPropCtrl ()
     {
         return propCtrl;
@@ -256,6 +296,7 @@ public class AppCtrl
     {
         return canvasCtrl;
     }
+*/
     
     /**
      * Exposes the tool width, which
@@ -468,6 +509,8 @@ public class AppCtrl
         anchorPane.getChildren ().addAll (propSlider, sidePane);
         AnchorPane.setBottomAnchor (sidePane, anchorOffset);
         anchorPane.setBackground (transparent);
+        
+        //anchorPane.setStyle ("-fx-border-color: yellow; -fx-border-width: 5;");
 
         // propSlider
         propSlider.setLayoutX (cornerRadius);

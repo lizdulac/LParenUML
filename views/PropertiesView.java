@@ -2,7 +2,9 @@ package views;
 import controllers.*;
 import model.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -17,12 +19,30 @@ public class PropertiesView
 {
     private PropertiesCtrl propCtrl;
     private AnchorPane properties;
-    ListView<String> listView;
+    HBox hBox;
+    ListView<String> listFields;
+    ListView<Button> listButtons;
+    ObservableList<Button> buttons;
    
     public PropertiesView (PropertiesCtrl pController)
     {
         propCtrl = pController;
+        
+        Button blank = new Button();
+        blank.setVisible(false);
+        Button attr = new Button("+ New Attr.");
+        Button func = new Button("+ New Func.");
+        Button misc = new Button("+ New Misc.");
+        
+        buttons = FXCollections.observableArrayList(blank, attr, func, misc);
+        listButtons = new ListView<Button>(buttons);
+        listButtons.setPrefWidth (100.0);
+        
         properties = new AnchorPane ();
+        hBox = new HBox(listButtons);
+        hBox.setStyle("-fx-padding: 0 0 0 55");
+        properties.getChildren().add(hBox);
+        AnchorPane.setRightAnchor (hBox, 0.0);
     }
 
     public Pane getProperties ()
@@ -30,27 +50,18 @@ public class PropertiesView
         return properties;
     }
     
-    public void drawNode (ListView<String> lv) {        
-        listView = lv;
-        listView.setPrefWidth(180.0);
-        listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                listView.edit(listView.getSelectionModel().getSelectedIndex());
-                System.out.println("clicked on " + listView.getSelectionModel().getSelectedItem());
-            }
-        });
-        
-        properties.getChildren().clear();
-        properties.getChildren().add(listView);
-        AnchorPane.setRightAnchor(listView, 0.0);
+    public void redraw(ListView<String> lv) {        
+        listFields = lv;
+        listFields.setPrefWidth (150.0);
+        hBox.getChildren().clear();
+        hBox.getChildren().addAll(listFields, listButtons);
     }
     
     public void focusOnProp (int i)
     {
-        listView.requestFocus();
-        listView.getSelectionModel().select(i);
-        listView.getFocusModel().focus(i);
-        listView.edit(i);
+        listFields.requestFocus();
+        listFields.getSelectionModel().select(i);
+        listFields.getFocusModel().focus(i);
+        listFields.edit(i);
     }
 }

@@ -56,10 +56,12 @@ public class CanvasView
         return nodes.get (i);
     }
     
+    /*
     public void redrawVNode(Integer i, String name, String atr)
     {
         nodes.get(i).refreshData(name, atr);
     }
+    */
     
     /**
      * Draw the visual representation of a UNode.
@@ -77,9 +79,9 @@ public class CanvasView
      */
 //    public StackPane drawNode (double x, double y, int uNodeId)
     // TODO: check this
-    public VNode drawNode (double x, double y, int id, String name, ObservableList<String> atr)
+    public VNode drawNode (double x, double y, int id, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
     {
-        VNode vNode = new VNode (x, y, id, scale, name, atr);
+        VNode vNode = new VNode (x, y, id, scale, name, attr, func, misc);
         vNode.relocate(x, y);
         
         // Deal with mouse events:

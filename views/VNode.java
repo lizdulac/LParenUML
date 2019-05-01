@@ -24,6 +24,7 @@ public class VNode extends Pane
     private int id;
     protected ListView<ListView<String>> parentLV;
     ObservableList<ListView<String>> sectionsList;
+    ObservableList<String> className;
 
     private final double cellHeight = 25;
     /************************** UNODE CONSTRUCTORS ************************/
@@ -62,17 +63,12 @@ public class VNode extends Pane
 //        this (x, y, nodeID, 1.0, name);
     }
     
-    /**
-     * 
-     * @param x
-     * @param y
-     * @param nodeID
-     * @param scale
-     */
+    /*
     public VNode (double x, double y, int nodeID, double scale, ObservableList<String> atr)
     {
         this (x, y, nodeID, scale, "", atr);
     }
+    */
     
     /**
      * 
@@ -82,7 +78,7 @@ public class VNode extends Pane
      * @param scale
      * @param name
      */
-    public VNode (double x, double y, int nodeID, double scale, String name, ObservableList<String> atr)
+    public VNode (double x, double y, int nodeID, double scale, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
     {
         id = nodeID;
      // this id must match the model
@@ -96,10 +92,10 @@ public class VNode extends Pane
         parentLV.setFocusTraversable(false);
         //parentLV.setMouseTransparent(true);
         
-        ObservableList<String> className = FXCollections.observableArrayList(name);
-        ObservableList<String> attrList = atr;
-        ObservableList<String> funcList = FXCollections.observableArrayList("func1", "func2", "func3");
-        ObservableList<String> miscList = FXCollections.observableArrayList("misc1", "misc2", "misc3");
+        className = FXCollections.observableArrayList(name);
+        ObservableList<String> attrList = attr;
+        ObservableList<String> funcList = func;
+        ObservableList<String> miscList = misc;
         
         ListView<String> nameLV = generateListView(className);
         ListView<String> attrLV = generateListView(attrList);
@@ -212,13 +208,10 @@ public class VNode extends Pane
         });
         return lView;
     }
-    
-    public void refreshData(String name, String atr)
+
+    public void refreshName(String name)
     {
-        // className
-        parentLV.getItems().get(0).getItems().set(0, name);
-        // attrList
-        parentLV.getItems().get(1).getItems().set(0, atr);
+        className.setAll(name);
     }
 }
 

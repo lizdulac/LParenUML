@@ -17,7 +17,7 @@ public class Command {
      */
     public enum Action
     {
-       ADD_NODE (0), ADD_EDGE (1), DELETE_NODE (2), DELETE_EDGE(3), SELECT_NODE(4), RENAME_NODE(5), UPDATE_ATR(6);
+       ADD_NODE (0), ADD_EDGE (1), DELETE_NODE (2), DELETE_EDGE(3), SELECT_NODE(4), EDIT_DATA(5);
         
         private final int value; 
         

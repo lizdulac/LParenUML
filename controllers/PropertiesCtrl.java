@@ -21,10 +21,11 @@ public class PropertiesCtrl
     public PropertiesView propView;
 
 	private Pane properties;
-    private double propW = 230;
-    private double propH = 230;
+    private double propW = 300;
+    private double propH = 250;
     private ListView<String> listView;
     private ObservableList<String> oList;
+    private ObservableList<String> nodeData;
 
 	public PropertiesCtrl (AppCtrl aController)
     {
@@ -32,9 +33,10 @@ public class PropertiesCtrl
         propView = new PropertiesView (this);
         oList = FXCollections.observableArrayList("< Select a ClassBox >");
         listView = new ListView<String>(oList);
-        propView.drawNode(listView);
-
-
+        listView.setCellFactory(TextFieldListCell.forListView());
+        listView.setOnEditCommit(propWriteData);
+        propView.redraw(listView);
+        
         configureProperties ();
     }
 	
@@ -70,81 +72,76 @@ public class PropertiesCtrl
         }
     }
     
-    public void refreshData(int id, String name, ObservableList<String> atr)
+    /**
+    *
+    * 
+    * @param
+    */
+    public void refreshPropData(ObservableList<String> list)
     {
-    	oList.clear();
-    	oList = FXCollections.observableArrayList(name);
-     	for (String s : atr) {
-     		oList.add(s);
-     	}
-     	
-     	listView = new ListView<String>(oList);
-     	listView.setUserData(id);
-        listView.setEditable(true);
-        listView.setCellFactory(TextFieldListCell.forListView());
-        listView.setOnEditCommit(propChangeData);
-        
-        propView.drawNode(listView);
-        
-        /*
-        listView.setOnEditCommit(
- 			@Override
- 			public void handle(ListView.EditEvent<String> t) {
- 				
- 				System.out.println("setOnEditCommit");
- 			}
- 		});    	
-         
- 		listView.setOnEditCommit(new EventHandler<ListView.EditEvent<String>>() {
- 			@Override
- 			public void handle(ListView.EditEvent<String> t) {
- 				listView.getItems().set(t.getIndex(), t.getNewValue());
- 				System.out.println("setOnEditCommit");
- 				}
- 		});
- 		
- 		listView.setOnEditCancel(new EventHandler<ListView.EditEvent<String>>() {
- 			@Override
- 			public void handle(ListView.EditEvent<String> t) {
- 				System.out.println("setOnEditCancel");
- 			}
- 		});	
- 		*/
+    	nodeData = list;
+    	
+    	// happens only the first time this method is called
+    	if( !listView.isEditable() )
+    	{
+            listView.setEditable (true);
+            listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            	@Override
+            	public void handle(MouseEvent event) {
+            		listView.edit(listView.getSelectionModel().getSelectedIndex());
+            		System.out.println("PROPTY: now editing '" + listView.getSelectionModel().getSelectedItem() + "'");
+            	}
+            });
+        }
+    	
+    	// node id is not a user editable field
+    	//listView.setUserData (Integer.parseInt (nodeData.get (0)));
+    	listView.getProperties().put("id", (Integer.parseInt (nodeData.get (0))));
+    	nodeData.remove (0);
+    	
+    	// the last String in the list stores the length of the 3 preceding sublists
+    	listView.getProperties().put("sizeCode", nodeData.get(nodeData.size() - 1));
+    	nodeData.remove(nodeData.size() - 1);
+    	
+    	// reset using the new data
+    	oList.setAll (nodeData);
+        propView.redraw (listView);
     }
-
-
-	//new EventHandler<ListView.EditEvent<String>>() {
 
 	/**
 	 * 
 	 */
-	public EventHandler<ListView.EditEvent<String>> propChangeData = new EventHandler<ListView.EditEvent<String>> ()
+	public EventHandler<ListView.EditEvent<String>> propWriteData = new EventHandler<ListView.EditEvent<String>> ()
 	{
 		@Override
 		public void handle(ListView.EditEvent<String> e) {
 			
-			int id = (int) listView.getUserData();
-			
-			if(e.getIndex() == 0)
-			{
-				String newName = e.getNewValue();				
-				listView.getItems().set(e.getIndex(), newName);
-				String atr = listView.getItems().get(e.getIndex() + 1);
-				
-				appCtrl.executeCommand (
-						packageAction (Action.RENAME_NODE, Scope.PROPERTY, id, newName, atr), false);
-			}
-			else if(e.getIndex() == 1)
-			{
-				String name = listView.getItems().get(e.getIndex() - 1);				
-				String newAtr =  e.getNewValue();
-				listView.getItems().set(e.getIndex(), newAtr);
-				
-				appCtrl.executeCommand (
-						packageAction (Action.UPDATE_ATR, Scope.PROPERTY, id, name, newAtr), false);
+			int id = (int) listView.getProperties().get("id");
+			String sizeCode = (String) listView.getProperties().get("sizeCode");
+			System.out.println(id + ", " + sizeCode);			
+					
+			for(char c : sizeCode.toCharArray())
+			{				
+		    	int currentSize = Character.getNumericValue(((String) listView.getProperties().get("sizeCode")).charAt(0));
+		    	for(int i = currentSize; i > 0; i--)
+				{
+		    		System.out.println("i");
+				}
 			}
 			
-			System.out.println("propChangeData");
+			// set newValue from user text edit
+			nodeData.set(e.getIndex(), e.getNewValue());
+			String name = nodeData.get(0);
+			
+			// nodeData[0] is node id
+			// nodeData[last] is sizeCode
+			nodeData.add(0, ((Integer) id).toString());
+			nodeData.add(nodeData.size(), "111");
+			
+			System.out.println("nodeData: " + nodeData);
+			
+			appCtrl.executeCommand (
+					packageAction (Action.EDIT_DATA, Scope.PROPERTY, id, name, nodeData), false);
 		}
 	};
     
@@ -179,8 +176,8 @@ public class PropertiesCtrl
 		}
 		Object[] data = cmd.getData();
 				
-		if(cmd.actionType == Action.RENAME_NODE)
-		{ //(Action.RENAME_NODE, Scope.PROPERTY, id, newValue)
+		if(cmd.actionType == Action.EDIT_DATA)
+		{ //(Action.EDIT_DATA, Scope.PROPERTY, id, name, nodeData)
 			
 			if(data.length != 3)
     		{
@@ -188,30 +185,19 @@ public class PropertiesCtrl
     			System.out.println("Data list expected 3 items but had: " + data.length);
     			return false;
     		}
+			// setFromList (Integer id, ObservableList<String> nodeData)
+			appCtrl.setFromList((int) data[0], (ObservableList<String>) data[2]);
 			
-			appCtrl.getNode((int) data[0]).setName((String) data[1]);;
-			appCtrl.getCanvasCtrl().canvasView.redrawVNode((int) data[0], (String) data[1], (String) data[2]);
+			// refreshVNode(Integer id, String name)
+			appCtrl.refreshVNode((int) data[0], (String) data[1]);
 			
-			System.out.println("EXECMD: node " + (int) data[0] + " was renamed by propInspctr");
+			// refreshPropData(ObservableList<String> list)
+			appCtrl.refreshPropData((ObservableList<String>) data[2]);
+			
+			System.out.println ("PTYCTR: Command executed EDIT_DATA");
 			return true;
 		}
-		else if(cmd.actionType == Action.UPDATE_ATR)
-		{ //(Action.RENAME_NODE, Scope.PROPERTY, id, newValue)
-			
-			if(data.length != 3)
-    		{
-    			System.out.println("Data for adding a node is incorrect");
-    			System.out.println("Data list expected 3 items but had: " + data.length);
-    			return false;
-    		}
-			
-			appCtrl.getNode((int) data[0]).setName((String) data[1]);;
-			appCtrl.getCanvasCtrl().canvasView.redrawVNode((int) data[0], (String) data[1], (String) data[2]);
-			
-			System.out.println("EXECMD: node " + (int) data[0] + " was renamed by propInspctr");
-			return true;
-		}
-		
+				
 		return false;
 	}
 }

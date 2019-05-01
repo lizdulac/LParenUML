@@ -1,5 +1,4 @@
 package model;
-
 import model.*;
 
 public final class ModelUtil
@@ -15,58 +14,36 @@ public final class ModelUtil
         System.out.println ("\n********** Graph **********");
         System.out.println ("********* " + theGraph.size () + " Nodes *********\n");
         int edgeTotal = 0;
-
-        for (int i = 0; i < theGraph.size (); i++)
-        {
-            UNode uNode = theGraph.getNode (i + 1);
-
-            // Can occur if a node is deleted
-            if (uNode != null)
+        
+        for (UNode uNode : theGraph.uNodes.values()) {
+        	System.out.println ("------ Node ------\n");
+            System.out.println ("         id: " + uNode.getId ());
+            System.out.println ("       name: " + uNode.getName ());
+            System.out.println (" attributes: " + uNode.getAttributes ());            
+            System.out.println ("  functions: " + uNode.getFunctions ());
+            System.out.println ("       misc: " + uNode.getMiscs ());
+            
+            System.out.println ("    inEdges: ");
+            for (UEdge edge : uNode.getInEdges ())
             {
-                System.out.println ("------ Node ------\n");
-                System.out.println ("         id: " + uNode.getId ());
-                System.out.println ("       name: " + uNode.getName ());
-                
-                System.out.println (" attributes: ");
-                for (String attribute : uNode.getAttributes ())
-                {
-                    System.out.println ("             " + attribute);
-                }
-                
-                System.out.println ("  functions: ");
-                for (String function : uNode.getFunctions ())
-                {
-                    System.out.println ("             " + function);
-                }
-                
-                System.out.println ("       misc: ");
-                for (String misc : uNode.getMiscs ())
-                {
-                    System.out.println ("             " + misc);
-                }
-                
-                System.out.println ("    inEdges: ");
-                for (UEdge edge : uNode.getInEdges ())
-                {
-                    edgeTotal++;
-                    UNode start = edge.getStartNode ();
-                    UNode end = edge.getEndNode ();
-                    System.out.println ("             " + start.getName () + " -> " + end.getName ());
-                }
-
-                System.out.println ("   outEdges: ");
-                for (UEdge edge : uNode.getOutEdges ())
-                {
-                    UNode start = edge.getStartNode ();
-                    UNode end = edge.getEndNode ();
-                    System.out.println ("             " + start.getName () + " -> " + end.getName ());
-                }
-
-                System.out.print ("\n");
+            	edgeTotal++;
+                UNode start = edge.getStartNode ();
+                UNode end = edge.getEndNode ();
+                System.out.println ("            " + start.getName () + " -> " + end.getName ());
             }
-
-            System.out.println ("****** " + edgeTotal + " Edges Total ******");
-            System.out.println ("***************************\n");
+            
+            System.out.println ("   outEdges: ");
+            for (UEdge edge : uNode.getOutEdges ())
+            {
+            	UNode start = edge.getStartNode ();
+                UNode end = edge.getEndNode ();
+                System.out.println ("            " + start.getName () + " -> " + end.getName ());
+            }
+            
+            System.out.print ("\n");
+            uNode.getAsList();
         }
+        System.out.println ("****** " + edgeTotal + " Edges Total ******");
+        System.out.println ("***************************\n");
     }
 }

@@ -12,7 +12,7 @@ import java.util.*;
 public class UGraph {
     
     // Map of Nodes
-    private Map< Integer ,UNode> uNodes;
+    protected Map< Integer ,UNode> uNodes;
     private Map<Integer, UEdge> uEdges;
     
     
