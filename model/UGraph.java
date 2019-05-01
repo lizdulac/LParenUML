@@ -13,7 +13,7 @@ public class UGraph {
     
     // Map of Nodes
     protected Map< Integer ,UNode> uNodes;
-    private Map<Integer, UEdge> uEdges;
+    protected Map<Integer, UEdge> uEdges;
     
     
    /**
@@ -118,6 +118,19 @@ public class UGraph {
     public Integer[] getAllNodes ()
     {
         Object[] temp = uNodes.keySet ().toArray ();
+        Integer[] keys = new Integer[temp.length];
+        System.arraycopy (temp, 0, keys, 0, temp.length);
+        Arrays.sort (keys);
+        return keys;
+     }
+
+    /**
+     * 
+     * @return
+     */
+    public Integer[] getAllEdges ()
+    {
+        Object[] temp = uEdges.keySet ().toArray ();
         Integer[] keys = new Integer[temp.length];
         System.arraycopy (temp, 0, keys, 0, temp.length);
         Arrays.sort (keys);
