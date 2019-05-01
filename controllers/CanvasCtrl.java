@@ -78,6 +78,26 @@ public class CanvasCtrl
         return ++uEdgeId;
     }
     
+    /**
+     * Necessary for file opening/saving
+     * 
+     * @param id
+     */
+    public void setUNodeId (int id)
+    {
+        uNodeId = id;
+    }
+    
+    /**
+     * Necessary for file opening/saving
+     * 
+     * @param id
+     */
+    public void setUEdgeId (int id)
+    {
+        uEdgeId = id;
+    }
+    
     /********************** CANVASCTRL EVENT HANDLERS *******************/
     /**
      * 
@@ -94,6 +114,7 @@ public class CanvasCtrl
                     int id = nextNodeId ();
                     String name = "Class " + ((Character) ((char) (id + 96))).toString (); 
                     
+                    // appCtrl.addNode() AND canvasView.drawNode()
                     appCtrl.executeCommand (
                             packageAction (Action.ADD_NODE, Scope.CANVAS, id, name, e.getX (), e.getY ()), false);
                 } else
@@ -281,48 +302,77 @@ public class CanvasCtrl
      */
     public EventHandler<MouseDragEvent> uNodeDragRelease = new EventHandler<MouseDragEvent> ()
     {
-    	@Override
-    	public void handle (MouseDragEvent e)
-    	{
-    		// mouse released within a UNode
-			isCanvasRelease = false;
+        @Override
+        public void handle (MouseDragEvent e)
+        {
+            // mouse released within a UNode
+            isCanvasRelease = false;
 
-			Region startRgn = canvasView.getVNode ((int) currentEdge.getUserData ());
-			Region endRgn = (Region) e.getSource ();
+            Region startRgn = canvasView.getVNode ((int) currentEdge.getUserData ());
+            Region endRgn = (Region) e.getSource ();
 
-			if (appCtrl.getToolState () == ToolState.ADD_EDGE)
-			{
-				Point2D currentEdgeStart = lastClick.get ();
-				Point2D releasePoint = new Point2D (e.getX (), e.getY ());
-				
-				// AnchorMgr functionality is currently disabled
-				AnchorMgr a = new AnchorMgr((Pane) e.getSource ());
-				//Point2D releasePoint = a.getNearAnchor (new Point2D (e.getX (), e.getY ()));
+            if (appCtrl.getToolState () == ToolState.ADD_EDGE)
+            {
+                Point2D currentEdgeStart = lastClick.get ();
+//                Point2D releasePoint = new Point2D (e.getX (), e.getY ());
 
-				int id = nextEdgeId ();
-				String name = "edgeName";
-				UNode startNode = appCtrl.getNode ((int) currentEdge.getUserData ());
-				UNode endNode = appCtrl.getNode ((int) endRgn.getUserData ());				
-				
-				getCanvas().getChildren().remove(currentEdge);		
-				currentEdge = null;
-				
-				appCtrl.executeCommand (
-					packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint), false);
+                // @ line #315:
+                // AnchorMgr functionality is currently disabled
+                AnchorMgr a = new AnchorMgr((Pane) e.getSource ());
+                Point2D releasePoint = a.getNearAnchor (new Point2D (e.getX (), e.getY ()));
 
-				lastClick.set (null);				
-			}
-		}
-};
+                int id = nextEdgeId ();
+                String name = "edgeName";
+                UNode startNode = appCtrl.getNode ((int) currentEdge.getUserData ());
+                UNode endNode = appCtrl.getNode ((int) endRgn.getUserData ());              
+                
+                getCanvas().getChildren().remove(currentEdge);      
+                currentEdge = null;
+                
+                appCtrl.executeCommand (
+                    packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint), false);              
+            }
+            lastClick.set (null); 
+        }
+    };
     
+    /**
+     * 
+     * @param percent
+     */
     public void zoomIn (double percent)
     {
         canvasView.zoomIn (percent);
     }
     
+    /**
+     * 
+     */
+    public void zoomReset ()
+    {
+        canvasView.zoomReset ();
+    }
+    
+    /**
+     * 
+     * @param id
+     * @param name
+     */
     public void refreshVNode(Integer id, String name)
     {
-    	canvasView.getVNode(id).refreshName(name);
+        canvasView.getVNode(id).refreshName(name);
+    }
+    
+    
+    /**
+     * 
+     */
+    public void clearScreen (Boolean history)
+    {
+        for (Integer i : canvasView.getNodeKeys ())
+        {
+            appCtrl.executeCommand(packageAction (Action.DELETE_NODE, Scope.CANVAS, i), history);
+        }
     }
 
     /********************** CANVASCTRL EXECUTE COMMAND ******************/
@@ -376,9 +426,9 @@ public class CanvasCtrl
             appCtrl.addNode ((Integer) data[0], (String) data[1]);
             ObservableList<String> attr = appCtrl.getGraph().getNode((int) data[0]).getAttributes();
             ObservableList<String> func = appCtrl.getGraph().getNode((int) data[0]).getFunctions();
-            ObservableList<String> misc = appCtrl.getGraph().getNode((int) data[0]).getMiscs();            
+            ObservableList<String> misc = appCtrl.getGraph().getNode((int) data[0]).getMiscs();
             
-            // drawNode (double x, double y, int id, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
+         // drawNode (double x, double y, int id, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
             canvasView.drawNode ((double) data[2], (double) data[3], (int) data[0], (String) data[1], attr, func, misc);
             System.out.println ("CVSCTR: Command executed ADD_NODE with id of " + (int) data[0]);    
        

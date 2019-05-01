@@ -12,7 +12,11 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
@@ -23,6 +27,8 @@ import javafx.scene.layout.BackgroundFill;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
+
 import javafx.util.Duration;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
@@ -99,7 +105,7 @@ public class AppCtrl
         canvasCtrl = new CanvasCtrl (this);
         propCtrl = new PropertiesCtrl (this);
         fileIO = new FileIO (this, canvasCtrl.canvasView);
-        history = new History (this);
+        history = new History ();
 
         // appStage - configure primary application window
         appStage = stage;
@@ -199,20 +205,22 @@ public class AppCtrl
      */
     public void cleanEdges(UNode n)
     {       
-        //clean outgoing edges and their ends  
-        for (UEdge e: n.getOutEdges())
-        {
-            theGraph.removeEdgeFromIn(e.getId ());
-            eraseEdge(e.getId ());
-        }
+        //clean outgoing edges and their ends 
+        if (n != null){
+            for (UEdge e: n.getOutEdges())
+            {
+                theGraph.removeEdgeFromIn(e.getId ());
+                eraseEdge(e.getId ());
+                }
         
-        //clean incoming edges and their starts
-        for (UEdge e : n.getInEdges())
-        {
-            theGraph.removeEdgeFromOut(e.getId ());
-            eraseEdge(e.getId ());
+            //clean incoming edges and their starts
+            for (UEdge e : n.getInEdges())
+            {
+                theGraph.removeEdgeFromOut(e.getId ());
+                eraseEdge(e.getId ());
+                }
+            }
         }
-    }
     
     /**
      * Erases Line representing Edge from canvas,
@@ -224,47 +232,46 @@ public class AppCtrl
     {
         
         executeCommand (packageAction(Action.DELETE_EDGE, Scope.CANVAS, id), false);
-    }
-    
-    /**
-     *
-     * 
-     * @param id
-     */
-    public ObservableList<String> getAsList(Integer id)
-    {
-    	return theGraph.getNode(id).getAsList();
-    }
-    
+    }  
     /**
     *
     * 
     * @param id
     */
-   public void setFromList(Integer id, ObservableList<String> nodeData)
+   public ObservableList<String> getAsList(Integer id)
    {
-	   theGraph.getNode(id).setFromList(nodeData);
+       return theGraph.getNode(id).getAsList();
    }
-    
-    /**
-    *
-    * 
-    * @param
-    */
-    public void refreshPropData(ObservableList<String> nodeData)
-    {
-    	propCtrl.refreshPropData(nodeData);
-    }
-    
-    /**
-    *
-    * 
-    * @param
-    */
-    public void refreshVNode(Integer id, String name)
-    {
-    	canvasCtrl.refreshVNode(id, name);
-    }
+
+   /**
+   *
+   * 
+   * @param id
+   */
+  public void setFromList(Integer id, ObservableList<String> nodeData)
+  {
+      theGraph.getNode(id).setFromList(nodeData);
+  }
+
+   /**
+   *
+   * 
+   * @param
+   */
+   public void refreshPropData(ObservableList<String> nodeData)
+   {
+       propCtrl.refreshPropData(nodeData);
+   }
+
+   /**
+   *
+   * 
+   * @param
+   */
+   public void refreshVNode(Integer id, String name)
+   {
+       canvasCtrl.refreshVNode(id, name);
+   }
     
     /**
      * Packages the parameters and the type of action into a Command class. The
@@ -284,9 +291,10 @@ public class AppCtrl
     
 
     /*********************** APPCTRL GENERAL GETTERS *******************/
-/*
+    /**
      * 
      * @return
+     */
     public PropertiesCtrl getPropCtrl ()
     {
         return propCtrl;
@@ -296,7 +304,6 @@ public class AppCtrl
     {
         return canvasCtrl;
     }
-*/
     
     /**
      * Exposes the tool width, which
@@ -459,21 +466,55 @@ public class AppCtrl
      */
     private MenuBar configureMenuBar (double canvasW)
     {
+
         // ************ FILE MENU ************
         // MenuItems
         MenuItem open = new MenuItem ("Open");
         MenuItem save = new MenuItem ("Save");
         MenuItem newF = new MenuItem ("New");
+
+        MenuItem redo = new MenuItem ("Redo");
+        MenuItem undo = new MenuItem ("Undo");
+
+        MenuItem reset = new MenuItem ("Reset Zoom");
+        MenuItem zoomIn = new MenuItem ("Zoom In");
+        MenuItem zoomOut = new MenuItem("Zoom Out");
         // EventHandlers
         open.setOnAction (openFile);
         save.setOnAction (saveFile);
         newF.setOnAction (newFile);
-        // Add Items
-        Menu fileMenu = new Menu ("File", null, open, save, newF);
+
+        redo.setOnAction (e -> redo());
+        undo.setOnAction (e -> undo());
+        
+        reset.setOnAction (zoomReset);
+        zoomIn.setOnAction(zoomInClick);
+        zoomOut.setOnAction(zoomOutClick);
+        // Create new menus
+        Menu fileMenu = new Menu ("File");
+
+        Menu editMenu = new Menu ("Edit");
+
+        Menu viewMenu = new Menu ("View");
+
+        //add menu items (dropdown menu)
+        fileMenu.getItems().add(open);
+        fileMenu.getItems().add(save);
+        fileMenu.getItems().add(newF);
+
+        editMenu.getItems().add(redo);
+        editMenu.getItems().add(undo);
+
+        viewMenu.getItems().add(reset);
+        viewMenu.getItems().add(zoomIn);
+        viewMenu.getItems().add(zoomOut);
 
 
         // ************* MENU BAR *************
-        MenuBar menuBar = new MenuBar(fileMenu);
+        MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().add(fileMenu);
+        menuBar.getMenus().add(editMenu);
+        menuBar.getMenus().add(viewMenu);
         menuBar.setBackground (transparent);
         menuBar.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 0;");
         menuBar.setMaxWidth (margin + canvasW + 2.0);
@@ -509,8 +550,6 @@ public class AppCtrl
         anchorPane.getChildren ().addAll (propSlider, sidePane);
         AnchorPane.setBottomAnchor (sidePane, anchorOffset);
         anchorPane.setBackground (transparent);
-        
-        //anchorPane.setStyle ("-fx-border-color: yellow; -fx-border-width: 5;");
 
         // propSlider
         propSlider.setLayoutX (cornerRadius);
@@ -638,7 +677,17 @@ public class AppCtrl
         Button printStats = new Button ();
         printStats.setText ("PrintStats");
         printStats.setPrefWidth (fontSize * 4.1);
-        toolButtons.getChildren ().addAll (showHide, printStats);
+        // Undo
+        Button undo = new Button ();
+        undo.setText ("Undo");
+        undo.setPrefWidth (fontSize * 4.1);
+        undo.setOnAction (e -> undo());
+        // Redo
+        Button redo = new Button ();
+        redo.setText ("Redo");
+        redo.setPrefWidth (fontSize * 4.1);
+        redo.setOnAction (e -> redo());
+        toolButtons.getChildren ().addAll (showHide, printStats, undo, redo);
         
         toolButtons.setPrefHeight ((fontSize + panelSpacing) * (UCodes.length) * 2.0);
         return toolButtons;
@@ -767,6 +816,33 @@ public class AppCtrl
         timeline.play ();
     }
     
+    public EventHandler<ActionEvent> zoomReset = new EventHandler<ActionEvent>()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            canvasCtrl.zoomReset ();
+        }
+    };
+    
+    public EventHandler<ActionEvent> zoomInClick = new EventHandler<ActionEvent>()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            canvasCtrl.zoomIn(-0.1);
+        }
+    };
+
+    public EventHandler<ActionEvent> zoomOutClick = new EventHandler<ActionEvent>()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            canvasCtrl.zoomIn(0.1);
+        }
+    };
+    
     /*********************** APPCTRL CHANGE LISTENERS *******************/
     /**
      * Whenever the height of appStage changes,
@@ -833,22 +909,7 @@ public class AppCtrl
         @Override
         public void handle (ActionEvent e)
         {
-            FileChooser fc = new FileChooser ();
-            fc.setTitle ("Save File");
-
-            // Set extension filter
-            // FileChooser.ExtensionFilter extFiler = new
-            // FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-            // For easier debugging:
-            FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-            fc.getExtensionFilters ().add (extFiler);
-
-            File file = fc.showSaveDialog (appStage);
-            if (file != null)
-            {
-                fileIO.save (file);
-                appStage.setTitle (appName + file.getName ());
-            }
+            saveFile();
         }
     };
 
@@ -873,8 +934,39 @@ public class AppCtrl
             File file = fc.showOpenDialog (appStage);
             if (file != null)
             {
-                fileIO.open (file);
-                appStage.setTitle (appName + file.getName ());
+                if (theGraph.size () != 0)
+                {
+                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Are you sure you want to proceed?");
+                    alert.setHeaderText("Opening a file will delete any unsaved progress.");
+                    alert.setContentText("Press ok to open file. Press cancel to keep working.");
+
+                    ButtonType buttonOk = new ButtonType("Ok");
+                    ButtonType buttonSave = new ButtonType("Save");
+                    ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonOk, buttonSave, buttonTypeCancel);
+
+                    Optional<ButtonType> result = alert.showAndWait();
+                
+                    if (result.get () == buttonSave)
+                    {
+                        saveFile ();
+                        // Boolean true means this clearScreen is not undoable
+                        // TODO: reset stack
+                        canvasCtrl.clearScreen (true);
+                        fileIO.open (file);
+                        appStage.setTitle (appName + file.getName ());
+                    }
+                    else if (result.get () == buttonOk)
+                    {
+                        openFile (file);
+                    }
+                    }
+                else
+                {
+                    openFile (file);
+                }
             }
         }
     };
@@ -914,6 +1006,73 @@ public class AppCtrl
             }
         }
     };
+    
+    /*************************** APPCTRL FUNCTIONS ***********************/  
+
+    /**
+     * 
+     */
+    public void saveFile ()
+    {
+        FileChooser fc = new FileChooser ();
+        fc.setTitle ("Save File");
+
+        // Set extension filter
+        // FileChooser.ExtensionFilter extFiler = new
+        // FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+        // For easier debugging:
+        FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
+        fc.getExtensionFilters ().add (extFiler);
+
+        File file = fc.showSaveDialog (appStage);
+        if (file != null)
+        {
+            fileIO.save (file);
+            appStage.setTitle (appName + file.getName ());
+        }
+    }
+    
+    /**
+     * 
+     * @param file
+     */
+    public void openFile (File file)
+    {
+        // Boolean true means this clearScreen is not undoable
+        // TODO: reset stack
+        canvasCtrl.clearScreen (true);
+        fileIO.open (file);
+        appStage.setTitle (appName + file.getName ());
+        
+        int lastNode = theGraph.getAllNodes ()[theGraph.getAllNodes ().length - 1];
+        canvasCtrl.setUNodeId (lastNode);
+        int lastEdge = theGraph.getAllEdges ()[theGraph.getAllEdges ().length - 1];
+        canvasCtrl.setUEdgeId (lastEdge);
+    }
+    
+    /**
+     * 
+     */
+    public void undo ()
+    {
+        Command undo = history.undo ();
+        if (undo != null)
+        {
+            executeCommand (undo, true);
+        }
+    }
+    
+    /**
+     * 
+     */
+    public void redo ()
+    {
+        Command redo = history.redo ();
+        if (redo != null)
+        {
+            executeCommand (redo, true);
+        }
+    }
 
     /*********************** APPCTRL EXECUTE COMMAND ********************/  
 
@@ -928,7 +1087,10 @@ public class AppCtrl
      */
     public boolean executeCommand (Command cmd, boolean isHistory)
     {
-        // if(isHistory) { return false; }
+        if (!isHistory && cmd != null)
+        {
+            history.push (cmd);
+        }
 
         if (cmd.actionScope == Scope.CANVAS) {
             canvasCtrl.executeCommand (cmd, isHistory);

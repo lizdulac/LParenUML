@@ -17,12 +17,20 @@ public class Command {
      */
     public enum Action
     {
-       ADD_NODE (0), ADD_EDGE (1), DELETE_NODE (2), DELETE_EDGE(3), SELECT_NODE(4), EDIT_DATA(5);
+        ADD_NODE (0), DELETE_NODE (1),
+        ADD_EDGE (2), DELETE_EDGE(3),
+        SELECT_NODE(4),
+        EDIT_DATA(5);
         
         private final int value; 
         
         Action (int value) { 
             this.value = value; 
+        }
+
+        public int getValue ()
+        {
+            return value;
         }
     };  
     
