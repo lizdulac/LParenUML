@@ -56,9 +56,10 @@ public class AppCtrl
     protected UGraph theGraph;
     private Stage appStage;
     private Scene appScene;
-    private Stage sideStage;
+    protected Stage sideStage;
     private Scene sideScene;
     private FileIO fileIO;
+    private History history;
 
     /*********************** APPCTRL FINAL VARIABLES *********************/
     private final double margin = 50;
@@ -95,8 +96,9 @@ public class AppCtrl
         theGraph = new UGraph ();
         toolState = ToolState.SELECT;
         canvasCtrl = new CanvasCtrl (this);
-        propCtrl = new PropertiesCtrl (this, canvasCtrl);
+        propCtrl = new PropertiesCtrl (this);
         fileIO = new FileIO (this, canvasCtrl.canvasView);
+        history = new History (this);
 
         // appStage - configure primary application window
         appStage = stage;
@@ -249,7 +251,12 @@ public class AppCtrl
     {
         return propCtrl;
     }
-
+    
+    public CanvasCtrl getCanvasCtrl ()
+    {
+        return canvasCtrl;
+    }
+    
     /**
      * Exposes the tool width, which
      * is needed to build the GUI.
@@ -609,11 +616,11 @@ public class AppCtrl
                 int val =(int) sourceButton.getUserData ();
                 if (val == ToolState.values ().length)
                 {
-                    executeCommand (packageAction(Action.ZOOM, Scope.CANVAS, 0.1), false);
+                    canvasCtrl.zoomIn (0.1);
                 }
                 else if (val == ToolState.values ().length + 1)
                 {
-                    executeCommand (packageAction(Action.ZOOM, Scope.CANVAS, -0.1), false);
+                    canvasCtrl.zoomIn (-0.1);
                 }
                 return;
             } catch (ClassCastException ex)

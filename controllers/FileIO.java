@@ -8,6 +8,7 @@ import java.util.*;
 
 import controllers.Command.Action;
 import controllers.Command.Scope;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 
@@ -88,9 +89,9 @@ public class FileIO
             double x = vn.getX ();
             double y = vn.getY ();
 
-            ArrayList<String> atts = node.getAttributes();
-            ArrayList<String> funcs = node.getFunctions();
-            ArrayList<String> misc = node.getMiscs();
+            ObservableList<String> atts = node.getAttributes();
+            ObservableList<String> funcs = node.getFunctions();
+            ObservableList<String> misc = node.getMiscs();
 
             System.out.printf ("%d%s%s%s%f%s%f%s", nodeID, delim, nodeName, delim, x, delim, y, delim);
             printStrings(atts);
@@ -166,7 +167,7 @@ public class FileIO
     //surround it with quotes
     //if more than 1, we need a comma
     //String = quote string + quote + endquote
-    public void printStrings (ArrayList<String> stringlist)
+    public void printStrings (ObservableList<String> stringlist)
     {
         if (stringlist.size () >= 1){
                 String s1 = stringlist.get(0);
@@ -218,34 +219,28 @@ public class FileIO
                 // controller.theGraph.addNode (id, name);
                 
                 String attributes = lineScanner.next ();
-                System.out.println ("FILEIO: attr " + attributes);
                 Scanner attributeScanner = new Scanner (attributes);
                 ArrayList<String> attribs = parseStrings(attributeScanner, controller.getNode(id));
                 for (String a : attribs)
                 {
-                    System.out.println ("FILEIO: add attr " + a);
                     controller.getNode (id).addAttribute (a);
                 }
                 attributeScanner.close ();
                 
                 String functions = lineScanner.next ();
-                System.out.println ("FILEIO: funcs " + functions);
                 Scanner functionScanner = new Scanner (functions);
                 ArrayList<String> funcs = parseStrings(functionScanner, controller.getNode (id));
                 for (String f : funcs)
                 {
-                    System.out.println ("FILEIO: add func " + f);
                     controller.getNode (id).addFunction (f);
                 }
                 functionScanner.close ();
                 
                 String miscs = lineScanner.next ();
-                System.out.println ("FILEIO: miscs " +  miscs);
                 Scanner miscScanner = new Scanner (miscs);
                 ArrayList<String> mis = parseStrings(miscScanner, controller.getNode (id));
                 for (String m : mis)
                 {
-                    System.out.println ("FILEIO: add misc " + m);
                     controller.getNode (id).addMisc (m);
                 }
                 miscScanner.close ();
@@ -268,14 +263,15 @@ public class FileIO
                         System.out.println ("Opening error: node of edge null");
                     } else
                     {
-                        // Args: Pane, Point2D start, Point2D end
+                        String edgeName = "";
                         VNode vn1 = view.getVNode (id);
                         VNode vn2 = view.getVNode (endNodeId);
-                        Region node1 = vn1.getRegion ();
+                        Region node1 = vn1;
                         Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
-                        Region node2 = vn2.getRegion ();
+                        Region node2 = vn2;
                         Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
-                        Object[] args2 = { node1, pt1, node2, pt2, edgeId };
+                        //id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint
+                        Object[] args2 = { edgeId , edgeName, controller.getNode (id), controller.getNode (endNodeId), node1, node2, pt1, pt2 };
                         Command addEdge = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (addEdge, true);
                     }
@@ -287,7 +283,7 @@ public class FileIO
                 startEdgeScanner.useDelimiter (",");
                 while (startEdgeScanner.hasNext ())
                 {
-                    int edgeId = startEdgeScanner.nextInt ();
+                    Integer edgeId = startEdgeScanner.nextInt ();
                     int startNodeId = startEdgeScanner.nextInt ();
                     if (startNodeId > id)
                     {
@@ -300,14 +296,15 @@ public class FileIO
                         System.out.println ("Opening error: node of edge null");
                     } else
                     {
-                        // Args: Pane, Point2D start, Point2D end
+                        String edgeName = "";
                         VNode vn1 = view.getVNode (startNodeId);
                         VNode vn2 = view.getVNode (id);
-                        Region node1 = vn1.getRegion ();
+                        Region node1 = vn1;
                         Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
-                        Region node2 = vn2.getRegion ();
+                        Region node2 = vn2;
                         Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
-                        Object[] args2 = { node1, pt1, node2, pt2, edgeId  };
+                        //id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint
+                        Object[] args2 = { edgeId , edgeName, controller.getNode (startNodeId), controller.getNode (id), node1, node2, pt1, pt2 };
                         Command addEdge = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (addEdge, true);
                     }
@@ -331,7 +328,6 @@ public class FileIO
         String current = "";
         while (scan.hasNext ())
         {
-            System.out.println ("FILEIOPRS: current is '" + current + "'");
             if (current.length () < 2)
             {
                 
@@ -342,14 +338,16 @@ public class FileIO
             }
             else
             {
-                strings.add (current.substring (1));
+                current = current.substring (1);
+                strings.add (current.replaceAll ("\\\"", "\""));
                 current = "";
             }
             current += scan.next ();
         }
         if (current.length () > 1)
         {
-            strings.add (current.substring (1, current.length () - 1));
+            current = current.substring (1, current.length () - 1);
+            strings.add (current.replaceAll ("\\\"", "\""));
         }
         return strings;
     }
