@@ -1,6 +1,7 @@
 package controllers;
 
-
+import controllers.Command.Action;
+import controllers.Command.Scope;
 /**
  * This class keeps an action, prepared to be executed.  
  *
