@@ -149,15 +149,6 @@ public class VNode extends Pane
         return this.getLayoutY ();
     }
 
-    /**
-     * 
-     * @return
-//     */
-//    public Region getRegion ()
-//    {
-//        return this;
-//    }
-
     /*************************** UNODE FUNCTIONS **************************/
     /**
      * 
