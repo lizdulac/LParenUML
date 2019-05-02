@@ -1,10 +1,11 @@
 package controllers;
 import model.*;
 import views.*;
-
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseDragEvent;
 
@@ -172,6 +173,16 @@ public class CanvasCtrl
             else if (appCtrl.getToolState () == ToolState.ADD_EDGE) {
             // DO NOT package these ADD_EDGE actions and send to executeCommand()
             // all necessary ADD_EDGE actions are taken care of in uNodeDragRelease
+
+                AnchorMgr a = new AnchorMgr( (Pane) srcNode);
+                
+                Point2D anchor = a.getNearAnchor(new Point2D(e.getX(), e.getY()));
+                //this math creates a point at the local space of the srcPane
+                double sumX = anchor.getX() + srcNode.getBoundsInParent().getMinX() +50;
+                double sumY = anchor.getY() + srcNode.getBoundsInParent().getMinY() +50;
+                
+                Point2D click = new Point2D(sumX, sumY);                
+                lastClick.set(click); 
                 
                 currentEdge = canvasView.beginEdgeDraw (srcNode, lastClick.get ());                
                 // currentEdge ID must be the same as startNode ID 

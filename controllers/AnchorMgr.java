@@ -1,8 +1,7 @@
 package controllers;
 
-import java.util.*;
 
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.geometry.*;
 import java.lang.Math;
 
@@ -13,7 +12,7 @@ import java.lang.Math;
  */
 public class AnchorMgr {
 	private Point2D[] anchorlist = new Point2D[12];
-	private Pane pane;
+	private Region region;
 	private final int numPoints = 3;
 	private double snapDistance = 6.5;
 	
@@ -23,20 +22,19 @@ public class AnchorMgr {
 	 *
 	 * @param pn pane to be anchored 
 	 */
-	public AnchorMgr(Pane pn){
-		pane =pn;
+	public AnchorMgr(Region pn){
+		region =pn;
 		generate_anchors();
 	}
-	
 	
 	/**
 	 * Sets a new pane to be anchored, generates new anchors.
 	 *
 	 * @param pn pane to be anchored 
 	 */
-	public void setPane(Pane pn)
+	public void setPane(Region pn)
 	{
-		pane =pn;
+		region =pn;
 		generate_anchors();
 	}
 	
@@ -44,8 +42,8 @@ public class AnchorMgr {
 	 * Exposes the anchored pane 
 	 *
 	 */
-	public Pane getPane() {
-		return pane;
+	public Region getPane() {
+		return region;
 	}
 
 	
@@ -70,8 +68,8 @@ public class AnchorMgr {
 	 */
 	public void generate_anchors()
 	{
-		double h = pane.getHeight();
-		double w = pane.getWidth();	
+		double h = region.getMaxHeight();
+		double w = region.getMaxWidth();	
 		double p =0;
 		
 		for(int i = 0; i < numPoints; ++i ) {
@@ -101,7 +99,6 @@ public class AnchorMgr {
 		
 	}
 	
-	
 	public Point2D[] getAnchorlist() {
 		return anchorlist;
 	}
@@ -114,11 +111,15 @@ public class AnchorMgr {
 	 * @return Point2D closest to the cursor on the released Node
 	 */
 	public Point2D getNearAnchor(Point2D cursor) {
-		double h = pane.getHeight();
-		double w = pane.getWidth();	
+		double h = region.getHeight();
+		double w = region.getWidth();	
+		System.out.println("pane weight: " + w);
+		System.out.println("pane height: " + h);
+		
 		double x = cursor.getX();
 		double y = cursor.getY();
-		
+		System.out.println("cursor x: " + x);
+		System.out.println("cursor y: " + y);
 		
 		Point2D cur = cursor;
 		double topMiddle   = distance(x, y, anchorlist[4].getX(), anchorlist[4].getY());
@@ -166,28 +167,33 @@ public class AnchorMgr {
 					cur = anchorlist[2];
 				else
 					cur = anchorlist[6];
-			}			
-			
+			}						
 		}
 		else if(x > w/numPoints *2 && y > h/numPoints *2){//Lower Right Quadrant
 	
 			double botRight = distance(x, y, anchorlist[9].getX(), anchorlist[9].getY());
 			double rightBot = distance(x, y, anchorlist[11].getX(), anchorlist[11].getY());
 			
+			System.out.println("lower right");
 			if(botRight < rightBot)
 			{
+				System.out.println("--> 1");
 				if(botRight < botMiddle)
 					cur = anchorlist[9];
 				else
 					cur = anchorlist[5];
-				
 			}
 			else
 			{
-				if(rightBot < rightMiddle)
+				System.out.println("--> 2");
+				if(rightBot < rightMiddle) {
+					System.out.println("--> 2.1");
 					cur = anchorlist[11];
-				else
+				}
+				else {
+					System.out.println("--> 2.2");
 					cur = anchorlist[7];
+				}
 			}
 			
 		}
@@ -195,6 +201,7 @@ public class AnchorMgr {
 			double leftBot = distance(x, y, anchorlist[10].getX(), anchorlist[10].getY());
 			double botLeft = distance(x, y, anchorlist[1].getX(), anchorlist[1].getY());
 			
+			System.out.println("lower left");
 			if(botLeft < leftBot)
 			{	
 				if(botLeft < botMiddle)
@@ -204,13 +211,16 @@ public class AnchorMgr {
 			}
 			else
 			{
+				
 				if(leftBot < leftMiddle)
 					cur = anchorlist[10];
 				else
 					cur = anchorlist[6];				
 			}
-			
 		}
+		
+		System.out.println("anchor x: " + cur.getX());
+		System.out.println("anchor y: " + cur.getY());
 		return cur;
 	}
 
@@ -222,10 +232,10 @@ public class AnchorMgr {
 	 */
 	public boolean hasSnap(Point2D cursor)
 	{
-		double h = pane.getHeight();
-		double w = pane.getWidth();	
-		double px = pane.getLayoutX();
-		double py = pane.getLayoutY();
+		double h = region.getHeight();
+		double w = region.getWidth();	
+		double px = region.getLayoutX();
+		double py = region.getLayoutY();
 		double x = cursor.getX();
 		double y = cursor.getY();
 

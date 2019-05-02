@@ -630,12 +630,12 @@ public class AppCtrl
          */
         double fontSize = 20;
         final int[] UCodes = new int[] { 0x2723, 0x261D, 0x274F, 8594, 0x2620, 0x25FD, 0x25FB };
-        final String[] buttonNames = new String[] { "Move", "Select", "Create Class Box", "Create Relationship", "Delete", "Zoom Out", "Zoom In" };
+        final String[] buttonNames = new String[] { "Move", "Select Class Box", "Create Class Box", "Create Relationship", "Delete", "Zoom Out", "Zoom In" };
 
         Font buttonsFont = Font.font ("sans-serif", FontWeight.BOLD, fontSize);
 
         VBox toolButtons;
-        double panelSpacing = 25.0;
+        double panelSpacing = 20.0;
         Pos panelAlignment = Pos.CENTER;
         toolButtons = new VBox (panelSpacing);
         toolButtons.setAlignment (panelAlignment);
@@ -689,7 +689,7 @@ public class AppCtrl
         redo.setOnAction (e -> redo());
         toolButtons.getChildren ().addAll (showHide, printStats, undo, redo);
         
-        toolButtons.setPrefHeight ((fontSize + panelSpacing) * (UCodes.length) * 2.0);
+        toolButtons.setPrefHeight ((fontSize + panelSpacing) * (UCodes.length + 4) * 1.3);
         return toolButtons;
     }
 
@@ -925,11 +925,8 @@ public class AppCtrl
             fc.setTitle ("Open File");
 
             // Set extension filter
-            // FileChooser.ExtensionFilter extFilter = new
-            // FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-            // For easier debugging:
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-            fc.getExtensionFilters ().add (extFilter);
+             FileChooser.ExtensionFilter extFilter = new
+             FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
 
             File file = fc.showOpenDialog (appStage);
             if (file != null)
@@ -939,7 +936,7 @@ public class AppCtrl
                     Alert alert = new Alert(AlertType.CONFIRMATION);
                     alert.setTitle("Are you sure you want to proceed?");
                     alert.setHeaderText("Opening a file will delete any unsaved progress.");
-                    alert.setContentText("Press ok to open file. Press cancel to keep working.");
+                    alert.setContentText("Press ok to open file. Press save to save first. Press cancel to keep working.");
 
                     ButtonType buttonOk = new ButtonType("Ok");
                     ButtonType buttonSave = new ButtonType("Save");
@@ -1018,11 +1015,8 @@ public class AppCtrl
         fc.setTitle ("Save File");
 
         // Set extension filter
-        // FileChooser.ExtensionFilter extFiler = new
-        // FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-        // For easier debugging:
-        FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-        fc.getExtensionFilters ().add (extFiler);
+         FileChooser.ExtensionFilter extFiler = new
+         FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
 
         File file = fc.showSaveDialog (appStage);
         if (file != null)

@@ -10,6 +10,7 @@ import controllers.Command.Action;
 import controllers.Command.Scope;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
 import java.io.File;
@@ -263,15 +264,27 @@ public class FileIO
                         System.out.println ("Opening error: node of edge null");
                     } else
                     {
+                        
                         String edgeName = "";
                         VNode vn1 = view.getVNode (id);
                         VNode vn2 = view.getVNode (endNodeId);
-                        Region node1 = vn1;
-                        Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
-                        Region node2 = vn2;
-                        Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
+                        
+                        AnchorMgr a = new AnchorMgr( vn1);
+                        
+                        Point2D anchor = a.getNearAnchor(new Point2D(vn1.getX (), vn1.getY()));
+                        
+                        //this math creates a point at the local space of the srcPane
+                        double sumX = anchor.getX() + vn1.getBoundsInParent().getMinX() +50;
+                        double sumY = anchor.getY() + vn1.getBoundsInParent().getMinY() +50;
+                        Point2D pt1 = new Point2D (sumX, sumY);
+                        
+                        AnchorMgr b = new AnchorMgr( vn2);
+                                        
+                        b.setPane(vn2);
+                        Point2D pt2 = b.getNearAnchor (new Point2D (vn2.getX (), vn2.getY ()));
+                        
                         //id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint
-                        Object[] args2 = { edgeId , edgeName, controller.getNode (id), controller.getNode (endNodeId), node1, node2, pt1, pt2 };
+                        Object[] args2 = { edgeId , edgeName, controller.getNode (id), controller.getNode (endNodeId), vn1, vn2, pt1, pt2 };
                         Command addEdge = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (addEdge, true);
                     }
@@ -299,12 +312,22 @@ public class FileIO
                         String edgeName = "";
                         VNode vn1 = view.getVNode (startNodeId);
                         VNode vn2 = view.getVNode (id);
-                        Region node1 = vn1;
-                        Point2D pt1 = new Point2D (vn1.getX (), vn1.getY ());
-                        Region node2 = vn2;
-                        Point2D pt2 = new Point2D (vn2.getX (), vn2.getY ());
+                        
+                        AnchorMgr a = new AnchorMgr( vn1);
+                        
+                        Point2D anchor = a.getNearAnchor(new Point2D(vn1.getX (), vn1.getY()));
+                        
+                        //this math creates a point at the local space of the srcPane
+                        double sumX = anchor.getX() + vn1.getBoundsInParent().getMinX() +50;
+                        double sumY = anchor.getY() + vn1.getBoundsInParent().getMinY() +50;
+                        Point2D pt1 = new Point2D (sumX, sumY);
+                        
+                        AnchorMgr b = new AnchorMgr( vn2);
+                                        
+                        b.setPane(vn2);
+                        Point2D pt2 = b.getNearAnchor (new Point2D (vn2.getX (), vn2.getY ()));
                         //id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint
-                        Object[] args2 = { edgeId , edgeName, controller.getNode (startNodeId), controller.getNode (id), node1, node2, pt1, pt2 };
+                        Object[] args2 = { edgeId , edgeName, controller.getNode (startNodeId), controller.getNode (id), vn1, vn2, pt1, pt2 };
                         Command addEdge = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (addEdge, true);
                     }
