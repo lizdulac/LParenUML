@@ -14,21 +14,10 @@ import java.util.*;
  * but a lot more simplistic. 
  * It is purely to save executed commands and to undo/redo them
  ******
- * April 26: History might need to know the timeline action sequence
- * to determine where how many undo you can spam and how many redo 
- * you can spam. 
- * peaking at the top of the stack and see what the latest action is when
- * redo / undo is called to see if the action is redoable or undoable.
- ******
- * For multi-levels of undo. Instead of remembering the latest command, 
- * Keep a list of all commands and a reference to the 'current' one.
- * When we execute a command, we append it to the list and that 
- * represent where we currently are. 
- * When undo(), we undo() the current command and move the current
- * pointer back. When redo(), we advance the pointer and then 
- * re-execute the cmd. But if they choose to have a new Action
- * after undoing some already before, everything in the list after
- * the current cmd will be wiped. 
+ * May 1st: 
+ * Bug: when there is one last item per stack. Calling undo() on 
+ *     the last Action would throw error.
+ *  
  */
 
 
@@ -37,27 +26,40 @@ public class History {
 	private Stack<Command> redoStack = new Stack<Command>();
 	private AppCtrl appCtrl;
 
+	//A list of all Commands, including Action, Undo, Redo
+	//Enum of the three ACTION, REDO, UNDO
+	//if A on stack, remove it and put U
+	//private Stack<Command> command_sequence = new Stack<Command>();
 	
+	/**
+	*
+	*/
+	public enum Command_Sequence
+	{
+		
+	}
 	/**
 	 * Actions that execute gets push into the undoStack() to have undo function
 	 */
 	public void execute (Command cmd)
 	{
 		undoStack.push(cmd);
+		command_sequence.push(cmd);
 	}
 	
 	/**
 	 * undo() will take the cmd from the undoStack and pop the top cmd
 	 * .that cmd will then be send over to appCtrl to do the opposite of it 
-	 *  i.e: if undoCmd has ADD_NODE then appCtrl will execute the opposite, DELETE_NODE
+	 * i.e: if undoCmd has ADD_NODE then appCtrl will execute the opposite, DELETE_NODE
 	 */
 	public void undo()
 	{
 		System.out.println("undo()");
 		//If the undoStack is not empty (ie, there's things to be undone)
 		//pop the top command of undo and push that cmd int the redo stack
-		if (!undoStack.isEmpty())
+		if (!undoStack.isEmpty() && )
 		{
+			command_sequence.push(undoCmd);
 			Command undoCmd = undoStack.pop();
 			appCtrl.executeCommand(undoCmd, true);
 			redoStack.push(undoCmd);
@@ -76,12 +78,12 @@ public class History {
 	public void redo()
 	{
 		System.out.println("redo()");
-		if ( !redoStack.isEmpty())
+		if ( !redoStack.isEmpty() && command_sequence.top
 		{
+			command_sequence.push(redoCmd);
 			Command redoCmd = undoStack.pop();
 			appCtrl.executeCommand(redoCmd,true);
 			undoStack.push(redoCmd);
-
 		}
 		else {
 			System.out.println ("Nothing to redo here");
