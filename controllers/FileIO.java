@@ -62,7 +62,7 @@ public class FileIO
             System.setOut (filestream);
             saveUGraph ();
             System.setOut (console);
-            filestream.close();
+            filestream.close ();
             return true;
         } catch (FileNotFoundException e)
         {
@@ -72,7 +72,7 @@ public class FileIO
     }
 
     /**
-     * This method prints out 
+     * This method prints out
      */
     private void saveUGraph ()
     {
@@ -90,16 +90,16 @@ public class FileIO
             double x = vn.getX ();
             double y = vn.getY ();
 
-            ObservableList<String> atts = node.getAttributes();
-            ObservableList<String> funcs = node.getFunctions();
-            ObservableList<String> misc = node.getMiscs();
+            ObservableList<String> atts = node.getAttributes ();
+            ObservableList<String> funcs = node.getFunctions ();
+            ObservableList<String> misc = node.getMiscs ();
 
             System.out.printf ("%d%s%s%s%f%s%f%s", nodeID, delim, nodeName, delim, x, delim, y, delim);
-            printStrings(atts);
-            printStrings(funcs);
-            printStrings(misc);
-            printInEdges(node.getInEdges ());
-            printOutEdges(node.getOutEdges ());    
+            printStrings (atts);
+            printStrings (funcs);
+            printStrings (misc);
+            printInEdges (node.getInEdges ());
+            printOutEdges (node.getOutEdges ());
             System.out.println ();
         }
     }
@@ -114,25 +114,26 @@ public class FileIO
      */
     public void printInEdges (ArrayList<UEdge> inEdges)
     {
-        if (inEdges.size() >= 1)
+        if (inEdges.size () >= 1)
         {
-            for (int i = 0; i < inEdges.size (); i++)
-            {
-                UEdge edge = inEdges.get(i);
-                UNode sNode = edge.getStartNode ();
-                int sNodeID = sNode.getId ();
-                int edgeID = edge.getId();
+            UEdge edge = inEdges.get (0);
+            UNode sNode = edge.getStartNode ();
+            int sNodeID = sNode.getId ();
+            int edgeID = edge.getId ();
 
-                System.out.print(edgeID + "," + sNodeID);
-                for(int j = 1; j < inEdges.size(); j++)
-                {
-                    System.out.print("," + edgeID + "," + sNodeID);
-                }
-                System.out.print(delim);
+            System.out.print (edgeID + "," + sNodeID);
+            for (int j = 1; j < inEdges.size (); j++)
+            {
+                UEdge e = inEdges.get (j);
+                UNode n = e.getStartNode ();
+                int nId = n.getId ();
+                int eId = e.getId ();
+
+                System.out.print ("," + eId + "," + nId);
             }
-        }
-        else
-        System.out.print(delim);
+            System.out.print (delim);
+        } else
+            System.out.print (delim);
     }
 
     /**
@@ -143,49 +144,51 @@ public class FileIO
      */
     public void printOutEdges (ArrayList<UEdge> outEdges)
     {
-        if(outEdges.size() >= 1)
+        if (outEdges.size () >= 1)
         {
-            for (int i = 0; i < outEdges.size (); i++)
-            {
-                UEdge edge = outEdges.get(i);
-                UNode eNode = edge.getEndNode ();
-                int eNodeID = eNode.getId ();
-                int edgeID = edge.getId();
+            UEdge edge = outEdges.get (0);
+            UNode eNode = edge.getEndNode ();
+            int eNodeID = eNode.getId ();
+            int edgeID = edge.getId ();
 
-                System.out.print(edgeID + "," + eNodeID);
-                for(int j = 1; j < outEdges.size(); j++)
-                {
-                    System.out.print("," + edgeID + "," + eNodeID);
-                }
-                System.out.print(delim);
+            System.out.print (edgeID + "," + eNodeID);
+            for (int j = 1; j < outEdges.size (); j++)
+            {
+                UEdge e = outEdges.get (j);
+                UNode n = e.getEndNode ();
+                int nId = n.getId ();
+                int eId = e.getId ();
+                
+                System.out.print ("," + eId + "," + nId);
             }
-        }
-        else
-        System.out.print(delim); 
+            System.out.print (delim);
+        } else
+            System.out.print (delim);
     }
 
-    //string .replaceAll quotes with /" "
-    //surround it with quotes
-    //if more than 1, we need a comma
-    //String = quote string + quote + endquote
+    // string .replaceAll quotes with /" "
+    // surround it with quotes
+    // if more than 1, we need a comma
+    // String = quote string + quote + endquote
     public void printStrings (ObservableList<String> stringlist)
     {
-        if (stringlist.size () >= 1){
-                String s1 = stringlist.get(0);
-                String replaceString = s1.replaceAll("\"", "\\\"");
-                System.out.print("\"" + replaceString + "\"");
-                
-                for(int i = 1; i < stringlist.size (); i++)
-                {
-                    String s2 = stringlist.get(i);
-                    String replaceString2 = s2.replaceAll("\"", "\\\"");
-                    System.out.print("," + "\"" + replaceString + "\"");
-                }
-                System.out.print(delim);
+        if (stringlist.size () >= 1)
+        {
+            String s1 = stringlist.get (0);
+            String replaceString = s1.replaceAll ("\"", "\\\"");
+            System.out.print ("\"" + replaceString + "\"");
+
+            for (int i = 1; i < stringlist.size (); i++)
+            {
+                String s2 = stringlist.get (i);
+                String replaceString2 = s2.replaceAll ("\"", "\\\"");
+                System.out.print ("," + "\"" + replaceString + "\"");
             }
-        else
-             System.out.print(delim);
+            System.out.print (delim);
+        } else
+            System.out.print (delim);
     }
+
     /**
      * Open file; recreates UGraph with all UNodes and UEdges
      * id;name;x;y;attributes;functions;miscs;edges;edges;
@@ -212,34 +215,34 @@ public class FileIO
                 String name = lineScanner.next ();
                 double x = lineScanner.nextDouble ();
                 double y = lineScanner.nextDouble ();
-                        
+
                 // add node
                 Object[] args = { id, name, x, y };
                 Command addNode = new Command (Action.ADD_NODE, Scope.CANVAS, args);
                 controller.executeCommand (addNode, true);
                 // controller.theGraph.addNode (id, name);
-                
+
                 String attributes = lineScanner.next ();
                 Scanner attributeScanner = new Scanner (attributes);
-                ArrayList<String> attribs = parseStrings(attributeScanner, controller.getNode(id));
+                ArrayList<String> attribs = parseStrings (attributeScanner, controller.getNode (id));
                 for (String a : attribs)
                 {
                     controller.getNode (id).addAttribute (a);
                 }
                 attributeScanner.close ();
-                
+
                 String functions = lineScanner.next ();
                 Scanner functionScanner = new Scanner (functions);
-                ArrayList<String> funcs = parseStrings(functionScanner, controller.getNode (id));
+                ArrayList<String> funcs = parseStrings (functionScanner, controller.getNode (id));
                 for (String f : funcs)
                 {
                     controller.getNode (id).addFunction (f);
                 }
                 functionScanner.close ();
-                
+
                 String miscs = lineScanner.next ();
                 Scanner miscScanner = new Scanner (miscs);
-                ArrayList<String> mis = parseStrings(miscScanner, controller.getNode (id));
+                ArrayList<String> mis = parseStrings (miscScanner, controller.getNode (id));
                 for (String m : mis)
                 {
                     controller.getNode (id).addMisc (m);
@@ -264,27 +267,30 @@ public class FileIO
                         System.out.println ("Opening error: node of edge null");
                     } else
                     {
-                        
+
                         String edgeName = "";
                         VNode vn1 = view.getVNode (id);
                         VNode vn2 = view.getVNode (endNodeId);
-                        
-                        AnchorMgr a = new AnchorMgr( vn1);
-                        
-                        Point2D anchor = a.getNearAnchor(new Point2D(vn1.getX (), vn1.getY()));
-                        
-                        //this math creates a point at the local space of the srcPane
-                        double sumX = anchor.getX() + vn1.getBoundsInParent().getMinX() +50;
-                        double sumY = anchor.getY() + vn1.getBoundsInParent().getMinY() +50;
+
+                        AnchorMgr a = new AnchorMgr (vn1);
+
+                        Point2D anchor = a.getNearAnchor (new Point2D (vn1.getX (), vn1.getY ()));
+
+                        // this math creates a point at the local space of the
+                        // srcPane
+                        double sumX = anchor.getX () + vn1.getBoundsInParent ().getMinX () + 50;
+                        double sumY = anchor.getY () + vn1.getBoundsInParent ().getMinY () + 50;
                         Point2D pt1 = new Point2D (sumX, sumY);
-                        
-                        AnchorMgr b = new AnchorMgr( vn2);
-                                        
-                        b.setPane(vn2);
+
+                        AnchorMgr b = new AnchorMgr (vn2);
+
+                        b.setPane (vn2);
                         Point2D pt2 = b.getNearAnchor (new Point2D (vn2.getX (), vn2.getY ()));
-                        
-                        //id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint
-                        Object[] args2 = { edgeId , edgeName, controller.getNode (id), controller.getNode (endNodeId), vn1, vn2, pt1, pt2 };
+
+                        // id, name, startNode, endNode, startRgn, endRgn,
+                        // currentEdgeStart, releasePoint
+                        Object[] args2 = { edgeId, edgeName, controller.getNode (id), controller.getNode (endNodeId),
+                                vn1, vn2, pt1, pt2 };
                         Command addEdge = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (addEdge, true);
                     }
@@ -312,22 +318,25 @@ public class FileIO
                         String edgeName = "";
                         VNode vn1 = view.getVNode (startNodeId);
                         VNode vn2 = view.getVNode (id);
-                        
-                        AnchorMgr a = new AnchorMgr( vn1);
-                        
-                        Point2D anchor = a.getNearAnchor(new Point2D(vn1.getX (), vn1.getY()));
-                        
-                        //this math creates a point at the local space of the srcPane
-                        double sumX = anchor.getX() + vn1.getBoundsInParent().getMinX() +50;
-                        double sumY = anchor.getY() + vn1.getBoundsInParent().getMinY() +50;
+
+                        AnchorMgr a = new AnchorMgr (vn1);
+
+                        Point2D anchor = a.getNearAnchor (new Point2D (vn1.getX (), vn1.getY ()));
+
+                        // this math creates a point at the local space of the
+                        // srcPane
+                        double sumX = anchor.getX () + vn1.getBoundsInParent ().getMinX () + 50;
+                        double sumY = anchor.getY () + vn1.getBoundsInParent ().getMinY () + 50;
                         Point2D pt1 = new Point2D (sumX, sumY);
-                        
-                        AnchorMgr b = new AnchorMgr( vn2);
-                                        
-                        b.setPane(vn2);
+
+                        AnchorMgr b = new AnchorMgr (vn2);
+
+                        b.setPane (vn2);
                         Point2D pt2 = b.getNearAnchor (new Point2D (vn2.getX (), vn2.getY ()));
-                        //id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint
-                        Object[] args2 = { edgeId , edgeName, controller.getNode (startNodeId), controller.getNode (id), vn1, vn2, pt1, pt2 };
+                        // id, name, startNode, endNode, startRgn, endRgn,
+                        // currentEdgeStart, releasePoint
+                        Object[] args2 = { edgeId, edgeName, controller.getNode (startNodeId), controller.getNode (id),
+                                vn1, vn2, pt1, pt2 };
                         Command addEdge = new Command (Action.ADD_EDGE, Scope.CANVAS, args2);
                         controller.executeCommand (addEdge, true);
                     }
@@ -343,7 +352,7 @@ public class FileIO
             return false;
         }
     }
-    
+
     public ArrayList<String> parseStrings (Scanner scan, UNode node)
     {
         ArrayList<String> strings = new ArrayList<String> ();
@@ -353,13 +362,11 @@ public class FileIO
         {
             if (current.length () < 2)
             {
-                
-            }
-            else if (current.charAt (current.length () - 1) == '\\')
+
+            } else if (current.charAt (current.length () - 1) == '\\')
             {
                 current = current.substring (0, current.length () - 1) + "\",";
-            }
-            else
+            } else
             {
                 current = current.substring (1);
                 strings.add (current.replaceAll ("\\\"", "\""));

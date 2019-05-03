@@ -1,7 +1,7 @@
 package controllers;
 
 
-import javafx.scene.layout.Region;
+import javafx.scene.layout.Pane;
 import javafx.geometry.*;
 import java.lang.Math;
 
@@ -12,7 +12,7 @@ import java.lang.Math;
  */
 public class AnchorMgr {
 	private Point2D[] anchorlist = new Point2D[12];
-	private Region region;
+	private Pane pane;
 	private final int numPoints = 3;
 	private double snapDistance = 6.5;
 	
@@ -22,8 +22,8 @@ public class AnchorMgr {
 	 *
 	 * @param pn pane to be anchored 
 	 */
-	public AnchorMgr(Region pn){
-		region =pn;
+	public AnchorMgr(Pane pn){
+		pane =pn;
 		generate_anchors();
 	}
 	
@@ -32,9 +32,9 @@ public class AnchorMgr {
 	 *
 	 * @param pn pane to be anchored 
 	 */
-	public void setPane(Region pn)
+	public void setPane(Pane pn)
 	{
-		region =pn;
+		pane =pn;
 		generate_anchors();
 	}
 	
@@ -42,8 +42,8 @@ public class AnchorMgr {
 	 * Exposes the anchored pane 
 	 *
 	 */
-	public Region getPane() {
-		return region;
+	public Pane getPane() {
+		return pane;
 	}
 
 	
@@ -68,8 +68,8 @@ public class AnchorMgr {
 	 */
 	public void generate_anchors()
 	{
-		double h = region.getMaxHeight();
-		double w = region.getMaxWidth();	
+		double h = pane.getHeight();
+		double w = pane.getWidth();	
 		double p =0;
 		
 		for(int i = 0; i < numPoints; ++i ) {
@@ -111,8 +111,8 @@ public class AnchorMgr {
 	 * @return Point2D closest to the cursor on the released Node
 	 */
 	public Point2D getNearAnchor(Point2D cursor) {
-		double h = region.getHeight();
-		double w = region.getWidth();	
+		double h = pane.getHeight();
+		double w = pane.getWidth();	
 		System.out.println("pane weight: " + w);
 		System.out.println("pane height: " + h);
 		
@@ -232,10 +232,10 @@ public class AnchorMgr {
 	 */
 	public boolean hasSnap(Point2D cursor)
 	{
-		double h = region.getHeight();
-		double w = region.getWidth();	
-		double px = region.getLayoutX();
-		double py = region.getLayoutY();
+		double h = pane.getHeight();
+		double w = pane.getWidth();	
+		double px = pane.getLayoutX();
+		double py = pane.getLayoutY();
 		double x = cursor.getX();
 		double y = cursor.getY();
 

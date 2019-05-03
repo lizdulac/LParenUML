@@ -229,8 +229,7 @@ public class AppCtrl
      * @param id
      */
     public void eraseEdge (Integer id)
-    {
-        
+    {       
         executeCommand (packageAction(Action.DELETE_EDGE, Scope.CANVAS, id), false);
     }  
     /**
@@ -936,9 +935,9 @@ public class AppCtrl
                     Alert alert = new Alert(AlertType.CONFIRMATION);
                     alert.setTitle("Are you sure you want to proceed?");
                     alert.setHeaderText("Opening a file will delete any unsaved progress.");
-                    alert.setContentText("Press ok to open file. Press save to save first. Press cancel to keep working.");
+                    alert.setContentText("Press \"open\" to continue. Press \"save\" to save first. Press \"cancel\" to keep working.");
 
-                    ButtonType buttonOk = new ButtonType("Ok");
+                    ButtonType buttonOk = new ButtonType("Open");
                     ButtonType buttonSave = new ButtonType("Save");
                     ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 

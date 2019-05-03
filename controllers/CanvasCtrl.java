@@ -1,11 +1,9 @@
 package controllers;
 import model.*;
 import views.*;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseDragEvent;
 
@@ -157,7 +155,7 @@ public class CanvasCtrl
             Point2D clickPoint = new Point2D (e.getSceneX (), e.getSceneY ());
             lastClick.set (clickPoint);
 
-            Region srcNode = (Region) e.getSource ();
+            VNode srcNode = (VNode) e.getSource ();
             int id = (int) srcNode.getUserData ();
             UNode uNode = appCtrl.getNode (id);
 
@@ -174,7 +172,7 @@ public class CanvasCtrl
             // DO NOT package these ADD_EDGE actions and send to executeCommand()
             // all necessary ADD_EDGE actions are taken care of in uNodeDragRelease
 
-                AnchorMgr a = new AnchorMgr( (Pane) srcNode);
+                AnchorMgr a = new AnchorMgr(srcNode);
                 
                 Point2D anchor = a.getNearAnchor(new Point2D(e.getX(), e.getY()));
                 //this math creates a point at the local space of the srcPane
@@ -319,29 +317,26 @@ public class CanvasCtrl
             // mouse released within a UNode
             isCanvasRelease = false;
 
-            Region startRgn = canvasView.getVNode ((int) currentEdge.getUserData ());
-            Region endRgn = (Region) e.getSource ();
+            VNode startPane = canvasView.getVNode ((int) currentEdge.getUserData ());
+            VNode endPane = (VNode) e.getSource ();
 
             if (appCtrl.getToolState () == ToolState.ADD_EDGE)
             {
                 Point2D currentEdgeStart = lastClick.get ();
-//                Point2D releasePoint = new Point2D (e.getX (), e.getY ());
 
-                // @ line #315:
-                // AnchorMgr functionality is currently disabled
-                AnchorMgr a = new AnchorMgr((Pane) e.getSource ());
+                AnchorMgr a = new AnchorMgr(endPane);
                 Point2D releasePoint = a.getNearAnchor (new Point2D (e.getX (), e.getY ()));
 
                 int id = nextEdgeId ();
                 String name = "edgeName";
                 UNode startNode = appCtrl.getNode ((int) currentEdge.getUserData ());
-                UNode endNode = appCtrl.getNode ((int) endRgn.getUserData ());              
+                UNode endNode = appCtrl.getNode ((int) endPane.getUserData ());              
                 
                 getCanvas().getChildren().remove(currentEdge);      
                 currentEdge = null;
                 
                 appCtrl.executeCommand (
-                    packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint), false);              
+                    packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startPane, endPane, currentEdgeStart, releasePoint), false);              
             }
             lastClick.set (null); 
         }
@@ -472,6 +467,12 @@ public class CanvasCtrl
         case DELETE_NODE:
         //(Action.DELETE_NODE, Scope.CANVAS, id)
             
+            if (data.length != 1)
+            {
+                System.out.println ("Data for deleting a node is incorrect.");
+                System.out.println ("Data list expected 1 item but had: " + data.length);
+                return false;
+            } 
             int id = (int) data[0];
             appCtrl.removeNode (id);
             canvasView.removeNode (id);
@@ -481,6 +482,12 @@ public class CanvasCtrl
         case DELETE_EDGE:
         //data[0] - id
             
+            if (data.length != 1)
+            {
+                System.out.println ("Data for deleting an edge is incorrect.");
+                System.out.println ("Data list expected 1 item but had: " + data.length);
+                return false;
+            } 
             canvasView.removeEdge ((int) data[0]);
             System.out.println ("CVSCTR: Command executed DELETE_EDGE");
             return true;
