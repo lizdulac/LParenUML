@@ -225,27 +225,48 @@ public class FileIO
                 String attributes = lineScanner.next ();
                 Scanner attributeScanner = new Scanner (attributes);
                 ArrayList<String> attribs = parseStrings (attributeScanner, controller.getNode (id));
-                for (String a : attribs)
+                for (int i = 0; i < attribs.size (); ++i)
                 {
-                    controller.getNode (id).addAttribute (a);
+                    if ( i < controller.getNode (id).getAttributes ().size ())
+                    {
+                        controller.getNode (id).setAttribute (i, attribs.get (i));
+                    }
+                    else
+                    {
+                        controller.getNode (id).addAttribute (attribs.get (i));
+                    }
                 }
                 attributeScanner.close ();
 
                 String functions = lineScanner.next ();
                 Scanner functionScanner = new Scanner (functions);
                 ArrayList<String> funcs = parseStrings (functionScanner, controller.getNode (id));
-                for (String f : funcs)
+                for (int i = 0; i < funcs.size (); ++i)
                 {
-                    controller.getNode (id).addFunction (f);
+                    if ( i < controller.getNode (id).getFunctions ().size ())
+                    {
+                        controller.getNode (id).setFunction (i, funcs.get (i));
+                    }
+                    else
+                    {
+                        controller.getNode (id).addFunction (funcs.get (i));
+                    }
                 }
                 functionScanner.close ();
 
                 String miscs = lineScanner.next ();
                 Scanner miscScanner = new Scanner (miscs);
                 ArrayList<String> mis = parseStrings (miscScanner, controller.getNode (id));
-                for (String m : mis)
+                for (int i = 0; i < mis.size (); ++i)
                 {
-                    controller.getNode (id).addMisc (m);
+                    if ( i < controller.getNode (id).getMiscs ().size ())
+                    {
+                        controller.getNode (id).setMisc (i, mis.get (i));
+                    }
+                    else
+                    {
+                        controller.getNode (id).addMisc (mis.get (i));
+                    }
                 }
                 miscScanner.close ();
 
