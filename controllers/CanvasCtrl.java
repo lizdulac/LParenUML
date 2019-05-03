@@ -467,7 +467,8 @@ public class CanvasCtrl
         case DELETE_NODE:
         //(Action.DELETE_NODE, Scope.CANVAS, id)
             
-            if (data.length != 1)
+            // Command length 1, Undo Command length 4
+            if (data.length != 1 && data.length != 4)
             {
                 System.out.println ("Data for deleting a node is incorrect.");
                 System.out.println ("Data list expected 1 item but had: " + data.length);
@@ -482,7 +483,8 @@ public class CanvasCtrl
         case DELETE_EDGE:
         //data[0] - id
             
-            if (data.length != 1)
+            // Command length 1, Undo Command length 8
+            if (data.length != 1 && data.length != 8)
             {
                 System.out.println ("Data for deleting an edge is incorrect.");
                 System.out.println ("Data list expected 1 item but had: " + data.length);
