@@ -591,11 +591,11 @@ public class AppCtrl
         
         // ******************** ZOOM TOOLBAR ********************
         // Create Buttons
-    	Button zoomOutButton = new Button (Character.toString ((char) 0x2796));
-    	Button zoomInButton = new Button (Character.toString ((char) 0x2795));
+    	Button zoomOutButton = new Button ("-");
+    	Button zoomInButton = new Button ("+");
     	Button zoomResetButton = new Button ("Reset Zoom");
-        zoomOutButton.setStyle("-fx-font-size: " + fontSize);
-    	zoomInButton.setStyle("-fx-font-size: " + fontSize);
+        zoomOutButton.setStyle("-fx-font-weight: bold; -fx-font-size: " + fontSize);
+    	zoomInButton.setStyle("-fx-font-weight: bold; -fx-font-size: " + fontSize);
     	zoomResetButton.setStyle("-fx-font-size: " + fontSize);
     	
         // EventHandlers
@@ -619,20 +619,20 @@ public class AppCtrl
         // ******************** HISTORY TOOLBAR ********************
         // Undo Button
         Text undoText = new Text("Undo ");
-        Text undoArrow = new Text(" " + Character.toString ((char) 0x2B8C));       
+        Text undoArrow = new Text(" " + Character.toString ((char) 0x293a));       
         HBox undoLabel = new HBox(4, undoArrow, undoText);
         Button undoButton = new Button (null, undoLabel);
         undoButton.resizeRelocate(0, 0, spacing, 0);
-    	undoArrow.setStyle("-fx-font-size: " + (fontSize + 2));
+    	undoArrow.setStyle("-fx-font-size: " + (fontSize + 5));
     	undoText.setStyle("-fx-font-size: " + (fontSize + 1));
         
         // Redo Button
         Text redoText = new Text(" Redo");
-        Text redoArrow = new Text(Character.toString ((char) 0x2B8E) + " ");       
+        Text redoArrow = new Text(Character.toString ((char) 0x293b) + " ");       
         HBox redoLabel = new HBox(3, redoText, redoArrow);
         Button redoButton = new Button(null, redoLabel);
         redoButton.resizeRelocate(0, 0, spacing, 0);   
-    	redoArrow.setStyle("-fx-font-size: " + (fontSize + 2));
+    	redoArrow.setStyle("-fx-font-size: " + (fontSize + 5));
     	redoText.setStyle("-fx-font-size: " + (fontSize + 1));
     	
         // EventHandlers
