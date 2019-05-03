@@ -101,6 +101,17 @@ public class History {
             return null;
         }
     }
+    
+    public boolean isEmpty()
+    {
+        return undoStack.isEmpty ();
+    }
+    
+    public void clear()
+    {
+        undoStack.clear ();
+        redoStack.clear ();
+    }
 
     public History()
     {

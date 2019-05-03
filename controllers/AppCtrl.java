@@ -497,7 +497,8 @@ public class AppCtrl
         SeparatorMenuItem fBreak1 = new SeparatorMenuItem();
         MenuItem newF = new MenuItem ("New");  
         MenuItem open = new MenuItem ("Open");
-        MenuItem save = new MenuItem ("Save");
+        MenuItem save = new MenuItem ("Save As");
+        MenuItem newW = new MenuItem ("New Window");
         SeparatorMenuItem fBreak2 = new SeparatorMenuItem();
         MenuItem stats = new MenuItem ("Show Diagram Statistics");
         SeparatorMenuItem fBreak3 = new SeparatorMenuItem();
@@ -509,6 +510,7 @@ public class AppCtrl
         fileMenu.getItems().add(newF);
         fileMenu.getItems().add(open);
         fileMenu.getItems().add(save);
+        fileMenu.getItems().add (newW);
         fileMenu.getItems().add(fBreak2);
         fileMenu.getItems().add(stats);
         fileMenu.getItems().add(fBreak3);
@@ -519,8 +521,9 @@ public class AppCtrl
         newF.setOnAction (newFile);
         open.setOnAction (openFile);
         save.setOnAction (saveFile);
+        newW.setOnAction (newWindow);
         stats.setOnAction(e -> ModelUtil.printStats (getGraph()));
-        exit.setOnAction(e -> Platform.exit());
+        exit.setOnAction(exitEvent);
         
         // ************ EDIT DROPDOWN ************
         Menu editMenu = new Menu ("Edit");
@@ -768,7 +771,7 @@ public class AppCtrl
         Pos panelAlignment = Pos.CENTER;
         Font buttonsFont = Font.font ("sans-serif", FontWeight.BOLD, fontSize);
         
-        final int[] UCodes = new int[] { 0x2725, 0x270b, 0x2338, 0x2b67, 0x2718 };
+        final int[] UCodes = new int[] { 0x2725, 0x261D, 0x274F, 8594, 0x2718 };
         final String[] buttonNames = new String[] { "Move Graph", "Select / Move", "Create Class Box", "Create Relationship", "Delete" };
 
         VBox toolButtons;
@@ -802,28 +805,6 @@ public class AppCtrl
                 buttons[i].setOnAction (buttonClick);
             }
         }
-
-        /* Development / Debugging Buttons ***
-        // PropSlider
-        Button showHide = new Button ();
-        showHide.setText ("PropSlider");
-        showHide.setPrefWidth (fontSize * 4.1);
-        // PrintStats
-        Button printStats = new Button ();
-        printStats.setText ("PrintStats");
-        printStats.setPrefWidth (fontSize * 4.1);
-        // Undo
-        Button undo = new Button ();
-        undo.setText ("Undo");
-        undo.setPrefWidth (fontSize * 4.1);
-        undo.setOnAction (e -> undo());
-        // Redo
-        Button redo = new Button ();
-        redo.setText ("Redo");
-        redo.setPrefWidth (fontSize * 4.1);
-        redo.setOnAction (e -> redo());
-        toolButtons.getChildren ().addAll (showHide, printStats, undo, redo);
-        */
         
         toolButtons.setPrefHeight ((fontSize + panelSpacing) * (buttons.length + 3));
         return toolButtons;
@@ -1067,7 +1048,7 @@ public class AppCtrl
             File file = fc.showOpenDialog (appStage);
             if (file != null)
             {
-                if (theGraph.size () != 0)
+                if (!history.isEmpty ())
                 {
                     Alert alert = new Alert(AlertType.CONFIRMATION);
                     alert.setTitle("Are you sure you want to proceed?");
@@ -1086,16 +1067,17 @@ public class AppCtrl
                     {
                         saveFile ();
                         // Boolean true means this clearScreen is not undoable
-                        // TODO: reset stack
+                        history.clear ();
                         canvasCtrl.clearScreen (true);
                         fileIO.open (file);
                         appStage.setTitle (appName + file.getName ());
                     }
                     else if (result.get () == buttonOk)
                     {
+                        history.clear ();
                         openFile (file);
                     }
-                    }
+                }
                 else
                 {
                     openFile (file);
@@ -1103,11 +1085,45 @@ public class AppCtrl
             }
         }
     };
+    
+    public EventHandler<ActionEvent> newFile = new EventHandler<ActionEvent> ()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            if (!history.isEmpty ())
+            {
+                Alert alert = new Alert(AlertType.CONFIRMATION);
+                alert.setTitle("Unsaved Work");
+                alert.setHeaderText("Are you sure you want to continue? Creating a new document will delete any unsaved progress.");
+                alert.setContentText("Press \"continue\" to continue. Press \"cancel\" to keep working.");
+
+                ButtonType buttonOk = new ButtonType("Continue");
+                ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+                alert.getButtonTypes().setAll(buttonOk, buttonTypeCancel);
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.get () == buttonOk)
+                {
+                    history.clear ();
+                    canvasCtrl.clearScreen (true);
+                    appStage.setTitle (appName + "Untitled Document");
+                }                
+            }
+            else
+            {
+                history.clear ();
+                canvasCtrl.clearScreen (true);
+                appStage.setTitle (appName + "Untitled Document");
+            }
+        }
+    };
 
     /**
      * re-launch this program in a new process
      */
-    public EventHandler<ActionEvent> newFile = new EventHandler<ActionEvent> ()
+    public EventHandler<ActionEvent> newWindow = new EventHandler<ActionEvent> ()
     {
         @Override
         public void handle (ActionEvent e)
@@ -1136,6 +1152,36 @@ public class AppCtrl
             } catch (IOException ex)
             {
                 System.out.println ("newFile exec error");
+            }
+        }
+    };
+    
+    public EventHandler<ActionEvent> exitEvent = new EventHandler<ActionEvent> ()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            if (!history.isEmpty ())
+            {
+                Alert alert = new Alert(AlertType.CONFIRMATION);
+                alert.setTitle("Unsaved Work");
+                alert.setHeaderText("Are you sure you want to continue? Exiting will delete any unsaved progress.");
+                alert.setContentText("Press \"ok\" to continue. Press \"cancel\" to keep working.");
+
+                ButtonType buttonOk = new ButtonType("Exit");
+                ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+                alert.getButtonTypes().setAll(buttonOk, buttonTypeCancel);
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.get () == buttonOk)
+                {
+                    Platform.exit();
+                }                
+            }
+            else
+            {
+                Platform.exit();
             }
         }
     };

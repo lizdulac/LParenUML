@@ -473,6 +473,10 @@ public class CanvasCtrl
             // endEdgeDraw (int id, Region endRgn, Line theEdge, Point2D releasePoint)
             canvasView.endEdgeDraw ((int) data[0], (Region) data[5], (Line) currentEdge, (Point2D) data[7]);
             
+            currentEdge.toBack ();
+            ((VNode) data[4]).toFront ();
+            ((VNode) data[5]).toFront ();
+            
             // dragging over, the line can begin accepting mouse events again
             currentEdge.setMouseTransparent (false);
             currentEdge = null;
