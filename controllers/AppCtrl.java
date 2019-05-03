@@ -129,6 +129,7 @@ public class AppCtrl
 
         // start - GUI interface is now visible
         System.out.println ("\n******* Start *******\n");
+        
         appStage.setHeight (Screen.getPrimary ().getVisualBounds ().getHeight ());
         sideStage.setHeight (Screen.getPrimary ().getVisualBounds ().getHeight ());
     }
@@ -401,7 +402,7 @@ public class AppCtrl
     private BorderPane configureAppStage ()
     {
         double canvasW = 800;
-        double canvasH = canvasW;
+        double canvasH = 500;
 
         // Stage settings
         appStage.setMinWidth (canvasW);
