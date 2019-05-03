@@ -594,8 +594,14 @@ public class AppCtrl
     	Button zoomOutButton = new Button ("-");
     	Button zoomInButton = new Button ("+");
     	Button zoomResetButton = new Button ("Reset Zoom");
+    	
+    	Tooltip zoomOutTT = new Tooltip("Zoom Out");
+    	Tooltip zoomInTT = new Tooltip("Zoom In");
+    	
         zoomOutButton.setStyle("-fx-font-weight: bold; -fx-font-size: " + fontSize);
+        zoomOutButton.setTooltip(zoomOutTT);
     	zoomInButton.setStyle("-fx-font-weight: bold; -fx-font-size: " + fontSize);
+    	zoomInButton.setTooltip(zoomInTT);
     	zoomResetButton.setStyle("-fx-font-size: " + fontSize);
     	
         // EventHandlers
