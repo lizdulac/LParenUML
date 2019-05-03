@@ -102,12 +102,22 @@ class UGraphTest {
 		graph.addEdge(4, n1, n2, "edge1");
 		
 		graph.removeEdge(4);
+
+		boolean hasEdge = true;
 		
 		Integer[] nodes = graph.getAllNodes();
 		for(int i = 0; i < nodes.length; i++) 
 		{
-			asssertTrue();
+			if(nodes[i].getInEdges().contains(graph.getEdge(4)))
+			{
+				hasEdge = true;
+			}
+			if(nodes[i].getOutEdges().contains(graph.getEdge(4)))
+			{
+				hasEdge = true;
+			}
 		}
+		assertTrue((hasEdge == false), "All edges failed to be deleted");
 	}
 	
 	
