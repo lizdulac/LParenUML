@@ -74,7 +74,12 @@ public class UGraph {
         return uEdges.get (id);
     }
     
-    public void removeEdge(Integer id)
+    public void removeEdge (Integer id)
+    {
+        uEdges.remove (id);
+    }
+    
+    public void removeEdgeFromAll(Integer id)
     {
         UEdge e = getEdge(id);
         e.getStartNode ().getOutEdges ().remove (e);
@@ -86,7 +91,6 @@ public class UGraph {
     {
         UEdge e = getEdge(id);
         e.getEndNode ().getInEdges ().remove (e);
-        uEdges.remove (id);
     }
     
     public void removeEdgeFromOut(Integer id)
