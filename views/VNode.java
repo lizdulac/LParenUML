@@ -10,7 +10,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.util.Callback;
 
 /**
@@ -27,49 +26,7 @@ public class VNode extends Pane
     ObservableList<String> className;
 
     private final double cellHeight = 25;
-    /************************** UNODE CONSTRUCTORS ************************/
-    /**
-     * 
-     * @param nodeID
-     * @depricated
-     */
-    public VNode (int nodeID)
-    {
-        this (90, 90, nodeID);
-    }
-    
-    /**
-     * 
-     * @param x
-     * @param y
-     * @param nodeID
-     * @deprecated
-     */
-    public VNode (double x, double y, int nodeID)
-    {
-        this (x, y, nodeID, "");
-    }
-    
-    /**
-     * 
-     * @param x
-     * @param y
-     * @param nodeID
-     * @param name
-     * @deprecated
-     */
-    public VNode (double x, double y, int nodeID, String name)
-    {
-//        this (x, y, nodeID, 1.0, name);
-    }
-    
-    /*
-    public VNode (double x, double y, int nodeID, double scale, ObservableList<String> atr)
-    {
-        this (x, y, nodeID, scale, "", atr);
-    }
-    */
-    
+    /************************** UNODE CONSTRUCTORS ************************/ 
     /**
      * 
      * @param x
@@ -126,7 +83,8 @@ public class VNode extends Pane
         this.setLayoutX (x);
         this.setLayoutY (y);
     }
-    /************************* UNODE GENERAL GETTERS **********************/
+    
+    /************************* VNODE GENERAL GETTERS **********************/
     public int getIntId ()
     {
         return id;
@@ -149,7 +107,7 @@ public class VNode extends Pane
         return this.getLayoutY ();
     }
 
-    /*************************** UNODE FUNCTIONS **************************/
+    /*************************** VNODE FUNCTIONS **************************/
     /**
      * 
      * @param x

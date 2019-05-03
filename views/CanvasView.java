@@ -249,6 +249,7 @@ public class CanvasView
      */
     public void removeEdge (Integer id)
     {
+        System.out.println ("Remove Edge: " + id);
         Line edge = edges.get (id);
         canvas.getChildren ().remove (edge);
         edges.remove (id);
