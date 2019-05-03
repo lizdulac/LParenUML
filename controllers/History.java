@@ -1,6 +1,8 @@
 package controllers;
 import java.util.*;
 
+import controllers.Command.Action;
+
 
 /**
  * 
@@ -33,65 +35,75 @@ import java.util.*;
 
 
 public class History {
-	private Stack<Command> undoStack = new Stack<Command>();
-	private Stack<Command> redoStack = new Stack<Command>();
-	private AppCtrl appCtrl;
+    private Stack<Command> undoStack = new Stack<Command>();
+    private Stack<Command> redoStack = new Stack<Command>();
+    private AppCtrl appCtrl;
 
-	
-	//Keeping a list of commands, executes, undoes and redoes 
-	//by using the concept of history
-	//private List<Command> command_sequence();
-	
-	public void execute (Command cmd)
-	{
-		undoStack.push(cmd);
-		//cmd.execute();
-	}
-	
-	/**
-	 * undo() will take the cmd from the undoStack and pop the top cmd
-	 * for it to be disapear from the view
-	 */
-	public void undo()
-	{
-		System.out.println("undo()");
-		//If the undoStack is not empty (ie, there's things to be undone)
-		//pop the top command of undo and push that cmd int the redo stack
-		if (!undoStack.isEmpty())
-		{
-			Command undoCmd = undoStack.pop();
-			appCtrl.executeCommand(undoCmd, true);
-			redoStack.push(undoCmd);
-			//cmd.undo();
-		} else {
-			System.out.println ("Nothing to undo here");
-		}
-	}
+    
+    //Keeping a list of commands, executes, undoes and redoes 
+    //by using the concept of history
+    //private List<Command> command_sequence();
+    
+    public void push (Command cmd)
+    {
+        System.out.println ("HISTRY: Command pushed on undo stack");
+        undoStack.push(cmd);
+        //cmd.execute();
+    }
+    
+    /**
+     * undo() will take the cmd from the undoStack and pop the top cmd
+     * for it to be disapear from the view
+     */
+    public Command undo()
+    {
+        System.out.println("undo()");
+        //If the undoStack is not empty (ie, there's things to be undone)
+        //pop the top command of undo and push that cmd int the redo stack
+        if (!undoStack.isEmpty())
+        {
+            Command undoCmd = undoStack.pop();
+            
+            Action opposite = Action.values ()[undoCmd.actionType.getValue () + 1];
+            undoCmd.actionType = opposite;
 
-	/**
-	 * redo() must leave exactly the same setate as execute(). 
-	 * very similar to execute
-	 */
-	public void redo()
-	{
-		System.out.println("redo()");
-		//If the redo stack is not empty and the command is redoAble
-		// pop the cmd from redo stack and push it over to undoStack
-		// Redo would re-execute the 
-		if ( !redoStack.isEmpty())
-		{
-			Command redoCmd = undoStack.pop();
-			undoStack.push(redoCmd);
+            redoStack.push(undoCmd);
+            
+            return undoCmd;
+        } else {
+            System.out.println ("Nothing to undo here");
+            return null;
+        }
+    }
 
-			//redoCmd.execute ???????
-		}
-		else {
-			System.out.println ("Nothing to redo here");
-		}
-	}
+    /**
+     * redo() must leave exactly the same setate as execute(). 
+     * very similar to execute
+     */
+    public Command redo()
+    {
+        System.out.println("redo()");
+        //When calling redo(), pop the top command from redoStack
+        //send it over to appCtrl
+        //push that cmd over to undoStack
+        if ( !redoStack.isEmpty())
+        {
+            Command redoCmd = redoStack.pop();
 
-	public History(AppCtrl controller)
-	{
-		appCtrl = controller; 
-	}
+            Action opposite = Action.values ()[redoCmd.actionType.getValue () - 1];
+            redoCmd.actionType = opposite;
+            
+            undoStack.push(redoCmd);
+            return redoCmd;
+        }
+        else {
+            System.out.println ("Nothing to redo here");
+            return null;
+        }
+    }
+
+    public History()
+    {
+
+    }
 }

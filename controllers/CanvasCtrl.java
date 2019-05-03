@@ -78,6 +78,26 @@ public class CanvasCtrl
         return ++uEdgeId;
     }
     
+    /**
+     * Necessary for file opening/saving
+     * 
+     * @param id
+     */
+    public void setUNodeId (int id)
+    {
+        uNodeId = id;
+    }
+    
+    /**
+     * Necessary for file opening/saving
+     * 
+     * @param id
+     */
+    public void setUEdgeId (int id)
+    {
+        uEdgeId = id;
+    }
+    
     /********************** CANVASCTRL EVENT HANDLERS *******************/
     /**
      * 
@@ -86,7 +106,7 @@ public class CanvasCtrl
     {
         @Override
         public void handle (MouseEvent e)
-        {        	
+        {           
             if (e.getTarget () == e.getSource ())
             {
                 if (appCtrl.getToolState () == ToolState.ADD_NODE)
@@ -102,6 +122,8 @@ public class CanvasCtrl
                     System.out.println ("CANVAS: canvas clicked, no action");
                 }
             }
+            // Required for move drags to reset
+            lastClick.set (null);
         }
     };
     
@@ -110,18 +132,19 @@ public class CanvasCtrl
      */
     public EventHandler<MouseDragEvent> canvasDragRelease = new EventHandler<MouseDragEvent> ()
     {
-    	@Override
-    	public void handle (MouseDragEvent e)
-    	{    		
-    		if (appCtrl.getToolState () == ToolState.ADD_EDGE)
+        @Override
+        public void handle (MouseDragEvent e)
+        {           
+            if (appCtrl.getToolState () == ToolState.ADD_EDGE)
             {
-    			getCanvas().getChildren().remove(currentEdge);
+                getCanvas().getChildren().remove(currentEdge);
                 currentEdge = null;
                 System.out.println ("CVSCTR: edge creation cancelled.");
             }
-		}
-	};
-	
+            lastClick.set (null);
+        }
+    };
+    
     /**
      * 
      */
@@ -137,19 +160,36 @@ public class CanvasCtrl
             int id = (int) srcNode.getUserData ();
             UNode uNode = appCtrl.getNode (id);
 
-            if (appCtrl.getToolState () == ToolState.SELECT)
-            {
-            	ObservableList<String> atr = appCtrl.getNode(id).getAttributes();
-            	// Selecting a node is not un-doable so it is not packaged
-            	appCtrl.getPropCtrl().refreshData(id, uNode.getName(), atr);
+            if (appCtrl.getToolState () == ToolState.SELECT_MOVE)
+            {// Selecting a node is not undo-able so actions are not packaged
+            	
+                ObservableList<String> atr = appCtrl.getNode(id).getAttributes();
+                
+                if(canvasView.getVNode(id).getSelected()){
+                	canvasView.unselectAllNodes(appCtrl.getUnselectedStyle());
+                	//canvasView.getVNode(id).setStyle();
+                	System.out.println ("U-NODE: node " + id + " changed to selected is " + canvasView.getVNode(id).getSelected());
+                }
+                else{
+                	canvasView.unselectAllNodes(appCtrl.getUnselectedStyle());
+                	canvasView.getVNode(id).setSelected(true);
+                	canvasView.getVNode(id).setStyle(appCtrl.getSelectedStyle());
+                	System.out.println ("U-NODE: node " + id + " changed to selected is " + canvasView.getVNode(id).getSelected());
+                }            
+
+            // only toggle the slider if it is currently hidden
+                if( !appCtrl.propIsVisible() ) {
+                	appCtrl.toggleSlider();
+                }                
+                appCtrl.refreshPropData(appCtrl.getAsList(id));
                 appCtrl.sideStage.requestFocus();
                 
-                System.out.println ("U-NODE: node " + uNode.getId () + " selected");
+//                System.out.println ("U-NODE: node " + id + " selected");
             }
             else if (appCtrl.getToolState () == ToolState.ADD_EDGE) {
             // DO NOT package these ADD_EDGE actions and send to executeCommand()
             // all necessary ADD_EDGE actions are taken care of in uNodeDragRelease
-            	
+                
                 currentEdge = canvasView.beginEdgeDraw (srcNode, lastClick.get ());                
                 // currentEdge ID must be the same as startNode ID 
                 currentEdge.setUserData (uNode.getId ());
@@ -178,6 +218,7 @@ public class CanvasCtrl
                 // consume MouseEvent, prevent canvasMouseRelease from getting it
                 e.consume ();
             }
+            lastClick.set (null);
         }
     };
 
@@ -196,7 +237,7 @@ public class CanvasCtrl
             // System.out.println("startFullDrag: "+srcNode.getUserData());
 
             if (appCtrl.getToolState () == ToolState.ADD_EDGE)
-            {            	
+            {               
                 // this call is required for uNodeDragRelease to operate
                 srcNode.startFullDrag ();
             }
@@ -213,7 +254,7 @@ public class CanvasCtrl
         {
             Region srcNode = (Region) e.getSource ();
 
-            if (appCtrl.getToolState () == ToolState.SELECT)
+            if (appCtrl.getToolState () == ToolState.SELECT_MOVE)
             {
                 Point2D dragPoint = new Point2D (e.getSceneX (), e.getSceneY ());
                 // canvasView.moveNode(srcNode, lastClick.get(), dragPoint);
@@ -261,7 +302,7 @@ public class CanvasCtrl
         @Override
         public void handle (MouseEvent e)
         {
-            if (appCtrl.getToolState () == ToolState.MOVE)
+            if (appCtrl.getToolState () == ToolState.MOVE_GRAPH)
             {
                 Point2D clickPoint = new Point2D (e.getX (), e.getY ());
                 if (lastClick.get () != null)
@@ -278,40 +319,78 @@ public class CanvasCtrl
      */
     public EventHandler<MouseDragEvent> uNodeDragRelease = new EventHandler<MouseDragEvent> ()
     {
-    	@Override
-    	public void handle (MouseDragEvent e)
-    	{
-    		// mouse released within a UNode
-			isCanvasRelease = false;
+        @Override
+        public void handle (MouseDragEvent e)
+        {
+            // mouse released within a UNode
+            isCanvasRelease = false;
 
-			Region startRgn = canvasView.getVNode ((int) currentEdge.getUserData ());
-			Region endRgn = (Region) e.getSource ();
+            Region startRgn = canvasView.getVNode ((int) currentEdge.getUserData ());
+            Region endRgn = (Region) e.getSource ();
 
-			if (appCtrl.getToolState () == ToolState.ADD_EDGE)
-			{
-				Point2D currentEdgeStart = lastClick.get ();
-				Point2D releasePoint = new Point2D (e.getX (), e.getY ());
+            if (appCtrl.getToolState () == ToolState.ADD_EDGE)
+            {
+                Point2D currentEdgeStart = lastClick.get ();
+//                Point2D releasePoint = new Point2D (e.getX (), e.getY ());
 
-				// @ line #315:
-				// AnchorMgr functionality is currently disabled
-				AnchorMgr a = new AnchorMgr((Pane) e.getSource ());
-				//Point2D releasePoint = a.getNearAnchor (new Point2D (e.getX (), e.getY ()));
+                // @ line #315:
+                // AnchorMgr functionality is currently disabled
+                AnchorMgr a = new AnchorMgr((Pane) e.getSource ());
+                Point2D releasePoint = a.getNearAnchor (new Point2D (e.getX (), e.getY ()));
 
-				int id = nextEdgeId ();
-				String name = "edgeName";
-				UNode startNode = appCtrl.getNode ((int) currentEdge.getUserData ());
-				UNode endNode = appCtrl.getNode ((int) endRgn.getUserData ());				
-				
-				getCanvas().getChildren().remove(currentEdge);		
-				currentEdge = null;
-				
-				appCtrl.executeCommand (
-					packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint), false);
-
-				lastClick.set (null);				
-			}
-		}
-	};
+                int id = nextEdgeId ();
+                String name = "edgeName";
+                UNode startNode = appCtrl.getNode ((int) currentEdge.getUserData ());
+                UNode endNode = appCtrl.getNode ((int) endRgn.getUserData ());              
+                
+                getCanvas().getChildren().remove(currentEdge);      
+                currentEdge = null;
+                
+                appCtrl.executeCommand (
+                    packageAction (Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint), false);              
+            }
+            lastClick.set (null); 
+        }
+    };
+    
+    /**
+     * 
+     * @param percent
+     */
+    public void zoomIn (double percent)
+    {
+        canvasView.zoomIn (percent);
+    }
+    
+    /**
+     * 
+     */
+    public void zoomReset ()
+    {
+        canvasView.zoomReset ();
+    }
+    
+    /**
+     * 
+     * @param id
+     * @param name
+     */
+    public void refreshVNode(Integer id, String name)
+    {
+        canvasView.getVNode(id).refreshName(name);
+    }
+    
+    
+    /**
+     * 
+     */
+    public void clearScreen (Boolean history)
+    {
+        for (Integer i : canvasView.getNodeKeys ())
+        {
+            appCtrl.executeCommand(packageAction (Action.DELETE_NODE, Scope.CANVAS, i), history);
+        }
+    }
 
     /********************** CANVASCTRL EXECUTE COMMAND ******************/
     /**
@@ -345,33 +424,35 @@ public class CanvasCtrl
         /*
          * if(isHistory) { return false; }
          */
-    	
+        
         Object[] data = cmd.getData ();        
         Action currentAction = cmd.actionType;
         
         switch (currentAction)
         {
-        case ADD_NODE:        	
+        case ADD_NODE:          
         //(Action.ADD_NODE, Scope.CANVAS, id, name, e.getX (), e.getY ())
-        	
-        	if (data.length != 4)
-        	{
+            
+            if (data.length != 4)
+            {
                 System.out.println ("Data for adding a node is incorrect.");
                 System.out.println ("Data list expected 4 items but had: " + data.length);
                 return false;
             }
             // addNode (Integer id, String name)
             appCtrl.addNode ((Integer) data[0], (String) data[1]);
-            ObservableList<String> atr = appCtrl.getGraph().getNode((int) data[0]).getAttributes();
+            ObservableList<String> attr = appCtrl.getGraph().getNode((int) data[0]).getAttributes();
+            ObservableList<String> func = appCtrl.getGraph().getNode((int) data[0]).getFunctions();
+            ObservableList<String> misc = appCtrl.getGraph().getNode((int) data[0]).getMiscs();
             
-            // drawNode (double x, double y, int id, String name, ObservableList<String> atr)
-            canvasView.drawNode ((double) data[2], (double) data[3], (int) data[0], (String) data[1], atr);
+         // drawNode (double x, double y, int id, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
+            canvasView.drawNode ((double) data[2], (double) data[3], (int) data[0], (String) data[1], attr, func, misc);
             System.out.println ("CVSCTR: Command executed ADD_NODE with id of " + (int) data[0]);    
        
         return true;            
         case ADD_EDGE:
         //(Action.ADD_EDGE, Scope.CANVAS, id, name, startNode, endNode, startRgn, endRgn, currentEdgeStart, releasePoint)
-        	
+            
             if (data.length != 8)
             {
                 System.out.println ("Data for adding a node is incorrect.");
@@ -388,16 +469,16 @@ public class CanvasCtrl
             canvasView.endEdgeDraw ((int) data[0], (Region) data[5], (Line) currentEdge, (Point2D) data[7]);
             
          // dragging over, the line can begin accepting mouse events again
-			currentEdge.setMouseTransparent (false);
-			currentEdge = null;
+            currentEdge.setMouseTransparent (false);
+            currentEdge = null;
             
             System.out.println ("CVSCTR: Command executed ADD_EDGE with id of " + (int) data[0]);
             
         return true;
         case DELETE_NODE:
         //(Action.DELETE_NODE, Scope.CANVAS, id)
-        	
-        	int id = (int) data[0];
+            
+            int id = (int) data[0];
             appCtrl.removeNode (id);
             canvasView.removeNode (id);
             System.out.println ("CVSCTR: Command executed DELETE_NODE");
@@ -405,7 +486,7 @@ public class CanvasCtrl
         return true;
         case DELETE_EDGE:
         //data[0] - id
-        	
+            
             canvasView.removeEdge ((int) data[0]);
             System.out.println ("CVSCTR: Command executed DELETE_EDGE");
             return true;
