@@ -3,27 +3,37 @@ import controllers.Command.Scope;
 import controllers.Command.Action;
 import model.*;
 
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
+
 import javafx.util.Duration;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
@@ -36,8 +46,10 @@ import javafx.event.EventHandler;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -53,20 +65,33 @@ public class AppCtrl
     private PropertiesCtrl propCtrl;
     private CanvasCtrl canvasCtrl;
     private ToolState toolState;
+    private Button prevState;
     protected UGraph theGraph;
     private Stage appStage;
     private Scene appScene;
-    private Stage sideStage;
+    protected Stage sideStage;
     private Scene sideScene;
     private FileIO fileIO;
+    private History history;
+    private VBox propSlider;
 
     /*********************** APPCTRL FINAL VARIABLES *********************/
+    private final double menuH = 39;
     private final double margin = 50;
     private final double cornerRadius = 50;
     private final double toolW = cornerRadius + margin;
     private final String appName = "RParen - a UML Diagram Editor by LParen - ";
+    private final String selected =  ".button {-fx-background-color:linear-gradient(#f8f8f8, #dcdcdc),"
+            + "linear-gradient(#ffffff 0%, #dfdfdf 20%, #dcdcdc 100%),linear-gradient(#e0e0e0 0%, #fcfcfc 50%);"
+            + "-fx-background-color: white;-fx-background-radius: 8,7,6;-fx-background-insets: 0,1,2;"
+            + "-fx-focus-color: transparent;-fx-effect: dropshadow( three-pass-box , #0E92F0 , 10, 0 , 0 , 1 );"
+            + "-fx-text-fill: #0E92F0;-fx-border-color:#aaaaaa;-fx-border-width: 2 2 2 2;"//#75eae8;";
+            + "-fx-border-radius: 8,7,6;";
+    private final String unselected = ".button {" + "-fx-background-color:linear-gradient(#f2f2f2, #d6d6d6),"
+            + "linear-gradient(#fcfcfc 0%, #d9d9d9 20%, #d6d6d6 100%),linear-gradient(#dddddd 0%, #f6f6f6 50%);"
+            + "-fx-background-radius: 8,7,6;-fx-background-insets: 0,1,2;-fx-text-fill: black;"
+            + "-fx-focus-color: transparent;}";
     private final String canvasBgHex = "#F2F2F2";
-    // private final Background canvasBg = new Background (new BackgroundFill (Color.web (canvasBgHex), null, null));
     private final Background marginBg = new Background (new BackgroundFill (Color.WHITE, null, null));
     private final Background transparent = new Background (new BackgroundFill (Color.TRANSPARENT, null, null));
 
@@ -84,10 +109,11 @@ public class AppCtrl
         // initialization
         BorderPane borderPane;
         theGraph = new UGraph ();
-        toolState = ToolState.SELECT;
+        toolState = ToolState.SELECT_MOVE;
         canvasCtrl = new CanvasCtrl (this);
-        propCtrl = new PropertiesCtrl (this, canvasCtrl);
+        propCtrl = new PropertiesCtrl (this);
         fileIO = new FileIO (this, canvasCtrl.canvasView);
+        history = new History ();
 
         // appStage - configure primary application window
         appStage = stage;
@@ -186,21 +212,23 @@ public class AppCtrl
      * @version 3.0 Inbound Iteration 3 
      */
     public void cleanEdges(UNode n)
-    {    	
-        //clean outgoing edges and their ends  
-        for (UEdge e: n.getOutEdges())
-        {
-        	theGraph.removeEdgeFromIn(e.getId ());
-            eraseEdge(e.getId ());
-        }
+    {       
+        //clean outgoing edges and their ends 
+        if (n != null){
+            for (UEdge e: n.getOutEdges())
+            {
+                theGraph.removeEdgeFromIn(e.getId ());
+                eraseEdge(e.getId ());
+                }
         
-        //clean incoming edges and their starts
-        for (UEdge e : n.getInEdges())
-        {
-        	theGraph.removeEdgeFromOut(e.getId ());
-            eraseEdge(e.getId ());
+            //clean incoming edges and their starts
+            for (UEdge e : n.getInEdges())
+            {
+                theGraph.removeEdgeFromOut(e.getId ());
+                eraseEdge(e.getId ());
+                }
+            }
         }
-    }
     
     /**
      * Erases Line representing Edge from canvas,
@@ -209,10 +237,48 @@ public class AppCtrl
      * @param id
      */
     public void eraseEdge (Integer id)
-    {
-    	
+    {       
         executeCommand (packageAction(Action.DELETE_EDGE, Scope.CANVAS, id), false);
     }  
+    /**
+    *
+    * 
+    * @param id
+    */
+   public ObservableList<String> getAsList(Integer id)
+   {
+       return theGraph.getNode(id).getAsList();
+   }
+
+   /**
+   *
+   * 
+   * @param id
+   */
+  public void setFromList(Integer id, ObservableList<String> nodeData)
+  {
+      theGraph.getNode(id).setFromList(nodeData);
+  }
+
+   /**
+   *
+   * 
+   * @param
+   */
+   public void refreshPropData(ObservableList<String> nodeData)
+   {
+       propCtrl.refreshPropData(nodeData);
+   }
+
+   /**
+   *
+   * 
+   * @param
+   */
+   public void refreshVNode(Integer id, String name)
+   {
+       canvasCtrl.refreshVNode(id, name);
+   }
     
     /**
      * Packages the parameters and the type of action into a Command class. The
@@ -240,7 +306,27 @@ public class AppCtrl
     {
         return propCtrl;
     }
-
+    
+    public CanvasCtrl getCanvasCtrl ()
+    {
+        return canvasCtrl;
+    }
+    
+    public boolean propIsVisible ()
+    {
+        return propCtrl.isVisible();
+    }
+    
+    public String getSelectedStyle()
+    {
+    	return selected;
+    }
+    
+    public String getUnselectedStyle()
+    {
+    	return unselected;
+    }
+    
     /**
      * Exposes the tool width, which
      * is needed to build the GUI.
@@ -314,7 +400,7 @@ public class AppCtrl
      */
     private BorderPane configureAppStage ()
     {
-        double canvasW = 700;
+        double canvasW = 800;
         double canvasH = canvasW;
 
         // Stage settings
@@ -349,7 +435,7 @@ public class AppCtrl
      */
     private BorderPane configureBorderPane (double canvasW, double canvasH)
     {
-        MenuBar menuBar = configureMenuBar (canvasW);
+        BorderPane menuBar = configureMenuBar (canvasW);
         Pane canvas = canvasCtrl.getCanvas ();
         Pane rightCorners = new Pane ();
         BorderPane borderPane = new BorderPane ();
@@ -377,7 +463,7 @@ public class AppCtrl
         canvas.setPrefWidth (canvasW);
         canvas.setPrefHeight (canvasH);
         topMargin.setPrefHeight (margin);
-        btmMargin.setPrefHeight (margin);
+        btmMargin.setPrefHeight (margin - menuH);
         leftMargin.setPrefWidth (margin);
         rightMargin.setPrefWidth (toolW);
         rightCorners.setPrefWidth (cornerRadius);
@@ -400,31 +486,178 @@ public class AppCtrl
      * @param canvasW initial width of the canvas
      * @return the JavaFX MenuBar that was created
      */
-    private MenuBar configureMenuBar (double canvasW)
+    private BorderPane configureMenuBar (double canvasW)
     {
-        // ************ FILE MENU ************
-        // MenuItems
+    	final double fontSize = 15;
+        final double spacing = 90;
+    	
+        // ************ FILE DROPDOWN ************
+        Menu fileMenu = new Menu ("File");        
+        // Create MenuItems
+        SeparatorMenuItem fBreak1 = new SeparatorMenuItem();
+        MenuItem newF = new MenuItem ("New");  
         MenuItem open = new MenuItem ("Open");
         MenuItem save = new MenuItem ("Save");
-        MenuItem newF = new MenuItem ("New");
+        SeparatorMenuItem fBreak2 = new SeparatorMenuItem();
+        MenuItem stats = new MenuItem ("Show Diagram Statistics");
+        SeparatorMenuItem fBreak3 = new SeparatorMenuItem();
+        MenuItem exit = new MenuItem ("Exit");
+        SeparatorMenuItem fBreak4 = new SeparatorMenuItem();
+        
+        // Add Items
+        fileMenu.getItems().add(fBreak1);
+        fileMenu.getItems().add(newF);
+        fileMenu.getItems().add(open);
+        fileMenu.getItems().add(save);
+        fileMenu.getItems().add(fBreak2);
+        fileMenu.getItems().add(stats);
+        fileMenu.getItems().add(fBreak3);
+        fileMenu.getItems().add(exit);
+        fileMenu.getItems().add(fBreak4);
+        
         // EventHandlers
+        newF.setOnAction (newFile);
         open.setOnAction (openFile);
         save.setOnAction (saveFile);
-        newF.setOnAction (newFile);
+        stats.setOnAction(e -> ModelUtil.printStats (getGraph()));
+        exit.setOnAction(e -> Platform.exit());
+        
+        // ************ EDIT DROPDOWN ************
+        Menu editMenu = new Menu ("Edit");
+        // Create MenuItems
+        SeparatorMenuItem eBreak1 = new SeparatorMenuItem();
+        MenuItem undo = new MenuItem ("Undo");
+        MenuItem redo = new MenuItem ("Redo");
+        SeparatorMenuItem eBreak2 = new SeparatorMenuItem();
+        MenuItem prop = new MenuItem ("Properties");
+        SeparatorMenuItem eBreak3 = new SeparatorMenuItem();
+        
         // Add Items
-        Menu fileMenu = new Menu ("File", null, open, save, newF);
-
-
-        // ************* MENU BAR *************
-        MenuBar menuBar = new MenuBar(fileMenu);
-        menuBar.setBackground (transparent);
-        menuBar.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 0;");
-        menuBar.setMaxWidth (margin + canvasW + 2.0);
-        menuBar.setPrefHeight (30.0);
-        menuBar.setMinHeight (30.0);
-        return menuBar;
+        editMenu.getItems().add(eBreak1);
+        editMenu.getItems().add(undo);
+        editMenu.getItems().add(redo);
+        editMenu.getItems().add(eBreak2);
+        editMenu.getItems().add(prop);
+        editMenu.getItems().add(eBreak3);
+        
+        // EventHandlers
+        undo.setOnAction (e -> undo());
+        redo.setOnAction (e -> redo());
+        prop.setOnAction (e -> { if( !propCtrl.isVisible())   toggleSlider() ;});
+        // only toggle the slider if it is currently hidden
+        
+        // ************ VIEW DROPDOWN ************
+        Menu viewMenu = new Menu ("View");
+        // Create MenuItems
+        SeparatorMenuItem vBreak1 = new SeparatorMenuItem();        
+        MenuItem zoomIn = new MenuItem ("Zoom In  ( + )");
+        MenuItem zoomOut = new MenuItem("Zoom Out  ( - )");
+        SeparatorMenuItem vBreak2 = new SeparatorMenuItem();        
+        MenuItem reset = new MenuItem ("Reset Zoom  (100%)");
+        SeparatorMenuItem vBreak3 = new SeparatorMenuItem();
+        
+        // Add Items
+        viewMenu.getItems().add(vBreak1);
+        viewMenu.getItems().add(zoomIn);
+        viewMenu.getItems().add(zoomOut);
+        viewMenu.getItems().add(vBreak2);
+        viewMenu.getItems().add(reset);
+        viewMenu.getItems().add(vBreak3);
+        
+        // EventHandlers
+        zoomIn.setOnAction(zoomInClick);
+        zoomOut.setOnAction(zoomOutClick);
+        reset.setOnAction (zoomReset);        
+        
+        // ******************** MAIN MENUBAR ********************
+        // MenuBar
+        MenuBar mainMenu = new MenuBar(fileMenu, editMenu, viewMenu);
+        StackPane.setAlignment(mainMenu, Pos.TOP_LEFT);
+        mainMenu.setMinHeight(menuH);
+        // StackPane
+        StackPane menuPane = new StackPane(mainMenu);        
+        menuPane.setPrefWidth(margin + (canvasW / 2) - (spacing * 3));
+        
+        // Menu Styling
+        fileMenu.setStyle("-fx-padding: 6;");
+        editMenu.setStyle("-fx-padding: 6;");
+        viewMenu.setStyle("-fx-padding: 6;");        
+        mainMenu.setStyle("-fx-padding: 0 0 0 6; -fx-font-size: " + fontSize);
+        mainMenu.setBackground (transparent);
+        
+        // ******************** ZOOM TOOLBAR ********************
+        // Create Buttons
+    	Button zoomOutButton = new Button (Character.toString ((char) 0x2796));
+    	Button zoomInButton = new Button (Character.toString ((char) 0x2795));
+    	Button zoomResetButton = new Button ("Reset Zoom");
+        zoomOutButton.setStyle("-fx-font-size: " + fontSize);
+    	zoomInButton.setStyle("-fx-font-size: " + fontSize);
+    	zoomResetButton.setStyle("-fx-font-size: " + fontSize);
+    	
+        // EventHandlers
+    	zoomOutButton.setOnAction(zoomOutClick);
+    	zoomInButton .setOnAction(zoomInClick);
+    	zoomResetButton.setOnAction (zoomReset);
+    	
+    	// zoomButtons HBox
+    	HBox zoomButtons = new HBox((spacing / 10), zoomOutButton, zoomResetButton, zoomInButton);
+    	zoomButtons.setMinWidth(spacing * 2);       
+        Pane zoomLeft = new Pane();
+        Pane zoomRight = new Pane();
+        
+        // zoomHBox
+        HBox zoomHBox = new HBox(zoomLeft, zoomButtons, zoomRight);
+    	zoomHBox.setMinHeight(menuH);
+    	HBox.setHgrow(zoomLeft, Priority.ALWAYS);
+    	HBox.setHgrow(zoomButtons, Priority.NEVER);
+    	HBox.setHgrow(zoomRight, Priority.ALWAYS);
+    	
+        // ******************** HISTORY TOOLBAR ********************
+        // Undo Button
+        Text undoText = new Text("Undo ");
+        Text undoArrow = new Text(" " + Character.toString ((char) 0x2B8C));       
+        HBox undoLabel = new HBox(4, undoArrow, undoText);
+        Button undoButton = new Button (null, undoLabel);
+        undoButton.resizeRelocate(0, 0, spacing, 0);
+    	undoArrow.setStyle("-fx-font-size: " + (fontSize + 2));
+    	undoText.setStyle("-fx-font-size: " + (fontSize + 1));
+        
+        // Redo Button
+        Text redoText = new Text(" Redo");
+        Text redoArrow = new Text(Character.toString ((char) 0x2B8E) + " ");       
+        HBox redoLabel = new HBox(3, redoText, redoArrow);
+        Button redoButton = new Button(null, redoLabel);
+        redoButton.resizeRelocate(0, 0, spacing, 0);   
+    	redoArrow.setStyle("-fx-font-size: " + (fontSize + 2));
+    	redoText.setStyle("-fx-font-size: " + (fontSize + 1));
+    	
+        // EventHandlers
+    	undoButton.setOnAction(e -> undo ());
+        redoButton.setOnAction (e -> redo ());
+        
+        // History AnchorPane & HBox
+        AnchorPane historyAnchor = new AnchorPane(undoButton, redoButton);
+        HBox historyHBox = new HBox(historyAnchor);
+        AnchorPane.setRightAnchor(redoButton, 0.0);
+        AnchorPane.setRightAnchor(undoButton, redoButton.getWidth());
+        historyAnchor.prefWidthProperty().bind (mainMenu.prefWidthProperty());
+        historyAnchor.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 0");
+        
+        // ******************** GLOBAL MENU SETTINGS ********************
+    	Pane menuSpacer = new Pane();
+    	menuSpacer.setPrefHeight(margin - menuH);   
+        menuPane.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 0");
+        zoomHBox.setStyle ("-fx-border-color: darkgray; -fx-border-width: 0 0 2 0;");
+    	historyHBox.setStyle ("-fx-padding: 0 " + toolW + " 0 0;");
+    	
+    	// borderPane acts as layout manager for entire top menu
+    	BorderPane borderPane = new BorderPane();
+    	borderPane.setLeft(menuPane);
+    	borderPane.setCenter(zoomHBox);
+    	borderPane.setRight(historyHBox);
+    	borderPane.setBottom(menuSpacer);       
+    	return borderPane;
     }
-
 
     /**
      * Configure settings for the secondary window (sideStage).
@@ -441,7 +674,7 @@ public class AppCtrl
                 + borderPane.getWidth () - toolW;
         double anchorOffset = calculateOffset (borderPane);
         AnchorPane anchorPane = new AnchorPane ();
-        VBox propSlider = configurePropSlider ();
+        propSlider = configurePropSlider ();
         Pane sidePane = configureSidePane ();
         sideScene = new Scene (anchorPane);
         sideStage = new Stage ();
@@ -456,7 +689,7 @@ public class AppCtrl
         // propSlider
         propSlider.setLayoutX (cornerRadius);
 
-     // sideStage
+        // sideStage
         sideStage.initStyle (StageStyle.TRANSPARENT);
         sideScene.setFill (Color.TRANSPARENT);
         sideStage.initOwner (appStage);
@@ -476,12 +709,12 @@ public class AppCtrl
         //     - this code (and the 2 buttons) will be eventually be deleted
         //
         // PropSlider button triggers toggleSlider()
-        ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
-                .setOnAction (e -> toggleSlider (((Pane) anchorPane.getChildren ().get (0))));
+        //((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
+        //        .setOnAction (e -> toggleSlider ());
         
         // PrintStats button triggers ModelUtil.printStats()
-        ((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (6))
-                .setOnAction (e -> ModelUtil.printStats (getGraph()));
+        //((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
+        //        .setOnAction (e -> ModelUtil.printStats (getGraph()));
     }
 
     /**
@@ -513,7 +746,7 @@ public class AppCtrl
 
         // Layout
         marginOverlay.setLayoutX (cornerRadius);
-        toolButtons.setLayoutY (30.0);
+        toolButtons.setLayoutY (menuH - 7);
         return sidePane;
     }
 
@@ -530,22 +763,15 @@ public class AppCtrl
          * Unicode numbers for button icons, in order:
          * MOVE, SELECT, ADD_NODE, ADD_EDGE, DELETE
          */
-        double fontSize = 20;
-        final int[] UCodes = new int[] { 0x2723, 0x261D, 0x274F, 8594, 0x2620 };
-        final String[] buttonNames = new String[] { "Move", "Select", "Create Node", "Create Edge", "Delete" };
-
+        double fontSize = 22.0;
+        double panelSpacing = 22.0;
+        Pos panelAlignment = Pos.CENTER;
         Font buttonsFont = Font.font ("sans-serif", FontWeight.BOLD, fontSize);
-
-        // Gross CSS code to style buttons
-        String buttonStyle = ".button {" + "-fx-background-color:linear-gradient(#f2f2f2, #d6d6d6),"
-                + "linear-gradient(#fcfcfc 0%, #d9d9d9 20%, #d6d6d6 100%),linear-gradient(#dddddd 0%, #f6f6f6 50%);"
-                + "-fx-background-radius: 8,7,6;-fx-background-insets: 0,1,2;-fx-text-fill: black;-fx-effect:"
-                + "dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );}" + ".button:selected {"
-                + "-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 );}";
+        
+        final int[] UCodes = new int[] { 0x2725, 0x270b, 0x2338, 0x2b67, 0x2718 };
+        final String[] buttonNames = new String[] { "Move Graph", "Select / Move", "Create Class Box", "Create Relationship", "Delete" };
 
         VBox toolButtons;
-        double panelSpacing = 25.0;
-        Pos panelAlignment = Pos.CENTER;
         toolButtons = new VBox (panelSpacing);
         toolButtons.setAlignment (panelAlignment);
 
@@ -562,7 +788,7 @@ public class AppCtrl
                 buttons[i].setTooltip (tt);
             }
             buttons[i].setFont (buttonsFont);
-            buttons[i].setStyle (buttonStyle);
+            buttons[i].setStyle (unselected);
             toolButtons.getChildren ().add (buttons[i]);
 
             if (i < ToolState.values ().length)
@@ -570,9 +796,14 @@ public class AppCtrl
                 buttons[i].setUserData (ToolState.values ()[i]);
                 buttons[i].setOnAction (buttonClick);
             }
+            else
+            {
+                buttons[i].setUserData (i);
+                buttons[i].setOnAction (buttonClick);
+            }
         }
 
-        //*** Development / Debugging Buttons ***
+        /* Development / Debugging Buttons ***
         // PropSlider
         Button showHide = new Button ();
         showHide.setText ("PropSlider");
@@ -581,27 +812,58 @@ public class AppCtrl
         Button printStats = new Button ();
         printStats.setText ("PrintStats");
         printStats.setPrefWidth (fontSize * 4.1);
-        toolButtons.getChildren ().addAll (showHide, printStats);
+        // Undo
+        Button undo = new Button ();
+        undo.setText ("Undo");
+        undo.setPrefWidth (fontSize * 4.1);
+        undo.setOnAction (e -> undo());
+        // Redo
+        Button redo = new Button ();
+        redo.setText ("Redo");
+        redo.setPrefWidth (fontSize * 4.1);
+        redo.setOnAction (e -> redo());
+        toolButtons.getChildren ().addAll (showHide, printStats, undo, redo);
+        */
         
-        toolButtons.setPrefHeight ((fontSize + panelSpacing) * (UCodes.length) * 2.0);
+        toolButtons.setPrefHeight ((fontSize + panelSpacing) * (buttons.length + 3));
         return toolButtons;
     }
 
+
+
     /**
-     * When a tool button is clicked, set
-     * the appropriate toolState value.
+     * 
      */
     public EventHandler<ActionEvent> buttonClick = new EventHandler<ActionEvent> ()
     {
         @Override
         public void handle (ActionEvent e)
         {
-            ToolState sourceButton = (ToolState) ((Node) e.getSource ()).getUserData ();
-
-            switch (sourceButton)
+            Button sourceButton = (Button) e.getSource ();
+            try {
+                int val =(int) sourceButton.getUserData ();
+                if (val == ToolState.values ().length)
+                {
+                    canvasCtrl.zoomIn (0.1);
+                }
+                else if (val == ToolState.values ().length + 1)
+                {
+                    canvasCtrl.zoomIn (-0.1);
+                }
+                return;
+            } catch (ClassCastException ex)
             {
-            case SELECT:
-                toolState = ToolState.SELECT;
+                
+            }
+            ToolState buttonState = (ToolState) (sourceButton.getUserData ());
+
+            switch (buttonState)
+            {
+            case MOVE_GRAPH:
+                toolState = ToolState.MOVE_GRAPH;
+                break;
+            case SELECT_MOVE:
+                toolState = ToolState.SELECT_MOVE;
                 break;
             case ADD_NODE:
                 toolState = ToolState.ADD_NODE;
@@ -613,9 +875,15 @@ public class AppCtrl
                 toolState = ToolState.DELETE;
                 break;
             default:
-                toolState = ToolState.SELECT;
+                toolState = ToolState.SELECT_MOVE;
             }
             System.out.println ("TSTATE: changed to " + toolState);
+            sourceButton.setStyle (selected);
+            if (prevState != null && prevState != sourceButton)
+            {
+                prevState.setStyle (unselected);
+            }
+            prevState = sourceButton;
         }
     };
 
@@ -656,7 +924,7 @@ public class AppCtrl
      * 
      * @param propSlider the Pane that contains the properties inspector
      */
-    private void toggleSlider (Pane propSlider)
+    protected void toggleSlider ()
     {
         double endW;
         DoubleProperty currentW = new SimpleDoubleProperty (propSlider.getWidth ());
@@ -683,6 +951,33 @@ public class AppCtrl
         timeline.getKeyFrames ().add (new KeyFrame (Duration.seconds (0.2), new KeyValue (currentW, endW)));
         timeline.play ();
     }
+    
+    public EventHandler<ActionEvent> zoomReset = new EventHandler<ActionEvent>()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            canvasCtrl.zoomReset ();
+        }
+    };
+    
+    public EventHandler<ActionEvent> zoomInClick = new EventHandler<ActionEvent>()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            canvasCtrl.zoomIn(-0.1);
+        }
+    };
+
+    public EventHandler<ActionEvent> zoomOutClick = new EventHandler<ActionEvent>()
+    {
+        @Override
+        public void handle (ActionEvent e)
+        {
+            canvasCtrl.zoomIn(0.1);
+        }
+    };
     
     /*********************** APPCTRL CHANGE LISTENERS *******************/
     /**
@@ -740,6 +1035,7 @@ public class AppCtrl
         }
     };
     
+
     /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
     /**
      * 
@@ -749,21 +1045,7 @@ public class AppCtrl
         @Override
         public void handle (ActionEvent e)
         {
-            FileChooser fc = new FileChooser ();
-            fc.setTitle ("Save File");
-
-            // Set extension filter
-            //FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-            // For easier debugging:
-            FileChooser.ExtensionFilter extFiler = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-            fc.getExtensionFilters ().add (extFiler);
-
-            File file = fc.showSaveDialog (appStage);
-            if (file != null)
-            {
-                fileIO.save (file);
-                appStage.setTitle (appName + file.getName ());
-            }
+            saveFile();
         }
     };
 
@@ -779,16 +1061,45 @@ public class AppCtrl
             fc.setTitle ("Open File");
 
             // Set extension filter
-            //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
-            // For easier debugging:
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("TXT files (*.txt)", "*.txt");
-            fc.getExtensionFilters ().add (extFilter);
+             FileChooser.ExtensionFilter extFilter = new
+             FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
 
             File file = fc.showOpenDialog (appStage);
             if (file != null)
             {
-                fileIO.open (file);
-                appStage.setTitle (appName + file.getName ());
+                if (theGraph.size () != 0)
+                {
+                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Are you sure you want to proceed?");
+                    alert.setHeaderText("Opening a file will delete any unsaved progress.");
+                    alert.setContentText("Press \"open\" to continue. Press \"save\" to save first. Press \"cancel\" to keep working.");
+
+                    ButtonType buttonOk = new ButtonType("Open");
+                    ButtonType buttonSave = new ButtonType("Save");
+                    ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+                    alert.getButtonTypes().setAll(buttonOk, buttonSave, buttonTypeCancel);
+
+                    Optional<ButtonType> result = alert.showAndWait();
+                
+                    if (result.get () == buttonSave)
+                    {
+                        saveFile ();
+                        // Boolean true means this clearScreen is not undoable
+                        // TODO: reset stack
+                        canvasCtrl.clearScreen (true);
+                        fileIO.open (file);
+                        appStage.setTitle (appName + file.getName ());
+                    }
+                    else if (result.get () == buttonOk)
+                    {
+                        openFile (file);
+                    }
+                    }
+                else
+                {
+                    openFile (file);
+                }
             }
         }
     };
@@ -805,17 +1116,93 @@ public class AppCtrl
             {
                 System.out.println (AppCtrl.class.getResource ("AppCtrl.class"));
                 // jar:file:/C:/Users/Liz/Desktop/umleditor.jar!/controllers/AppCtrl.class
-                
+                // 
+                //...file: /C:/Users/Liz/Desktop/umleditor.jar | !/con...
                 // file:/C:/Users/Liz/workspace/LParen/controllers/AppCtrl.class
 
+                String prefix = "jar:file:";
+                String postfix = ".jar!";
+                String fullPath = AppCtrl.class.getResource ("AppCtrl.class").toString ();
+                int begin = fullPath.indexOf (prefix) + prefix.length ();
+                int end = fullPath.indexOf (postfix) + postfix.length () - 1;
+                
+                if (begin < end)
+                {
+                    //String 
+                }
                 
                 Runtime.getRuntime ().exec ("java Main");
+                Runtime.getRuntime ().exec ("java -jar ");
             } catch (IOException ex)
             {
                 System.out.println ("newFile exec error");
             }
         }
     };
+    
+    /*************************** APPCTRL FUNCTIONS ***********************/  
+
+    /**
+     * 
+     */
+    public void saveFile ()
+    {
+        FileChooser fc = new FileChooser ();
+        fc.setTitle ("Save File");
+
+        // Set extension filter
+         FileChooser.ExtensionFilter extFiler = new
+         FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+
+        File file = fc.showSaveDialog (appStage);
+        if (file != null)
+        {
+            fileIO.save (file);
+            appStage.setTitle (appName + file.getName ());
+        }
+    }
+    
+    /**
+     * 
+     * @param file
+     */
+    public void openFile (File file)
+    {
+        // Boolean true means this clearScreen is not undoable
+        // TODO: reset stack
+        canvasCtrl.clearScreen (true);
+        fileIO.open (file);
+        appStage.setTitle (appName + file.getName ());
+        
+        int lastNode = theGraph.getAllNodes ()[theGraph.getAllNodes ().length - 1];
+        canvasCtrl.setUNodeId (lastNode);
+        int lastEdge = theGraph.getAllEdges ()[theGraph.getAllEdges ().length - 1];
+        canvasCtrl.setUEdgeId (lastEdge);
+    }
+    
+    /**
+     * 
+     */
+    public void undo ()
+    {
+        Command undo = history.undo ();
+        if (undo != null)
+        {
+            executeCommand (undo, true);
+        }
+    }
+    
+    /**
+     * 
+     */
+    public void redo ()
+    {
+        Command redo = history.redo ();
+        if (redo != null)
+        {
+            executeCommand (redo, true);
+        }
+    }
 
     /*********************** APPCTRL EXECUTE COMMAND ********************/  
 
@@ -830,7 +1217,10 @@ public class AppCtrl
      */
     public boolean executeCommand (Command cmd, boolean isHistory)
     {
-        // if(isHistory) { return false; }
+        if (!isHistory && cmd != null)
+        {
+            history.push (cmd);
+        }
 
         if (cmd.actionScope == Scope.CANVAS) {
             canvasCtrl.executeCommand (cmd, isHistory);

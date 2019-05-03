@@ -1,16 +1,20 @@
 package views;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import controllers.CanvasCtrl;
-
+import controllers.Command.Action;
+import controllers.Command.Scope;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
+import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ObservableList;
 
 public class CanvasView
 {
@@ -18,6 +22,7 @@ public class CanvasView
     private Pane canvas;
     private Map<Integer, VNode> nodes;
     private Map<Integer, Line> edges;
+    private double scale = 1.0;
 
     /**
      * CanvasView constructor
@@ -25,7 +30,6 @@ public class CanvasView
      * @param controller CanvasController containing all canvas eventhandlers
      * @param graph UGraph that this view is representing
      */
-    // TODO: delete UGraph
     public CanvasView (CanvasCtrl controller)
     {
         canvasCtrl = controller;
@@ -34,8 +38,8 @@ public class CanvasView
 
         canvas = new Pane ();
         canvas.setOnMousePressed (canvasCtrl.canvasMousePress);
-        canvas.setOnMouseReleased (canvasCtrl.canvasMouseRelease);
         canvas.setOnMouseDragged (canvasCtrl.canvasDrag);
+        canvas.setOnMouseDragReleased (canvasCtrl.canvasDragRelease);
     }
 
     /**
@@ -48,7 +52,11 @@ public class CanvasView
     }
 
     /*************************** NODE FUNCTIONS ***************************/
-
+    /**
+     * 
+     * @param i
+     * @return
+     */
     public VNode getVNode(Integer i)
     {
         return nodes.get (i);
@@ -70,28 +78,33 @@ public class CanvasView
      */
 //    public StackPane drawNode (double x, double y, int uNodeId)
     // TODO: check this
-    public VNode drawNode (double x, double y, int id)
+    public VNode drawNode (double x, double y, int id, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
     {
-        VNode visual = new VNode (x, y, id);
-        Region uNode = visual.getRegion ();
-
-        // ***** REGISTER EVENT HANDLERS *****
-        // Different pieces of the visual "uNode" need separate handlers
-
-        // nodeBody
-        uNode.setOnMousePressed (canvasCtrl.uNodeMousePress);
-        uNode.setOnDragDetected (canvasCtrl.uNodeDragDetected);
-
-        // uNode
-        uNode.setOnMouseDragged (canvasCtrl.uNodeDrag);
-        uNode.setOnMouseReleased (canvasCtrl.uNodeMouseRelease);
-        uNode.setOnMouseDragReleased (canvasCtrl.uNodeDragRelease);
-
-        canvas.getChildren ().add (uNode);
-        // add Pane to map "nodes"
-        nodes.put(id, visual);
-        return visual;
+        VNode vNode = new VNode (x, y, id, scale, name, attr, func, misc);
+        vNode.relocate(x, y);
+        
+        // Deal with mouse events:
+        // Each one is registered as an event filter rather than an event handler
+        vNode.addEventFilter(MouseEvent.MOUSE_PRESSED, canvasCtrl.uNodeMousePress);
+        vNode.addEventFilter(MouseEvent.MOUSE_RELEASED, canvasCtrl.uNodeMouseRelease);
+        // Dragging
+        vNode.addEventFilter(MouseEvent.DRAG_DETECTED, canvasCtrl.uNodeDragDetected);       
+        vNode.addEventFilter(MouseEvent.MOUSE_DRAGGED, canvasCtrl.uNodeDrag);       
+        vNode.addEventFilter(MouseDragEvent.MOUSE_DRAG_RELEASED, canvasCtrl.uNodeDragRelease);
+        
+        // add VNode to map of nodes
+        nodes.put(id, vNode);
+        canvas.getChildren ().add (vNode);
+        return vNode;
     }
+    
+    public void unselectAllNodes(String selectedStyle)
+    {
+    	for (VNode vNode : nodes.values()) {
+    		vNode.setSelected(false);
+    		vNode.setStyle(selectedStyle);
+    	}
+    }   
 
     /**
      * Remove the visual representation of a Node from the window
@@ -102,7 +115,7 @@ public class CanvasView
     {
         System.out.printf ("CVS-VW: removing Node %d\n", id);
         VNode node = getVNode(id);
-        canvas.getChildren ().remove (node.getRegion ());
+        canvas.getChildren ().remove (node);
         nodes.remove (node);
     }
     
@@ -122,11 +135,38 @@ public class CanvasView
         });
     }
     
-    // TODO: this
-    public Point2D getLocation (Integer nodeId)
+    /**
+     * 
+     */
+    public void zoomReset ()
     {
-        //StackPane pane = nodes.get (nodeId).pane;
-        return null;
+        zoomIn (1.0 - (1.0 / scale));
+    }
+    
+    /**
+     * 
+     * @param percent
+     */
+    public void zoomIn (double percent)
+    {
+        scale *= (1.0 - percent);
+        Point2D center = new Point2D (canvas.getWidth () / 2.0, canvas.getHeight () / 2.0);
+        nodes.replaceAll ((k,v) -> {
+            double newX = percent * (center.getX () - v.getX ());
+            double newY = percent * (center.getY () - v.getY ());
+            v.moveNode (newX, newY);
+            
+            // iterate through children of the region, too
+            v.setScaleX (scale);
+            v.setScaleY (scale);
+            
+            return v;
+        });
+    }
+    
+    public Set<Integer> getNodeKeys ()
+    {
+        return nodes.keySet ();
     }
 
     /*************************** EDGE FUNCTIONS ***************************/
@@ -211,8 +251,13 @@ public class CanvasView
         removeEdge(id);
     }
     
+    /**
+     * 
+     * @param id
+     */
     public void removeEdge (Integer id)
     {
+        System.out.println ("Remove Edge: " + id);
         Line edge = edges.get (id);
         canvas.getChildren ().remove (edge);
         edges.remove (id);

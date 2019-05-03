@@ -42,5 +42,5 @@ public final class ModelUtil
         }
         System.out.println ("****** " + edgeTotal + " Edges Total ******");
         System.out.println ("***************************\n");
-    }
+   }
 }
