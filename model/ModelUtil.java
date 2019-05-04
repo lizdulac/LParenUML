@@ -1,7 +1,5 @@
 package model;
 
-import model.*;
-
 public final class ModelUtil
 {
 
