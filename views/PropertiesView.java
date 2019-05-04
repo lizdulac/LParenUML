@@ -50,7 +50,7 @@ public class PropertiesView
         listButtons = new ListView<HBox>(buttons);
         listButtons.setPrefWidth (150.0);
         listButtons.setFocusTraversable(false);
-        //listButtons.setSelectionModel(new NoSelection<>());
+        listButtons.setSelectionModel(new NoSelection<>());
         
         properties = new VBox ();
         hBox = new HBox(listButtons);
