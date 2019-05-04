@@ -11,14 +11,31 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.Pane;
 import javafx.util.Callback;
 
+
+/************************** VNODE DEPENDANT CLASS *************************/
 /**
- * 
+ * @author David
+ */
+class NestedListCell extends ListCell<ListView<String>>
+{
+    public NestedListCell () { }
+    
+    @Override
+    protected void updateItem(ListView<String> item, boolean empty) {
+        // calling super here is important
+        super.updateItem(item, empty);
+        
+        setGraphic(item);
+        setStyle("-fx-background-color: white; -fx-border-width: 0 0 1 0; -fx-border-color: black;");
+    }
+}
+
+/**
  * @author Liz
- *
  */
 public class VNode extends Pane
 {
-    /************************** UNODE CLASS MEMBERS ***********************/
+    /************************** VNODE CLASS MEMBERS ***********************/
     private int id;
     private boolean isSelected;
     protected ListView<ListView<String>> parentLV;
@@ -26,49 +43,7 @@ public class VNode extends Pane
     ObservableList<String> className;
 
     private final double cellHeight = 25;
-    /************************** UNODE CONSTRUCTORS ************************/
-    /**
-     * 
-     * @param nodeID
-     * @depricated
-     */
-    public VNode (int nodeID)
-    {
-        this (90, 90, nodeID);
-    }
-    
-    /**
-     * 
-     * @param x
-     * @param y
-     * @param nodeID
-     * @deprecated
-     */
-    public VNode (double x, double y, int nodeID)
-    {
-        this (x, y, nodeID, "");
-    }
-    
-    /**
-     * 
-     * @param x
-     * @param y
-     * @param nodeID
-     * @param name
-     * @deprecated
-     */
-    public VNode (double x, double y, int nodeID, String name)
-    {
-//        this (x, y, nodeID, 1.0, name);
-    }
-    
-    /*
-    public VNode (double x, double y, int nodeID, double scale, ObservableList<String> atr)
-    {
-        this (x, y, nodeID, scale, "", atr);
-    }
-    */
-    
+    /************************** VNODE CONSTRUCTORS ************************/   
     /**
      * 
      * @param x
@@ -87,10 +62,7 @@ public class VNode extends Pane
         sectionsList = FXCollections.observableArrayList();
         parentLV = new ListView<ListView<String>>(sectionsList);         
         parentLV.setPrefWidth(150.0);
-        //parentLV.setStyle("-fx-background-insets: 0; -fx-padding: 0;");
-        //parentLV.setSelectionModel(new NoSelection<>());
         parentLV.setFocusTraversable(false);
-        //parentLV.setMouseTransparent(true);
         
         className = FXCollections.observableArrayList(name);
         ObservableList<String> attrList = attr;
@@ -127,13 +99,18 @@ public class VNode extends Pane
         this.setLayoutY (y);
     }
     /************************* VNODE GENERAL GETTERS **********************/
+    /**
+     * 
+     * @return VNode id (matches corresponding UNode id)
+     */
     public int getIntId ()
     {
         return id;
     }
+    
     /**
      * 
-     * @return
+     * @return 
      */
     public double getX ()
     {
@@ -161,14 +138,17 @@ public class VNode extends Pane
         this.setLayoutY (this.getLayoutY () + y);
     }
     
+    /**
+     * 
+     * @param list
+     * @return
+     */
     private ListView<String> generateListView(ObservableList<String> list)
     {
         ListProperty<String> listProperty = new SimpleListProperty<>(list);     
         ListView<String> lView = new ListView<String>(list);
         
-        //lView.setSelectionModel(new NoSelection<>());
         lView.setFocusTraversable(false);
-        //lView.setMouseTransparent(true);
         lView.setStyle("-fx-background-insets: 0; -fx-padding: 0;");
         lView.setPrefWidth(parentLV.getPrefWidth() - 30.0);
         lView.prefHeightProperty().bind(Bindings.size(listProperty).multiply(cellHeight));
@@ -200,32 +180,30 @@ public class VNode extends Pane
         return lView;
     }
 
+    /**
+     * 
+     * @param name
+     */
     public void refreshName(String name)
     {
         className.setAll(name);
     }
     
+    /**
+     * 
+     * @return
+     */
     public boolean getSelected()
     {
     	return isSelected;
     }
     
+    /**
+     * 
+     * @param value
+     */
     public void setSelected(boolean value)
     {
     	isSelected = value;
-    }
-}
-
-class NestedListCell extends ListCell<ListView<String>>
-{
-    public NestedListCell () { }
-    
-    @Override
-    protected void updateItem(ListView<String> item, boolean empty) {
-        // calling super here is important
-        super.updateItem(item, empty);
-        
-        setGraphic(item);
-        setStyle("-fx-background-color: white; -fx-border-width: 0 0 1 0; -fx-border-color: black;");
     }
 }

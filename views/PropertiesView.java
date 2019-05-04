@@ -1,24 +1,17 @@
 package views;
+
 import controllers.*;
-import model.*;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.cell.TextFieldListCell;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 
 public class PropertiesView
 {
-    private PropertiesCtrl propCtrl;
     private VBox properties;
     HBox hBox;
     ListView<String> listFields;
@@ -26,9 +19,7 @@ public class PropertiesView
     ObservableList<HBox> buttons;
    
     public PropertiesView (PropertiesCtrl pController)
-    {
-        propCtrl = pController;       
-       
+    {       
         Button attrButton = new Button(" " + Character.toString ((char) 0x2795) + " ");
         Button funcButton = new Button(" " + Character.toString ((char) 0x2795) + " ");
         Button miscButton = new Button(" " + Character.toString ((char) 0x2795) + " ");
@@ -50,7 +41,7 @@ public class PropertiesView
         listButtons = new ListView<HBox>(buttons);
         listButtons.setPrefWidth (150.0);
         listButtons.setFocusTraversable(false);
-        listButtons.setSelectionModel(new NoSelection<>());
+        //listButtons.setSelectionModel(new NoSelection<>());
         
         properties = new VBox ();
         hBox = new HBox(listButtons);

@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import controllers.CanvasCtrl;
-import controllers.Command.Action;
-import controllers.Command.Scope;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
 import javafx.scene.input.MouseDragEvent;
@@ -16,14 +14,19 @@ import javafx.scene.layout.Region;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 
+/**
+ * @author Liz and David
+ */
 public class CanvasView
 {
+    /********************** CANVASVIEW CLASS MEMBERS **********************/
     private CanvasCtrl canvasCtrl;
     private Pane canvas;
     private Map<Integer, VNode> nodes;
     private Map<Integer, Line> edges;
     private double scale = 1.0;
 
+    /************************ CANVASVIEW CONSTRUCTOR **********************/
     /**
      * CanvasView constructor
      * 
@@ -41,9 +44,9 @@ public class CanvasView
         canvas.setOnMouseDragged (canvasCtrl.canvasDrag);
         canvas.setOnMouseDragReleased (canvasCtrl.canvasDragRelease);
     }
-
+    
+    /************************* CANVASVIEW GETTERS *************************/
     /**
-     * 
      * @return JavaFX Pane representing visual workspace
      */
     public Pane getCanvas ()
@@ -51,17 +54,16 @@ public class CanvasView
         return canvas;
     }
 
-    /*************************** NODE FUNCTIONS ***************************/
     /**
-     * 
-     * @param i
+       * @param i
      * @return
      */
     public VNode getVNode(Integer i)
     {
         return nodes.get (i);
     }
-    
+
+    /************************* CANVASVIEW FUNCTIONS ***********************/
     /**
      * Draw the visual representation of a UNode.
      * 
@@ -76,8 +78,6 @@ public class CanvasView
      *            id of UNode represented by this display
      * @return JavaFX StackPane containing all visual elements of a UNode
      */
-//    public StackPane drawNode (double x, double y, int uNodeId)
-    // TODO: check this
     public VNode drawNode (double x, double y, int id, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
     {
         VNode vNode = new VNode (x, y, id, scale, name, attr, func, misc);
