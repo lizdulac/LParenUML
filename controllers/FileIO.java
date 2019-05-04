@@ -10,8 +10,6 @@ import controllers.Command.Action;
 import controllers.Command.Scope;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,6 +19,13 @@ import java.io.PrintStream;
  * FileIO object contains all objects and methods necessary to save the
  * UMLdiagram of an associated GUIcontroller. Files that can be opened/saved in
  * this program will have the extension ".uml".
+ * 
+ * Format: (one node per line)
+ * [nodeId];&[nodeName];&[vnodeXVal];&[vnodeYVal];&{"[attributes]"}*;&
+ * {"[functions]"}*;&{"[miscellaneous]"}*;&{[inEdgeId],[inEdgeOutNodeId]}*;&
+ * {[outEdgeId],[outEdgeInNodeId]}*;&
+ * 
+ * { x }* - 0 or more x's, comma-separated
  * 
  * CAUTION: Functions in this class alter PrintStream "System.out" during
  * execution.
@@ -47,7 +52,7 @@ public class FileIO
         view = v;
     }
 
-    /*************************** FILEIO FUNCTIONS *************************/
+    /***************************** FILEIO SAVE ****************************/
     /**
      * 
      * @param file
@@ -182,17 +187,16 @@ public class FileIO
             {
                 String s2 = stringlist.get (i);
                 String replaceString2 = s2.replaceAll ("\"", "\\\"");
-                System.out.print ("," + "\"" + replaceString + "\"");
+                System.out.print ("," + "\"" + replaceString2 + "\"");
             }
             System.out.print (delim);
         } else
             System.out.print (delim);
     }
-
+    
+    /***************************** FILEIO OPEN ****************************/
     /**
      * Open file; recreates UGraph with all UNodes and UEdges
-     * id;name;x;y;attributes;functions;miscs;edges;edges;
-     * 1;a;0.45;34.8;;;;;2,3;
      * 
      * @param file
      * @return

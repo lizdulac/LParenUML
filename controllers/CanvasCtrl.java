@@ -17,13 +17,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 
 /**
- * 
- * @author 
- *
+ * @author David and Liz
  */
 public class CanvasCtrl
 {
-    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
+    /*********************** CANVASCTRL CLASS MEMBERS *******************/
     private AppCtrl appCtrl;
     protected CanvasView canvasView;
 
@@ -33,10 +31,10 @@ public class CanvasCtrl
     private Line currentEdge;
     private final ObjectProperty<Point2D> lastClick;
 
-    /******************** APPCTRL FILEIO EVENT HANDLERS *****************/
+    /*********************** CANVASCTRL CONSTRUCTOR *********************/
     /**
      * 
-     * @param controller
+     * @param controller AppCtrl containing all eventhandling logic
      */
     public CanvasCtrl (AppCtrl controller)
     {
@@ -52,8 +50,7 @@ public class CanvasCtrl
 
     /************************* CANVASCTRL GETTERS **********************/
     /**
-     * 
-     * @return
+     * @return Pane representing workspace canvas
      */
     public Pane getCanvas ()
     {
@@ -61,8 +58,7 @@ public class CanvasCtrl
     }
 
     /**
-     * 
-     * @return
+     * @return Next available Node id
      */
     public Integer nextNodeId ()
     {
@@ -70,8 +66,7 @@ public class CanvasCtrl
     }
     
     /**
-     * 
-     * @return
+      * @return Next available Edge id
      */
     public Integer nextEdgeId ()
     {
@@ -162,8 +157,6 @@ public class CanvasCtrl
 
             if (appCtrl.getToolState () == ToolState.SELECT_MOVE)
             {// Selecting a node is not undo-able so actions are not packaged
-            	
-                ObservableList<String> atr = appCtrl.getNode(id).getAttributes();
                 
             	// toggle VNode selected state
                 if(canvasView.getVNode(id).getSelected()) {
@@ -208,7 +201,6 @@ public class CanvasCtrl
             {
                 appCtrl.executeCommand(packageAction (Action.DELETE_NODE, Scope.CANVAS, id), false);
             }
-            // System.out.println ("U-NODE: uNode clicked");
         }
     };
 
@@ -241,8 +233,6 @@ public class CanvasCtrl
             // default assumption is true, may be falsified by another handler
             isCanvasRelease = true;
             Region srcNode = (Region) e.getSource ();
-            
-            // System.out.println("startFullDrag: "+srcNode.getUserData());
 
             if (appCtrl.getToolState () == ToolState.ADD_EDGE)
             {               
@@ -265,15 +255,13 @@ public class CanvasCtrl
             if (appCtrl.getToolState () == ToolState.SELECT_MOVE)
             {
                 Point2D dragPoint = new Point2D (e.getSceneX (), e.getSceneY ());
-                // canvasView.moveNode(srcNode, lastClick.get(), dragPoint);
-                //VNode vn = canvasView.getVNode ((Integer) srcNode.getUserData ());
 
                 double delX = dragPoint.getX () - lastClick.get ().getX ();
                 double delY = dragPoint.getY () - lastClick.get ().getY ();
 
                 canvasView.getVNode ((Integer) srcNode.getUserData ()).moveNode (delX, delY);
                 lastClick.set (dragPoint);
-                // System.out.println("U-NODE: drag");
+
             } else if (appCtrl.getToolState () == ToolState.ADD_EDGE)
             {
                 // update mouse/cursor coordinates
@@ -296,6 +284,7 @@ public class CanvasCtrl
             if (appCtrl.getToolState () == ToolState.DELETE)
             {
                 int id = (int) edge.getUserData ();
+                
                 //appCtrl packages this command
                 appCtrl.removeEdge (id);
             }
@@ -357,10 +346,11 @@ public class CanvasCtrl
             lastClick.set (null); 
         }
     };
-    
+
+    /************************* CANVASCTRL FUNCTIONS *********************/
     /**
-     * 
-     * @param percent
+     * @param percent decimal percent to be zoomed in. Negative percents
+     * correspond to zooming out.
      */
     public void zoomIn (double percent)
     {
@@ -368,7 +358,7 @@ public class CanvasCtrl
     }
     
     /**
-     * 
+     * Reset display to original scale
      */
     public void zoomReset ()
     {
@@ -387,7 +377,7 @@ public class CanvasCtrl
     
     
     /**
-     * 
+     * Delete all visual elements (VNodes and Lines) from the workspace canvas
      */
     public void clearScreen (Boolean history)
     {
@@ -425,11 +415,7 @@ public class CanvasCtrl
      * @return
      */
     public boolean executeCommand (Command cmd, boolean isHistory)
-    {
-        /*
-         * if(isHistory) { return false; }
-         */
-        
+    {        
         Object[] data = cmd.getData ();        
         Action currentAction = cmd.actionType;
         
@@ -450,7 +436,7 @@ public class CanvasCtrl
             ObservableList<String> func = appCtrl.getGraph().getNode((int) data[0]).getFunctions();
             ObservableList<String> misc = appCtrl.getGraph().getNode((int) data[0]).getMiscs();
             
-         // drawNode (double x, double y, int id, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
+            // drawNode (double x, double y, int id, String name, ObservableList<String> attr, ObservableList<String> func, ObservableList<String> misc)
             canvasView.drawNode ((double) data[2], (double) data[3], (int) data[0], (String) data[1], attr, func, misc);
             System.out.println ("CVSCTR: Command executed ADD_NODE with id of " + (int) data[0]);    
        

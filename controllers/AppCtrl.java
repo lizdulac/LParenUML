@@ -9,7 +9,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -711,20 +710,6 @@ public class AppCtrl
         appStage.widthProperty ().addListener (appChangeW);
         appStage.yProperty ().addListener (appChangeY);
         appStage.xProperty ().addListener (appChangeX);
-
-        //*** Development / Debugging Buttons ***
-        //  Setting these event handlers requires traversing the JavaFX Scene Graph.
-        //  The code is UGLY but:
-        //     - it works :)
-        //     - this code (and the 2 buttons) will be eventually be deleted
-        //
-        // PropSlider button triggers toggleSlider()
-        //((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
-        //        .setOnAction (e -> toggleSlider ());
-        
-        // PrintStats button triggers ModelUtil.printStats()
-        //((Button) ((Pane) ((Pane) anchorPane.getChildren ().get (1)).getChildren ().get (1)).getChildren ().get (5))
-        //        .setOnAction (e -> ModelUtil.printStats (getGraph()));
     }
 
     /**
@@ -1038,7 +1023,9 @@ public class AppCtrl
     };
 
     /**
-     * 
+     * Prompt user to choose a .uml file to open. If there are unsaved changes
+     * on the screen, ask the user if they would like to first save changes, and
+     * follow through with the user's decision.
      */
     public EventHandler<ActionEvent> openFile = new EventHandler<ActionEvent> ()
     {
@@ -1049,8 +1036,8 @@ public class AppCtrl
             fc.setTitle ("Open File");
 
             // Set extension filter
-             FileChooser.ExtensionFilter extFilter = new
-             FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+            fc.getExtensionFilters ().add (extFilter);
 
             File file = fc.showOpenDialog (appStage);
             if (file != null)
@@ -1073,15 +1060,10 @@ public class AppCtrl
                     if (result.get () == buttonSave)
                     {
                         saveFile ();
-                        // Boolean true means this clearScreen is not undoable
-                        history.clear ();
-                        canvasCtrl.clearScreen (true);
-                        fileIO.open (file);
-                        appStage.setTitle (appName + file.getName ());
+                        openFile (file);
                     }
                     else if (result.get () == buttonOk)
                     {
-                        history.clear ();
                         openFile (file);
                     }
                 }
@@ -1113,16 +1095,12 @@ public class AppCtrl
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.get () == buttonOk)
                 {
-                    history.clear ();
-                    canvasCtrl.clearScreen (true);
-                    appStage.setTitle (appName + "Untitled Document");
+                    newFile ();
                 }                
             }
             else
             {
-                history.clear ();
-                canvasCtrl.clearScreen (true);
-                appStage.setTitle (appName + "Untitled Document");
+                newFile ();
             }
         }
     };
@@ -1137,25 +1115,31 @@ public class AppCtrl
         {
             try
             {
-                System.out.println (AppCtrl.class.getResource ("AppCtrl.class"));
-                // jar:file:/C:/Users/Liz/Desktop/umleditor.jar!/controllers/AppCtrl.class
-                // 
-                //...file: /C:/Users/Liz/Desktop/umleditor.jar | !/con...
-                // file:/C:/Users/Liz/workspace/LParen/controllers/AppCtrl.class
-
-                String prefix = "jar:file:";
-                String postfix = ".jar!";
-                String fullPath = AppCtrl.class.getResource ("AppCtrl.class").toString ();
-                int begin = fullPath.indexOf (prefix) + prefix.length ();
-                int end = fullPath.indexOf (postfix) + postfix.length () - 1;
-                
-                if (begin < end)
+                // dummy path to arbitrary class
+                String path = AppCtrl.class.getResource ("AppCtrl.class").toString ();
+                System.out.println (System.getProperty ("os.name"));
+                if (path.charAt (0) == 'j')
                 {
-                    //String 
+                    String prefix = "jar:file:";
+                    String postfix = ".jar!";
+                    // Ignore '!'
+                    int endIndex = prefix.lastIndexOf (postfix) + postfix.length () - 1;
+                    
+                    if (endIndex > prefix.length ())
+                    {
+                        String os = System.getProperty ("os.name");
+                        int beginIndex = prefix.length ();
+                        
+                        if (os.charAt (0) == 'W')
+                        {
+                            // Ignore first slash after prefix if using Windows
+                            ++beginIndex;
+                        }
+                        path = path.substring (beginIndex, endIndex);
+                        Runtime.getRuntime ().exec ("java -jar " + path);
+                    }
                 }
-                
                 Runtime.getRuntime ().exec ("java Main");
-                Runtime.getRuntime ().exec ("java -jar ");
             } catch (IOException ex)
             {
                 System.out.println ("newFile exec error");
@@ -1196,7 +1180,7 @@ public class AppCtrl
     /*************************** APPCTRL FUNCTIONS ***********************/  
 
     /**
-     * 
+     * Save all elements of the current uml
      */
     public void saveFile ()
     {
@@ -1204,8 +1188,8 @@ public class AppCtrl
         fc.setTitle ("Save File");
 
         // Set extension filter
-         FileChooser.ExtensionFilter extFiler = new
-         FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("UML files (*.uml)", "*.uml");
+        fc.getExtensionFilters ().add (extFilter);
 
         File file = fc.showSaveDialog (appStage);
         if (file != null)
@@ -1216,13 +1200,16 @@ public class AppCtrl
     }
     
     /**
+     * Open a .uml file (redraw all nodes as they were saved with relationships).
      * 
-     * @param file
+     * @param file File to be loaded
      */
     public void openFile (File file)
     {
+        // Reset History
+        history.clear ();
+        
         // Boolean true means this clearScreen is not undoable
-        // TODO: reset stack
         canvasCtrl.clearScreen (true);
         fileIO.open (file);
         appStage.setTitle (appName + file.getName ());
@@ -1234,7 +1221,17 @@ public class AppCtrl
     }
     
     /**
-     * 
+     * Clear screen and history (reset to new Untitled Document)
+     */
+    public void newFile ()
+    {
+        history.clear ();
+        canvasCtrl.clearScreen (true);
+        appStage.setTitle (appName + "Untitled Document");
+    }
+    
+    /**
+     * Undo last Command
      */
     public void undo ()
     {
@@ -1246,7 +1243,7 @@ public class AppCtrl
     }
     
     /**
-     * 
+     * Redo last Command
      */
     public void redo ()
     {

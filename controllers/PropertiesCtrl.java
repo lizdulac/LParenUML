@@ -1,9 +1,7 @@
 package controllers;
-import model.*;
 import views.*;
 
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -71,8 +69,6 @@ public class PropertiesCtrl
     }
     
     /**
-    *
-    * 
     * @param
     */
     public void refreshPropData(ObservableList<String> list)
